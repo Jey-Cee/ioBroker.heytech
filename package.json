@@ -1,0 +1,54 @@
+{
+    "name": "heytech",
+    "version": "0.0.1",
+    "description": "Template for adapter development",
+    "author": {
+        "name": "Jey Cee",
+        "email": "jey-cee@live.com"
+    },
+    "homepage": "https://github.com/Jey-Cee/ioBroker.heytech",
+    "license": "MIT",
+    "keywords": [
+        "iobroker",
+        "shutter",
+        "shutter control",
+        "heytech,"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Jey-Cee/ioBroker.heytech"
+    },
+    "dependencies": {
+        "@iobroker/adapter-core": "^1.0.3",
+        "lodash": "^4.17.11",
+        "telnet-rxjs": "^2.1.0"
+    },
+    "devDependencies": {
+        "@iobroker/testing": "^1.1.16",
+        "@types/chai": "^4.1.7",
+        "@types/chai-as-promised": "^7.1.0",
+        "@types/gulp": "^4.0.6",
+        "@types/mocha": "^5.2.6",
+        "@types/node": "^10.14.1",
+        "@types/proxyquire": "^1.3.28",
+        "@types/sinon": "^7.0.9",
+        "@types/sinon-chai": "^3.2.2",
+        "axios": "^0.18.0",
+        "chai": "^4.2.0",
+        "chai-as-promised": "^7.1.1",
+        "eslint": "^5.15.1",
+        "gulp": "^4.0.0",
+        "mocha": "^6.0.2",
+        "proxyquire": "^2.1.0",
+        "sinon": "^7.2.7",
+        "sinon-chai": "^3.3.0"
+    },
+    "main": "main.js",
+    "scripts": {
+        "gulp": "gulp"
+    },
+    "bugs": {
+        "url": "https://github.com/Jey-Cee/ioBroker.heytech/issues"
+    },
+    "readmeFilename": "README.md"
+}

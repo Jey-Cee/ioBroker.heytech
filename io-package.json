@@ -1,0 +1,89 @@
+{
+    "common": {
+        "name": "heytech",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial version created with Adapter-Studio by Jey Cee",
+                "de": "erste Version erstellt mit Adapter-Studio von Jey Cee",
+                "ru": "начальная версия, созданная с помощью Adapter-Studio by Jey Cee",
+                "pt": "versão inicial criada com o Adapter-Studio por Jey Cee",
+                "nl": "eerste versie gemaakt met Adapter-Studio door Jey Cee",
+                "fr": "Version initiale créée avec Adapter-Studio par Jey Cee",
+                "it": "versione iniziale creata con Adapter-Studio di Jey Cee",
+                "es": "versión inicial creada con Adapter-Studio por Jey Cee",
+                "pl": "początkowa wersja stworzona za pomocą Adapter-Studio przez Jey Cee"
+            }
+        },
+        "title": "HEYtech",
+        "titleLang": {
+            "en": "HEYtech",
+            "de": "HEYtech",
+            "ru": "HEYtech",
+            "pt": "HEYtech",
+            "nl": "HEYtech",
+            "fr": "HEYtech",
+            "it": "HEYtech",
+            "es": "HEYtech",
+            "pl": "HEYtech",
+            "zh-cn": "HEYtech"
+        },
+        "desc":  {
+            "en": "Connect to and control HEYtech devices. https://rolladensteuerung.de/",
+            "de": "Anschließen und Steuern von HEYtech-Geräten. https://rolladensteuerung.de/",
+            "ru": "Подключайтесь и управляйте устройствами HEYtech. https://rolladensteuerung.de/",
+            "pt": "Conecte e controle dispositivos HEYtech. https://rolladensteuerung.de/",
+            "nl": "Maak verbinding met HEYtech-apparaten en bedien deze. https://rolladensteuerung.de/",
+            "fr": "Connectez-vous à et contrôlez les appareils HEYtech. https://rolladensteuerung.de/",
+            "it": "Connetti e controlla i dispositivi HEYtech. https://rolladensteuerung.de/",
+            "es": "Conectar y controlar dispositivos HEYtech. https://rolladensteuerung.de/",
+            "pl": "Połącz się i kontroluj urządzenia HEYtech. https://rolladensteuerung.de/",
+            "zh-cn": "连接并控制HEYtech设备"
+        },
+        "authors": "Jey Cee<jey-cee@live.com>",
+        "keywords": [
+            "iobroker",
+            "shutter",
+            "shutter control",
+            "heytech,"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "heytech.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/Jey-Cee/ioBroker.heytech/master/admin/heytech.png",
+        "readme": "https://github.com/Jey-Cee/ioBroker.heytech/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "hardware",
+        "compact": true,
+        "materialize": true,
+        "supportCustoms": false,
+        "dependencies": [
+            {
+                "admin": ">=3.0.0"
+            },
+            {
+                "js-controller": ">=1.4.2"
+            }
+        ],
+        "messagebox": false
+    },
+    "native": {
+        "ip": "",
+        "port": "1002",
+        "pin": "",
+        "typ": "",
+        "eBoxes": 0,
+        "briSensor": false,
+        "oTempSensor": false,
+        "iTempSensor": false,
+        "rainSensor": false,
+        "windSensor": false,
+        "alarmSensor": false,
+        "humiditySensor": false
+    },
+    "objects": [],
+    "instanceObjects": []
+}

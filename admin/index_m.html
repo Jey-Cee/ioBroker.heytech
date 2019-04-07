@@ -1,0 +1,143 @@
+<html>
+
+<head>
+
+    <!-- Load ioBroker scripts and styles-->
+    <link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
+    <link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+
+    <script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+
+    <script type="text/javascript" src="../../js/translate.js"></script>
+    <script type="text/javascript" src="../../lib/js/materialize.js"></script>
+    <script type="text/javascript" src="../../js/adapter-settings.js"></script>
+
+    <!-- Load our own files -->
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript" src="words.js"></script>
+
+    <script type="text/javascript">
+        // This will be called by the admin adapter when the settings page loads
+        function load(settings, onChange) {
+            // example: select elements with id=key and class=value and insert value
+            if (!settings) return;
+            $('.value').each(function () {
+                var $key = $(this);
+                var id = $key.attr('id');
+                if ($key.attr('type') === 'checkbox') {
+                    // do not call onChange direct, because onChange could expect some arguments
+                    $key.prop('checked', settings[id])
+                        .on('change', () => onChange())
+                        ;
+                } else {
+                    // do not call onChange direct, because onChange could expect some arguments
+                    $key.val(settings[id])
+                        .on('change', () => onChange())
+                        .on('keyup', () => onChange())
+                        ;
+                }
+            });
+            onChange(false);
+            // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
+            if (M) M.updateTextFields();
+        }
+
+        // This will be called by the admin adapter when the user presses the save button
+        function save(callback) {
+            // example: select elements with class=value and build settings object
+            var obj = {};
+            $('.value').each(function () {
+                var $this = $(this);
+                if ($this.attr('type') === 'checkbox') {
+                    obj[$this.attr('id')] = $this.prop('checked');
+                } else {
+                    obj[$this.attr('id')] = $this.val();
+                }
+            });
+            callback(obj);
+        }
+    </script>
+
+</head>
+
+<body>
+
+    <div class="m adapter-container">
+
+        <div class="row">
+            <div class="col s12 m4 l2">
+                <img src="heytech.png" class="logo">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s3 input-field">
+                <input type="text" class="value" id="ip" />
+                <label for="ip" class="translate">IP</label>
+            </div>
+            <div class="col s3 input-field">
+                <input type="number" class="value" id="port" />
+                <label for="port" class="translate">Port</label>
+            </div>
+            <div class="col s3 input-field">
+                <input type="number" class="value" id="pin" />
+                <label for="pin" class="translate">PIN</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s3">
+                <select class="value" id="typ">
+                    <option value="RS874L">RS874L</option>
+                    <option value="RS879">RS879</option>
+                    <option value="RS879S">RS879S</option>
+                    <option value="RS879M">RS879M</option>
+                    <option value="WS879">WS879</option>
+                    <option value="WS879M">WS879M</option>
+                </select>
+                <label for="typ" class="translate">Typ</label>
+            </div>
+            <div class="input-field col s3">
+                <input value="0" id="eBoxes" type="number" min="0" max="3" class="value validate">
+                <label class="active translate" for="eBoxes">Number of extension boxes</label>
+            </div>
+        </div>
+        <div class="row">
+            <h5 class="translate">Installed sensors</h5>
+
+                <div class="input-field col s2">
+                            <input class="value" type="checkbox" id="briSensor">
+                            <label for="briSensor" class="translate">Brightness</label>
+                </div>
+                <div class="input-field col s2">
+                            <input class="value" type="checkbox" id="oTempSensor"/>
+                            <label for="oTempSensor" class="translate">Outdoor Temperature</label>
+                </div>
+                <div class="input-field col s2">
+                            <input class="value" type="checkbox" id="iTempSensor"/>
+                            <label for="iTempSensor" class="translate">Indoor Temperature</label>
+                </div>
+                <div class="input-field col s2">
+                            <input class="value" type="checkbox" id="humiditySensor"/>
+                            <label for="humiditySensor" class="translate">Temperature and humidity</label>
+                </div>
+                <div class="input-field col s2">
+                            <input class="value" type="checkbox" id="rainSensor"/>
+                            <label for="rainSensor" class="translate">Rain</label>
+                </div>
+                <div class="input-field col s2">
+                            <input class="value" type="checkbox" id="windSensor"/>
+                            <label for="windSensor" class="translate">Wind</label>
+                </div>
+                <div class="input-field col s2">
+                            <input class="value" type="checkbox" id="alarmSensor"/>
+                            <label for="alarmSensor" class="translate">Alarm contact</label>
+                </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
