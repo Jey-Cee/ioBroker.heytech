@@ -15,177 +15,253 @@ const ENDE_SOP = 'ende_sop';
 const START_SKD = 'start_skd';
 const ENDE_SKD = 'ende_skd';
 
+let client = null;
 
-function heyClient(cmd, no){
+
+function createClient(){
     let lastStrings = '';
-    let connectedHeytechReader = false;
 
-        if (this.config.ip === "" || this.config.ip === null || this.config.ip === undefined) {
-            this.log.warn('No ip address in configuration found');
-        } else if (this.config.port === "" || this.config.port === null || this.config.port === undefined) {
-            this.log.warn('No port in configuration found');
-        } else {
+    if (this.config.ip === "" || this.config.ip === null || this.config.ip === undefined) {
+        this.log.warn('No ip address in configuration found');
+    } else if (this.config.port === "" || this.config.port === null || this.config.port === undefined) {
+        this.log.warn('No port in configuration found');
+    } else {
 
-            const client = Telnet.client(this.config.ip + ':' + this.config.port);
+        client = Telnet.client(this.config.ip + ':' + this.config.port);
+    }
 
+    client.filter((event) => event instanceof Telnet.Event.Connected)
+        .subscribe(() => {
+            this.log.info('Connected to controller');
+            client.send('skd');
+            client.send(newLine);
+            client.send(newLine);
 
-            lastStrings = '';
+            //client.send('rhi' + newLine + newLine + 'rhb' + newLine + '1' + newLine + 'up' + newLine + newLine);
+            /*client.send(newLine);
+            client.send(newLine);
+            client.send('rhb');
+            client.send(newLine);
+            client.send('1');
+            client.send(newLine);
+            client.send('up');
+            client.send(newLine);
+            client.send(newLine);*/
 
-            client.filter((event) => event instanceof Telnet.Event.Connected)
-                .subscribe(() => {
-                    this.log.info('Connected to controller');
+        });
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin);
-                        client.send(newLine);
-                        client.send(newLine);
-                    }
-                    client.send('skd');
-                    client.send(newLine);
-                    client.send(newLine);
+    client.filter((event) => event instanceof Telnet.Event.Disconnected)
+        .subscribe(() => {
+            this.log.info('Disconnected from controller');
+            client.connect()
+        });
 
-                });
+    client.subscribe(
+        (event) => {
+            console.log('Received event:', event);
+        },
+        (error) => {
+            console.error('An error occurred:', error);
+        }
+    );
 
-            client.filter((event)=> event instanceof Telnet.Event.Disconnected)
-                .subscribe(()=>{
-                    this.log.info('Disconnected from controller');
-                    client.connect()
-                });
+    let wait;
 
-            client.subscribe(
-                (event) => {
-                    //this.log.info('Received event:', event);
-                },
-                (error) => {
-                    this.log.error('An error occurred:', error);
+    client.data.subscribe((data) => {
+
+            clearTimeout(wait);
+
+            let that = this;
+
+        wait = setTimeout(function(){
+            that.log.debug('No data received within last 2 seconds');
+            client.send('skd');
+            client.send(newLine);
+            client.send(newLine);
+        }, 2000);
+
+            lastStrings = lastStrings.concat(data);
+
+            // SOP  Oeffnungs-Prozent
+            if (lastStrings.indexOf(START_SOP) >= 0 && lastStrings.indexOf(ENDE_SOP) >= 0) {
+                // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
+                let statusStr = lastStrings.substring(
+                    lastStrings.indexOf(START_SOP) + START_SOP.length,
+                    lastStrings.indexOf(ENDE_SOP)
+                );
+                const rolladenStatus = statusStr.split(',');
+                lastStrings = '';
+                this.log.debug(rolladenStatus);
+                wStatus(rolladenStatus);
+            } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
+                // Klima-Daten
+                // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
+                let klimaStr = lastStrings.substring(
+                    lastStrings.indexOf(START_SKD) + START_SKD.length,
+                    lastStrings.indexOf(ENDE_SKD)
+                );
+                const klimadaten = klimaStr.split(',');
+                lastStrings = '';
+                this.log.debug(klimadaten);
+                wKlima(klimadaten);
+            }
+
+        });
+
+    let wStatus = writeStatus.bind(this);
+
+    function writeStatus(data){
+
+        let that = this;
+
+        for(let i = 0; i < data.length; i++){
+            let z = i + 1;
+            this.getState('outputs.' + z + '.status', function(err, state){
+                if(state.val !== data[i]){
+                    that.setState('outputs.' + z + '.status', {val: data[i], ack: true});
                 }
-            );
+            });
 
-            client.data
-                .subscribe((data) => {
-                    this.log.info(data);
-                    if (!connectedHeytechReader) {
-                        return;
-                    }
-                    lastStrings = lastStrings.concat(data);
-                    //this.log.info(data);
-                    // SOP  Oeffnungs-Prozent
-                    if (lastStrings.indexOf(START_SOP) >= 0 && lastStrings.indexOf(ENDE_SOP) >= 0) {
-                        // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
-                        let statusStr = lastStrings.substring(
-                            lastStrings.indexOf(START_SOP) + START_SOP.length,
-                            lastStrings.indexOf(ENDE_SOP)
-                        );
-                        const rolladenStatus = statusStr.split(',');
-                        lastStrings = '';
-                        //client.disconnect();
-                        //connectedHeytechReader = false;
-                        //resolve(rolladenStatus);
-                        this.log.info(rolladenStatus);
-                        wStatus(rolladenStatus);
-                    } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
-                        // Klima-Daten
-                        // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
-                        let klimaStr = lastStrings.substring(
-                            lastStrings.indexOf(START_SKD) + START_SKD.length,
-                            lastStrings.indexOf(ENDE_SKD)
-                        );
-                        const klimadaten = klimaStr.split(',');
-                        lastStrings = '';
-                        //client.disconnect();
-                        //connectedHeytechReader = false;
-                        //resolve(klimadaten);
-                        this.log.info(klimadaten);
-                        wKlima(klimadaten);
-                    }
-                });
-            connectedHeytechReader = true;
-            if(cmd === null) {
-                client.connect();
-            }
+        }
 
-            if(cmd === 'down'){
-                this.log.info('Test');
-                if(this.config.pin !== ''){
-                    client.send('rsc');
-                    client.send(newLine);
-                    client.send(this.config.pin);
-                    client.send(newLine);
-                    client.send(newLine);
+    }
+
+    let wKlima = writeKlima.bind(this);
+
+    function writeKlima(data){
+        let that = this;
+        this.getStates('sensors.*', function(err, states){
+            let st;
+            let vAlarm;
+            let vWindM;
+            let vWindA;
+            let vRain;
+            let vHumidity;
+            let vTiMax;
+            let vTiMin;
+            let vTi;
+            let vToMax;
+            let vToMin;
+            let vTo;
+            let vBriAv;
+            let vBriAc;
+
+            for(st in states){
+                let name = st.replace(`heytech.${that['instance']}.sensors.`, '');
+
+                switch(name){
+                    case 'alarm':
+                        vAlarm = states[st]['val'];
+                        break;
+                    case 'wind_maximum':
+                        vWindM = states[st]['val'];
+                        break;
+                    case 'wind_actual':
+                        vWindA = states[st]['val'];
+                        break;
+                    case 'rain':
+                        vRain = states[st]['val'];
+                        break;
+                    case 'humidity':
+                        vHumidity = states[st]['val'];
+                        break;
+                    case 'temp_indoor_max':
+                        vTiMax = states[st]['val'];
+                        break;
+                    case 'temp_indoor_min':
+                        vTiMin = states[st]['val'];
+                        break;
+                    case 'temp_indoor':
+                        vTi = states[st]['val'];
+                        break;
+                    case 'temp_outdoor_max':
+                        vToMax = states[st]['val'];
+                        break;
+                    case 'temp_outdoor_min':
+                        vToMin = states[st]['val'];
+                        break;
+                    case 'temp_outdoor':
+                        vTo = states[st]['val'];
+                        break;
+                    case 'bri_average':
+                        vBriAv = states[st]['val'];
+                        break;
+                    case 'bri_actual':
+                        vBriAc = states[st]['val'];
+                        break;
                 }
-                client.send('rhi');
-                client.send(newLine);
-                client.send(newLine);
-                client.send('rhb');
-                client.send(newLine);
-                client.send(no);
-                client.send(newLine);
-                client.send(cmd);
-                client.send(newLine);
-                client.send(newLine);
             }
 
-        }
+            if(that.config.briSensor === true){
+                if(vBriAc !== data[0]){
+                    that.setState('sensors.bri_actual', {val: data[0], ack: true});
+                }
+                if(vBriAv !== data[14]){
+                    that.setState('sensors.bri_average', {val: data[14], ack: true});
+                }
 
-        let wStatus = writeStatus.bind(this);
-
-        function writeStatus(data){
-
-            for(let i = 0; i < data.length; i++){
-                let z = i + 1;
-                this.setState('outputs.' + z + '.status', {val: data[i], ack: true});
             }
 
-        }
+            if(that.config.iTempSensor === true || that.config.humiditySensor === true){
+                if(vTi !== data[1] + ',' + data[2]){
+                    that.setState('sensors.temp_indoor', {val: data[1] + ',' + data[2], ack: true});
+                }
+                if(vTiMin !== data[3]){
+                    that.setState('sensors.temp_indoor_min', {val: data[3], ack: true});
+                }
+                if(vTiMax !== data[4]){
+                    that.setState('sensors.temp_indoor_max', {val: data[4], ack: true});
+                }
 
-        let wKlima = writeKlima.bind(this);
-
-        function writeKlima(data){
-            if(this.config.briSensor === true){
-                this.setState('sensors.bri_actual', {val: data[0], ack: true});
-                this.setState('sensors.bri_average', {val: data[14], ack: true});
             }
 
-            if(this.config.iTempSensor === true || this.config.humiditySensor === true){
-                this.setState('sensors.temp_indoor', {val: data[1] + ',' + data[2], ack: true});
-                this.setState('sensors.temp_indoor_min', {val: data[3], ack: true});
-                this.setState('sensors.temp_indoor_max', {val: data[4], ack: true});
+            if(that.config.oTempSensor === true){
+                if(vTo !== data[5] + ',' + data[6]){
+                    that.setState('sensors.temp_outdoor', {val: data[5] + ',' + data[6], ack: true});
+                }
+                if(vToMin !== data[7]){
+                    that.setState('sensors.temp_outdoor_min', {val: data[7], ack: true});
+                }
+                if(vToMax !== data[8]){
+                    that.setState('sensors.temp_outdoor_max', {val: data[8], ack: true});
+                }
             }
 
-            if(this.config.oTempSensor === true){
-                this.setState('sensors.temp_outdoor', {val: data[5] + ',' + data[6], ack: true});
-                this.setState('sensors.temp_outdoor_min', {val: data[7], ack: true});
-                this.setState('sensors.temp_outdoor_max', {val: data[8], ack: true});
+            if(that.config.windSensor === true){
+                if(vWindA !== data[9]){
+                    that.setState('sensors.wind_actual', {val: data[9], ack: true});
+                }
+                if(vWindM !== data[10]){
+                    that.setState('sensors.wind_maximum', {val: data[10], ack: true});
+                }
             }
 
-            if(this.config.windSensor === true){
-                this.setState('sensors.wind_actual', {val: data[9], ack: true});
-                this.setState('sensors.wind_maximum', {val: data[10], ack: true});
+            if(that.config.alarmSensor === true){
+                if(vAlarm !== data[11]){
+                    that.setState('sensors.alarm', {val: data[11], ack: true})
+                }
             }
 
-            if(this.config.alarmSensor === true){
-                this.setState('sensors.alarm', {val: data[11], ack: true})
+            if(that.config.rainSensor === true){
+                if(vRain !== data[12]){
+                    that.setState('sensors.rain', {val: data[12], ack: true})
+                }
             }
 
-            if(this.config.rainSensor === true){
-                this.setState('sensors.rain', {val: data[12], ack: true})
+            if(that.config.humiditySensor === true){
+                if(vHumidity !== data[15]){
+                    that.setState('sensors.humidity', {val: data[15], ack: true})
+                }
+
             }
+            
+        });
 
-            if(this.config.humiditySensor === true){
-                this.setState('sensors.humidity', {val: data[15], ack: true})
-            }
-        }
-
-        //let sCmd = sendCommand.bind(this);
-
-
-
-
+        
+    }
 }
 
-let hc;
+let cC;
 
 class Heytech extends utils.Adapter {
 
@@ -197,13 +273,13 @@ class Heytech extends utils.Adapter {
             ...options,
             name: 'heytech'
         });
-        hc = heyClient.bind(this);
         this.on('ready', this.onReady.bind(this));
         this.on('objectChange', this.onObjectChange.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
         // this.on("message", this.onMessage.bind(this));
         this.on('unload', this.onUnload.bind(this));
 
+        cC = createClient.bind(this);
 
     }
 
@@ -492,8 +568,8 @@ class Heytech extends utils.Adapter {
                 });
 
             }
-
-        hc(null);
+        cC();
+        client.connect();
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates('*');
 
@@ -542,17 +618,83 @@ class Heytech extends utils.Adapter {
             let res1 = patt1.test(id);
             let res2 = patt2.test(id);
             let res3 = patt3.test(id);
-            if(res1 === true){
-                //this.log.info('Test res1');
-                hc(res1, 1);
-            }
-            if(res2 === true){
-                //this.log.info('Test res2');
-                hc(res2, 1);
-            }
-            if(res3 === true){
-                //this.log.info('Test res3');
-                hc(res3, 1);
+            if(client === null){
+                cC();
+            }else {
+                if (res1 === true) {
+                    let helper = id.replace('.down', '');
+                    let no = helper.match(/\d*$/g);
+
+                    if (this.config.pin !== '') {
+                        client.send('rsc');
+                        client.send(newLine);
+                        client.send(this.config.pin);
+                        client.send(newLine);
+                        client.send(newLine);
+                    }
+                    client.send('rhi');
+                    client.send(newLine);
+                    client.send(newLine);
+                    client.send('rhb');
+                    client.send(newLine);
+                    client.send(no[0]);
+                    client.send(newLine);
+                    client.send('down');
+                    client.send(newLine);
+                    client.send(newLine);
+
+                    this.log.info(no[0] + ' down');
+
+                }
+                if (res2 === true) {
+                    let helper = id.replace('.up', '');
+                    let no = helper.match(/\d*$/g);
+
+                    if (this.config.pin !== '') {
+                        client.send('rsc');
+                        client.send(newLine);
+                        client.send(this.config.pin);
+                        client.send(newLine);
+                        client.send(newLine);
+                    }
+                    client.send('rhi');
+                    client.send(newLine);
+                    client.send(newLine);
+                    client.send('rhb');
+                    client.send(newLine);
+                    client.send(no[0]);
+                    client.send(newLine);
+                    client.send('up');
+                    client.send(newLine);
+                    client.send(newLine);
+
+                    this.log.info(no[0] + ' up');
+
+                }
+                if (res3 === true) {
+                    let helper = id.replace('.stop', '');
+                    let no = helper.match(/\d*$/g);
+
+                    if (this.config.pin !== '') {
+                        client.send('rsc');
+                        client.send(newLine);
+                        client.send(this.config.pin);
+                        client.send(newLine);
+                        client.send(newLine);
+                    }
+                    client.send('rhi');
+                    client.send(newLine);
+                    client.send(newLine);
+                    client.send('rhb');
+                    client.send(newLine);
+                    client.send(no[0]);
+                    client.send(newLine);
+                    client.send('stop');
+                    client.send(newLine);
+                    client.send(newLine);
+
+                    this.log.info(no[0] + ' stop');
+                }
             }
 
             //this.log.debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
