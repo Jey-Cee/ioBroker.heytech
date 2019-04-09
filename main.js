@@ -14,6 +14,16 @@ const START_SOP = 'start_sop';
 const ENDE_SOP = 'ende_sop';
 const START_SKD = 'start_skd';
 const ENDE_SKD = 'ende_skd';
+const START_SMO = 'start_smo';
+const ENDE_SMO = 'ende_smo';
+const START_SMC = 'start_smo';
+const ENDE_SMC = 'ende_smc';
+const START_SFI = 'start_sfi';
+const ENDE_SFI = 'ende_sfi';
+const START_SMN = 'start_smn';
+const ENDE_SMN = 'ende_smn';
+const START_STI = 'start_sti';
+
 
 let client = null;
 
@@ -33,20 +43,31 @@ function createClient(){
     client.filter((event) => event instanceof Telnet.Event.Connected)
         .subscribe(() => {
             this.log.info('Connected to controller');
-            client.send('skd');
+
+
+            if(this.config.pin !== '') {
+                client.send('rsc');
+                client.send(newLine);
+                client.send(this.config.pin.toString());
+                client.send(newLine);
+            }
+
             client.send(newLine);
+            client.send('sss');
+            client.send(newLine);
+            client.send('sss');
+            client.send(newLine);
+            client.send('smo');
+            client.send(newLine);
+            client.send('sdt');
+            client.send(newLine);
+            client.send('smc');
+            client.send(newLine);
+            client.send('smn');
+            client.send(newLine);
+            client.send('sfi');
             client.send(newLine);
 
-            //client.send('rhi' + newLine + newLine + 'rhb' + newLine + '1' + newLine + 'up' + newLine + newLine);
-            /*client.send(newLine);
-            client.send(newLine);
-            client.send('rhb');
-            client.send(newLine);
-            client.send('1');
-            client.send(newLine);
-            client.send('up');
-            client.send(newLine);
-            client.send(newLine);*/
 
         });
 
@@ -66,9 +87,10 @@ function createClient(){
     );
 
     let wait;
+    let smn = '';
 
     client.data.subscribe((data) => {
-
+            //this.log.debug('Data: ' + data);
             clearTimeout(wait);
 
             let that = this;
@@ -82,8 +104,9 @@ function createClient(){
 
             lastStrings = lastStrings.concat(data);
 
-            // SOP  Oeffnungs-Prozent
+
             if (lastStrings.indexOf(START_SOP) >= 0 && lastStrings.indexOf(ENDE_SOP) >= 0) {
+                // SOP  Oeffnungs-Prozent
                 // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
                 let statusStr = lastStrings.substring(
                     lastStrings.indexOf(START_SOP) + START_SOP.length,
@@ -104,9 +127,275 @@ function createClient(){
                 lastStrings = '';
                 this.log.debug(klimadaten);
                 wKlima(klimadaten);
+            }else if(lastStrings.indexOf(START_SMO) >= 0 && lastStrings.indexOf(ENDE_SMO) >= 0){
+                // Model Kennung
+                let modelStr = lastStrings.substring(
+                    lastStrings.indexOf(START_SMO) + START_SMO.length,
+                    lastStrings.indexOf(ENDE_SMO)
+                );
+                this.log.info('Model: ' + modelStr);
+                modelStr = modelStr.replace('HEYtech ', '');
+                if(this.config.autoDetect === true){
+                    this.setObjectNotExists('controller', {
+                        type: 'state',
+                        common: {
+                            name: modelStr,
+                            type: 'boolean',
+                            role: 'indicator',
+                            read: true,
+                            write: false
+                        },
+                        native: {
+                            model: modelStr
+                        },
+                    });
+                }else{
+                    this.extendObject('controller', {"native": {"model": modelStr}});
+                }
+
+                lastStrings = '';
+
+            }else if(lastStrings.indexOf(START_SMC) >= 0 && lastStrings.indexOf(ENDE_SMC) >= 0){
+                // Number of channels
+                let noChannelStr = lastStrings.substring(
+                    lastStrings.indexOf(START_SMC) + START_SMC.length,
+                    lastStrings.indexOf(ENDE_SMC)
+                );
+                this.log.debug('Number of Channels :' + noChannelStr);
+                this.extendObject('controller', {"native": {"channels": noChannelsStr}});
+                lastStrings = '';
+            }else if(lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0){
+                // Software Version
+                let svStr = lastStrings.substring(
+                    lastStrings.indexOf(START_SFI) + START_SFI.length,
+                    lastStrings.indexOf(ENDE_SFI)
+                );
+                this.log.info('Software version: ' + svStr);
+                this.extendObject('controller', {"native": {"swversion": svStr}});
+                lastStrings = '';
+            }else if(lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0){
+
+                smn = smn.concat(data);
+
+                let patt = new RegExp(START_STI);
+                let checkEnd = patt.test(data);
+
+                if(checkEnd){
+
+                    let channels = smn.match(/\d\d,.*,\d,/gm);
+                    wOutputs(channels);
+                    smn = '';
+                }
+
+
             }
 
         });
+
+    let wOutputs = writeOutputs.bind(this);
+
+    function writeOutputs(data){
+        let that = this;
+        let n = data.length;
+
+        for (let i = 0; i < n; i++) {
+            let z = i + 1;
+            let channel = data[i].split(',');
+            if(channel[0] < 65) {
+                let number = parseInt(channel[0]);
+                let vRole;
+                switch (channel[2]){
+                    case '1':
+                        vRole = 'shutter';
+                        break;
+                    case '2':
+                        vRole = 'device';
+                        break;
+                    case '3':
+                        vRole = 'group';
+                        break;
+                    case '4':
+                        vRole = 'device group';
+                        break;
+                }
+                
+                if(vRole === 'shutter' || vRole === 'group') {
+                    that.setObjectNotExists('shutters', {
+                        type: 'group',
+                        common: {
+                            name: 'Shutters',
+                            type: 'string',
+                            role: 'group',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    that.setObjectNotExists('shutters.' + number, {
+                        type: 'channel',
+                        common: {
+                            name: channel[1],
+                            type: 'boolean',
+                            role: vRole,
+                            read: true,
+                            write: false
+                        }
+                    });
+                    that.setObjectNotExists('shutters.' + number + '.up', {
+                        type: 'state',
+                        common: {
+                            name: channel[1] + ' up',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true
+                        }
+                    });
+                    that.setObjectNotExists('shutters.' + number + '.down', {
+                        type: 'state',
+                        common: {
+                            name: channel[1] + ' down',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true
+                        }
+                    });
+                    that.setObjectNotExists('shutters.' + number + '.stop', {
+                        type: 'state',
+                        common: {
+                            name: channel[1] + ' stop',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true
+                        }
+                    });
+                    that.setObjectNotExists('shutters.' + number + '.status', {
+                        type: 'state',
+                        common: {
+                            name: channel[1] + ' status',
+                            type: 'number',
+                            role: 'indicator',
+                            unit: '%',
+                            read: true,
+                            write: false
+                        }
+                    });
+                }else if(vRole === 'device' || vRole === 'device group'){
+                    let patt = new RegExp('~');
+                    let dimmer = patt.test(channel[1]);
+
+                    if(dimmer === false) {
+                        that.setObjectNotExists('devices', {
+                            type: 'group',
+                            common: {
+                                name: 'Devices',
+                                type: 'string',
+                                role: 'group',
+                                read: true,
+                                write: false
+                            }
+                        });
+                        that.setObjectNotExists('devices.' + number, {
+                            type: 'channel',
+                            common: {
+                                name: channel[1],
+                                type: 'boolean',
+                                role: vRole,
+                                read: true,
+                                write: false
+                            }
+                        });
+                        that.setObjectNotExists('devices.' + number + '.on', {
+                            type: 'state',
+                            common: {
+                                name: channel[1] + ' on',
+                                type: 'boolean',
+                                role: 'switch',
+                                read: true,
+                                write: true
+                            }
+                        });
+                    }else if(dimmer === true){
+                        that.setObjectNotExists('dimmer', {
+                            type: 'group',
+                            common: {
+                                name: 'Dimmer',
+                                type: 'string',
+                                role: 'group',
+                                read: true,
+                                write: false
+                            }
+                        });
+                        that.setObjectNotExists('dimmer.' + number, {
+                            type: 'channel',
+                            common: {
+                                name: channel[1],
+                                type: 'boolean',
+                                role: vRole,
+                                read: true,
+                                write: false
+                            }
+                        });
+                        that.setObjectNotExists('dimmer.' + number + '.on', {
+                            type: 'state',
+                            common: {
+                                name: channel[1] + ' on',
+                                type: 'boolean',
+                                role: 'switch',
+                                read: true,
+                                write: true
+                            }
+                        });
+                        that.setObjectNotExists('dimmer.' + number + '.level', {
+                            type: 'state',
+                            common: {
+                                name: channel[1] + ' level',
+                                type: 'number',
+                                role: 'level.dimmer',
+                                read: true,
+                                write: true
+                            }
+                        });
+                    }
+                    
+                }
+            }else if(channel[0] > 64){
+                let sceneNo = channel[0] - 64;
+                that.setObjectNotExists('scenes', {
+                    type: 'group',
+                    common: {
+                        name: 'Scenes',
+                        type: 'string',
+                        role: 'group',
+                        read: true,
+                        write: false
+                    }
+                });
+                that.setObjectNotExists('scenes.' + sceneNo, {
+                    type: 'channel',
+                    common: {
+                        name: channel[1],
+                        type: 'boolean',
+                        role: 'scene',
+                        read: true,
+                        write: false
+                    }
+                });
+                that.setObjectNotExists('scenes.' + sceneNo + '.activate', {
+                    type: 'state',
+                    common: {
+                        name: 'Activate' + channel[1],
+                        type: 'boolean',
+                        role: 'button',
+                        read: true,
+                        write: true
+                    }
+                });
+            }
+
+        }
+    }
 
     let wStatus = writeStatus.bind(this);
 
@@ -114,15 +403,89 @@ function createClient(){
 
         let that = this;
 
-        for(let i = 0; i < data.length; i++){
-            let z = i + 1;
-            this.getState('outputs.' + z + '.status', function(err, state){
-                if(state.val !== data[i]){
-                    that.setState('outputs.' + z + '.status', {val: data[i], ack: true});
-                }
-            });
+            for (let i = 0; i < data.length; i++) {
+                let z = i + 1;
+                if(that.config.autoDetect === false) {
+                    that.getState('outputs.' + z + '.status', function (err, state) {
+                        if (err) {
+                            that.log.error(err);
+                        } else if (state !== null && state.val !== data[i]) {
+                            that.setState('outputs.' + z + '.status', {val: data[i], ack: true});
+                        }
+                    });
+                }else if(that.config.autoDetect === true){
+                    //get all states that matches the id number
+                    that.getStates('*' + z + '.', function(err, states){
+                        //iterate thru all states
+                        let keys = Object.keys(states);
 
-        }
+                        //remove all states that are not for show values and scenes
+                        let pArr = ['down', 'up', 'stop', 'scenes', 'undefined'];
+                        for(let p in pArr){
+                            let patt = new RegExp(pArr[p]);
+                            for(let x in keys){
+                                let test = patt.test(keys[x]);
+                                if(test === true){
+                                    delete states[keys[x]];
+                                }
+                            }
+
+                        }
+
+                        keys = Object.keys(states);
+
+                            for(let x = 0; x < keys.length; x++){
+                                if(keys[x] === 'undefined' || keys[x] === undefined){
+
+                                }else{
+                                    let key = keys[x].replace(/\w*\.\d.\w*\./g, '');
+                                    key = key.replace(/\.\w+$/g, '');
+                                    key = parseInt(key);
+
+                                    if(states[keys[x]] === undefined){
+
+                                    }else{
+                                        let oldVal = null;
+                                        let ts = 0;
+                                        if(states[keys[x]] !== null){
+                                            oldVal = JSON.stringify(states[keys[x]]['val']);
+                                            oldVal = oldVal.replace(/"/g, '');
+                                            oldVal = oldVal.toString();
+                                        }
+                                        if(states[keys[x]] !== null){
+                                            ts = states[keys[x]]['ts'];
+                                            //that.log.info(ts);
+                                        }
+
+                                        ts = parseInt(ts);
+                                        let wait = 1500;
+                                        let d = new Date();
+                                        let time = d.getTime();
+
+                                        let newVal = data[i];
+                                        if(key === z && time - ts > wait){
+                                            let test = keys[x].match(/\w+$/g);
+                                            test = test.toString();
+                                            if((test === 'status' || test === 'level') && oldVal !== newVal){
+                                                that.setState(keys[x], {val: data[i], ack: true});
+                                            }else if(test === 'on'){
+
+                                                if(parseInt(data[i]) === 0 && (oldVal !== 'false' || oldVal === null)){
+                                                    that.setState(keys[x], {val: false, ack: true});
+                                                }else if(parseInt(data[i]) === 100 && (oldVal !== 'true' || oldVal === null)){
+                                                    that.setState(keys[x], {val: true, ack: true});
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+                    })
+                }
+
+            }
+
 
     }
 
@@ -130,6 +493,20 @@ function createClient(){
 
     function writeKlima(data){
         let that = this;
+
+        if(that.config.autoDetect){
+            that.setObjectNotExists('sensors', {
+                type: 'group',
+                common: {
+                    name: 'Sensor data',
+                    type: 'string',
+                    role: 'group',
+                    read: true,
+                    write: false
+                }
+            });
+        }
+
         this.getStates('sensors.*', function(err, states){
             let st;
             let vAlarm;
@@ -192,64 +569,207 @@ function createClient(){
                 }
             }
 
-            if(that.config.briSensor === true){
+
+            if(that.config.briSensor === true || that.config.autoDetect){
                 if(vBriAc !== data[0]){
+                    that.setObjectNotExists('sensors.bri_actual', {
+                        type: 'state',
+                        common: {
+                            name: 'Actual brightness',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'kLux',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.bri_actual', {val: data[0], ack: true});
                 }
                 if(vBriAv !== data[14]){
+                    that.setObjectNotExists('sensors.bri_average', {
+                        type: 'state',
+                        common: {
+                            name: 'Average brightness',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'kLux',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.bri_average', {val: data[14], ack: true});
                 }
 
             }
 
-            if(that.config.iTempSensor === true || that.config.humiditySensor === true){
+            if((that.config.iTempSensor === true || that.config.humiditySensor === true || that.config.autoDetect) && data[1] !== '999'){
                 if(vTi !== data[1] + ',' + data[2]){
+                    that.setObjectNotExists('sensors.temp_indoor', {
+                        type: 'state',
+                        common: {
+                            name: 'Indoor temperature',
+                            type: 'number',
+                            role: 'value.temperature',
+                            unit: '°C',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.temp_indoor', {val: data[1] + ',' + data[2], ack: true});
                 }
                 if(vTiMin !== data[3]){
+                    that.setObjectNotExists('sensors.temp_indoor_min', {
+                        type: 'state',
+                        common: {
+                            name: 'Indoor temperature minimum',
+                            type: 'number',
+                            role: 'value.temperature',
+                            unit: '°C',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.temp_indoor_min', {val: data[3], ack: true});
                 }
                 if(vTiMax !== data[4]){
+                    that.setObjectNotExists('sensors.temp_indoor_max', {
+                        type: 'state',
+                        common: {
+                            name: 'Indoor temperature maximum',
+                            type: 'number',
+                            role: 'value.temperature',
+                            unit: '°C',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.temp_indoor_max', {val: data[4], ack: true});
                 }
 
             }
 
-            if(that.config.oTempSensor === true){
+            if((that.config.oTempSensor === true || that.config.autoDetect) && data[5] !== '999'){
                 if(vTo !== data[5] + ',' + data[6]){
+                    that.setObjectNotExists('sensors.temp_outdoor', {
+                        type: 'state',
+                        common: {
+                            name: 'Outdoor temperature',
+                            type: 'number',
+                            role: 'value.temperature',
+                            unit: '°C',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.temp_outdoor', {val: data[5] + ',' + data[6], ack: true});
                 }
                 if(vToMin !== data[7]){
+                    that.setObjectNotExists('sensors.temp_outdoor_min', {
+                        type: 'state',
+                        common: {
+                            name: 'Outdoor temperature minimum',
+                            type: 'number',
+                            role: 'value.temperature',
+                            unit: '°C',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.temp_outdoor_min', {val: data[7], ack: true});
                 }
                 if(vToMax !== data[8]){
+                    that.setObjectNotExists('sensors.temp_outdoor_max', {
+                        type: 'state',
+                        common: {
+                            name: 'Outdoor temperature maximum',
+                            type: 'number',
+                            role: 'value.temperature',
+                            unit: '°C',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.temp_outdoor_max', {val: data[8], ack: true});
                 }
             }
 
-            if(that.config.windSensor === true){
+            if(that.config.windSensor === true || that.config.autoDetect){
                 if(vWindA !== data[9]){
+                    that.setObjectNotExists('sensors.wind_actual', {
+                        type: 'state',
+                        common: {
+                            name: 'Actual wind speed',
+                            type: 'number',
+                            role: 'value',
+                            unit: 'km/h',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.wind_actual', {val: data[9], ack: true});
                 }
                 if(vWindM !== data[10]){
+                    that.setObjectNotExists('sensors.wind_maximum', {
+                        type: 'state',
+                        common: {
+                            name: 'Maximum wind speed',
+                            type: 'number',
+                            role: 'value',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.wind_maximum', {val: data[10], ack: true});
                 }
             }
 
-            if(that.config.alarmSensor === true){
+            if(that.config.alarmSensor === true || that.config.autoDetect){
                 if(vAlarm !== data[11]){
+                    that.setObjectNotExists('sensors.alarm', {
+                        type: 'state',
+                        common: {
+                            name: 'Alarm',
+                            type: 'number',
+                            role: 'indicator',
+                            states: '0:false;1:true',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.alarm', {val: data[11], ack: true})
                 }
             }
 
-            if(that.config.rainSensor === true){
+            if(that.config.rainSensor === true || that.config.autoDetect){
                 if(vRain !== data[12]){
+                    that.setObjectNotExists('sensors.rain', {
+                        type: 'state',
+                        common: {
+                            name: 'Rain',
+                            type: 'number',
+                            role: 'indicator',
+                            states: '0:false;1:true',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.rain', {val: data[12], ack: true})
                 }
             }
 
-            if(that.config.humiditySensor === true){
+            if((that.config.humiditySensor === true || that.config.autoDetect) && data[15] !== '999'){
                 if(vHumidity !== data[15]){
+                    that.setObjectNotExists('sensors.humidity', {
+                        type: 'state',
+                        common: {
+                            name: 'Humidity',
+                            type: 'number',
+                            role: 'value.humidity',
+                            unit: '%',
+                            read: true,
+                            write: false
+                        }
+                    });
                     that.setState('sensors.humidity', {val: data[15], ack: true})
                 }
 
@@ -261,7 +781,10 @@ function createClient(){
     }
 }
 
+
+
 let cC;
+let start;
 
 class Heytech extends utils.Adapter {
 
@@ -280,6 +803,8 @@ class Heytech extends utils.Adapter {
         this.on('unload', this.onUnload.bind(this));
 
         cC = createClient.bind(this);
+        let d = new Date();
+        start = d.getTime();
 
     }
 
@@ -295,212 +820,212 @@ class Heytech extends utils.Adapter {
         Here a simple template for a boolean variable named "testVariable"
         Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
         */
-        this.setObjectNotExists('controller', {
-            type: 'state',
-            common: {
-                name: this.config.typ,
-                type: 'boolean',
-                role: 'indicator',
-                read: true,
-                write: false
-            },
-            native: {},
-        });
-
-        let out = this.config.eBoxes * 8;
-
-        switch (this.config.typ) {
-
-            case 'RS874L':
-                out = out + 8;
-                break;
-            case 'RS879':
-            case 'RS879S':
-            case 'RS879M':
-            case 'WS879':
-            case 'WS879M':
-                out = out + 32;
-                break;
-
-
-        }
-
-        if(this.config.briSensor === true || this.config.oTempSensor === true || this.config.iTempSensor === true || this.config.rainSensor === true || this.config.windSensor === true || this.config.alarmSensor === true){
-            this.setObjectNotExists('sensors', {
-                type: 'group',
-                common: {
-                    name: 'Sensor data',
-                    type: 'string',
-                    role: 'group',
-                    read: true,
-                    write: false
-                }
-            });
-        }
-
-        if(this.config.briSensor === true){
-            this.setObjectNotExists('sensors.bri_actual', {
+        if(this.config.autoDetect === false) {
+            this.setObjectNotExists('controller', {
                 type: 'state',
                 common: {
-                    name: 'Actual brightness',
-                    type: 'number',
-                    role: 'value.brightness',
-                    unit: 'kLux',
-                    read: true,
-                    write: false
-                }
-            });
-            this.setObjectNotExists('sensors.bri_average', {
-                type: 'state',
-                common: {
-                    name: 'Average brightness',
-                    type: 'number',
-                    role: 'value.brightness',
-                    unit: 'kLux',
-                    read: true,
-                    write: false
-                }
-            });
-        }
-
-        if(this.config.oTempSensor === true){
-            this.setObjectNotExists('sensors.temp_outdoor', {
-                type: 'state',
-                common: {
-                    name: 'Outdoor temperature',
-                    type: 'number',
-                    role: 'value.temperature',
-                    unit: '°C',
-                    read: true,
-                    write: false
-                }
-            });
-            this.setObjectNotExists('sensors.temp_outdoor_min', {
-                type: 'state',
-                common: {
-                    name: 'Outdoor temperature minimum',
-                    type: 'number',
-                    role: 'value.temperature',
-                    unit: '°C',
-                    read: true,
-                    write: false
-                }
-            });
-            this.setObjectNotExists('sensors.temp_outdoor_max', {
-                type: 'state',
-                common: {
-                    name: 'Outdoor temperature maximum',
-                    type: 'number',
-                    role: 'value.temperature',
-                    unit: '°C',
-                    read: true,
-                    write: false
-                }
-            });
-        }
-
-        if(this.config.iTempSensor === true || this.config.humiditySensor === true){
-            this.setObjectNotExists('sensors.temp_indoor', {
-                type: 'state',
-                common: {
-                    name: 'Indoor temperature',
-                    type: 'number',
-                    role: 'value.temperature',
-                    unit: '°C',
-                    read: true,
-                    write: false
-                }
-            });
-            this.setObjectNotExists('sensors.temp_indoor_min', {
-                type: 'state',
-                common: {
-                    name: 'Indoor temperature minimum',
-                    type: 'number',
-                    role: 'value.temperature',
-                    unit: '°C',
-                    read: true,
-                    write: false
-                }
-            });
-            this.setObjectNotExists('sensors.temp_indoor_max', {
-                type: 'state',
-                common: {
-                    name: 'Indoor temperature maximum',
-                    type: 'number',
-                    role: 'value.temperature',
-                    unit: '°C',
-                    read: true,
-                    write: false
-                }
-            });
-        }
-
-        if(this.config.humiditySensor === true){
-            this.setObjectNotExists('sensors.humidity', {
-                type: 'state',
-                common: {
-                    name: 'Humidity',
-                    type: 'number',
-                    role: 'value.humidity',
-                    unit: '%',
-                    read: true,
-                    write: false
-                }
-            });
-        }
-
-        if(this.config.rainSensor === true){
-            this.setObjectNotExists('sensors.rain', {
-                type: 'state',
-                common: {
-                    name: 'Rain',
-                    type: 'number',
+                    name: this.config.typ,
+                    type: 'boolean',
                     role: 'indicator',
-                    states: '0:false;1:true',
                     read: true,
                     write: false
-                }
+                },
+                native: {},
             });
-        }
 
-        if(this.config.windSensor === true){
-            this.setObjectNotExists('sensors.wind_actual', {
-                type: 'state',
-                common: {
-                    name: 'Actual wind speed',
-                    type: 'number',
-                    role: 'value',
-                    unit: 'km/h',
-                    read: true,
-                    write: false
-                }
-            });
-            this.setObjectNotExists('sensors.wind_maximum', {
-                type: 'state',
-                common: {
-                    name: 'Maximum wind speed',
-                    type: 'number',
-                    role: 'value',
-                    read: true,
-                    write: false
-                }
-            });
-        }
+            let out = this.config.eBoxes * 8;
 
-        if(this.config.alarmSensor === true){
-            this.setObjectNotExists('sensors.alarm', {
-                type: 'state',
-                common: {
-                    name: 'Alarm',
-                    type: 'number',
-                    role: 'indicator',
-                    states: '0:false;1:true',
-                    read: true,
-                    write: false
-                }
-            });
-        }
+            switch (this.config.typ) {
 
+                case 'RS874L':
+                    out = out + 8;
+                    break;
+                case 'RS879':
+                case 'RS879S':
+                case 'RS879M':
+                case 'WS879':
+                case 'WS879M':
+                    out = out + 32;
+                    break;
+
+
+            }
+
+            if (this.config.briSensor === true || this.config.oTempSensor === true || this.config.iTempSensor === true || this.config.rainSensor === true || this.config.windSensor === true || this.config.alarmSensor === true) {
+                this.setObjectNotExists('sensors', {
+                    type: 'group',
+                    common: {
+                        name: 'Sensor data',
+                        type: 'string',
+                        role: 'group',
+                        read: true,
+                        write: false
+                    }
+                });
+            }
+
+            if (this.config.briSensor === true) {
+                this.setObjectNotExists('sensors.bri_actual', {
+                    type: 'state',
+                    common: {
+                        name: 'Actual brightness',
+                        type: 'number',
+                        role: 'value.brightness',
+                        unit: 'kLux',
+                        read: true,
+                        write: false
+                    }
+                });
+                this.setObjectNotExists('sensors.bri_average', {
+                    type: 'state',
+                    common: {
+                        name: 'Average brightness',
+                        type: 'number',
+                        role: 'value.brightness',
+                        unit: 'kLux',
+                        read: true,
+                        write: false
+                    }
+                });
+            }
+
+            if (this.config.oTempSensor === true) {
+                this.setObjectNotExists('sensors.temp_outdoor', {
+                    type: 'state',
+                    common: {
+                        name: 'Outdoor temperature',
+                        type: 'number',
+                        role: 'value.temperature',
+                        unit: '°C',
+                        read: true,
+                        write: false
+                    }
+                });
+                this.setObjectNotExists('sensors.temp_outdoor_min', {
+                    type: 'state',
+                    common: {
+                        name: 'Outdoor temperature minimum',
+                        type: 'number',
+                        role: 'value.temperature',
+                        unit: '°C',
+                        read: true,
+                        write: false
+                    }
+                });
+                this.setObjectNotExists('sensors.temp_outdoor_max', {
+                    type: 'state',
+                    common: {
+                        name: 'Outdoor temperature maximum',
+                        type: 'number',
+                        role: 'value.temperature',
+                        unit: '°C',
+                        read: true,
+                        write: false
+                    }
+                });
+            }
+
+            if (this.config.iTempSensor === true || this.config.humiditySensor === true) {
+                this.setObjectNotExists('sensors.temp_indoor', {
+                    type: 'state',
+                    common: {
+                        name: 'Indoor temperature',
+                        type: 'number',
+                        role: 'value.temperature',
+                        unit: '°C',
+                        read: true,
+                        write: false
+                    }
+                });
+                this.setObjectNotExists('sensors.temp_indoor_min', {
+                    type: 'state',
+                    common: {
+                        name: 'Indoor temperature minimum',
+                        type: 'number',
+                        role: 'value.temperature',
+                        unit: '°C',
+                        read: true,
+                        write: false
+                    }
+                });
+                this.setObjectNotExists('sensors.temp_indoor_max', {
+                    type: 'state',
+                    common: {
+                        name: 'Indoor temperature maximum',
+                        type: 'number',
+                        role: 'value.temperature',
+                        unit: '°C',
+                        read: true,
+                        write: false
+                    }
+                });
+            }
+
+            if (this.config.humiditySensor === true) {
+                this.setObjectNotExists('sensors.humidity', {
+                    type: 'state',
+                    common: {
+                        name: 'Humidity',
+                        type: 'number',
+                        role: 'value.humidity',
+                        unit: '%',
+                        read: true,
+                        write: false
+                    }
+                });
+            }
+
+            if (this.config.rainSensor === true) {
+                this.setObjectNotExists('sensors.rain', {
+                    type: 'state',
+                    common: {
+                        name: 'Rain',
+                        type: 'number',
+                        role: 'indicator',
+                        states: '0:false;1:true',
+                        read: true,
+                        write: false
+                    }
+                });
+            }
+
+            if (this.config.windSensor === true) {
+                this.setObjectNotExists('sensors.wind_actual', {
+                    type: 'state',
+                    common: {
+                        name: 'Actual wind speed',
+                        type: 'number',
+                        role: 'value',
+                        unit: 'km/h',
+                        read: true,
+                        write: false
+                    }
+                });
+                this.setObjectNotExists('sensors.wind_maximum', {
+                    type: 'state',
+                    common: {
+                        name: 'Maximum wind speed',
+                        type: 'number',
+                        role: 'value',
+                        read: true,
+                        write: false
+                    }
+                });
+            }
+
+            if (this.config.alarmSensor === true) {
+                this.setObjectNotExists('sensors.alarm', {
+                    type: 'state',
+                    common: {
+                        name: 'Alarm',
+                        type: 'number',
+                        role: 'indicator',
+                        states: '0:false;1:true',
+                        read: true,
+                        write: false
+                    }
+                });
+            }
 
 
             for (let i = 0; i < out; i++) {
@@ -568,6 +1093,7 @@ class Heytech extends utils.Adapter {
                 });
 
             }
+        }
         cC();
         client.connect();
         // in this template all states changes inside the adapters namespace are subscribed
@@ -610,14 +1136,26 @@ class Heytech extends utils.Adapter {
      * @param {ioBroker.State | null | undefined} state
      */
     onStateChange(id, state) {
-        if (state) {
+        let d = new Date();
+        let now = d.getTime();
+        let diff = now - start;
+
+        if (state && diff > 30000) {
             // The state was changed
             let patt1 = new RegExp('down');
             let patt2 = new RegExp('up');
             let patt3 = new RegExp('stop');
+            let patt4 = new RegExp('on');
+            let patt5 = new RegExp('level');
+            let patt6 = new RegExp('activate');
+
             let res1 = patt1.test(id);
             let res2 = patt2.test(id);
             let res3 = patt3.test(id);
+            let res4 = patt4.test(id);
+            let res5 = patt5.test(id);
+            let res6 = patt6.test(id);
+
             if(client === null){
                 cC();
             }else {
@@ -628,8 +1166,7 @@ class Heytech extends utils.Adapter {
                     if (this.config.pin !== '') {
                         client.send('rsc');
                         client.send(newLine);
-                        client.send(this.config.pin);
-                        client.send(newLine);
+                        client.send(this.config.pin.toString());
                         client.send(newLine);
                     }
                     client.send('rhi');
@@ -642,10 +1179,13 @@ class Heytech extends utils.Adapter {
                     client.send('down');
                     client.send(newLine);
                     client.send(newLine);
+                    client.send('rhe');
+                    client.send(newLine);
+                    client.send(newLine);
 
-                    this.log.info(no[0] + ' down');
-
+                    this.log.info('down ' + no[0]);
                 }
+
                 if (res2 === true) {
                     let helper = id.replace('.up', '');
                     let no = helper.match(/\d*$/g);
@@ -653,8 +1193,7 @@ class Heytech extends utils.Adapter {
                     if (this.config.pin !== '') {
                         client.send('rsc');
                         client.send(newLine);
-                        client.send(this.config.pin);
-                        client.send(newLine);
+                        client.send(this.config.pin.toString());
                         client.send(newLine);
                     }
                     client.send('rhi');
@@ -667,10 +1206,13 @@ class Heytech extends utils.Adapter {
                     client.send('up');
                     client.send(newLine);
                     client.send(newLine);
+                    client.send('rhe');
+                    client.send(newLine);
+                    client.send(newLine);
 
-                    this.log.info(no[0] + ' up');
-
+                    this.log.info('up ' +no[0]);
                 }
+
                 if (res3 === true) {
                     let helper = id.replace('.stop', '');
                     let no = helper.match(/\d*$/g);
@@ -678,8 +1220,7 @@ class Heytech extends utils.Adapter {
                     if (this.config.pin !== '') {
                         client.send('rsc');
                         client.send(newLine);
-                        client.send(this.config.pin);
-                        client.send(newLine);
+                        client.send(this.config.pin.toString());
                         client.send(newLine);
                     }
                     client.send('rhi');
@@ -689,18 +1230,114 @@ class Heytech extends utils.Adapter {
                     client.send(newLine);
                     client.send(no[0]);
                     client.send(newLine);
-                    client.send('stop');
+                    client.send('off');
+                    client.send(newLine);
+                    client.send(newLine);
+                    client.send('rhe');
                     client.send(newLine);
                     client.send(newLine);
 
-                    this.log.info(no[0] + ' stop');
+                    this.log.info('stop ' + no[0]);
                 }
+
+                if (res4 === true) {
+                    let helper = id.replace('.on', '');
+                    let no = helper.match(/\d*$/g);
+                    let patt = new RegExp('dimmer');
+                    let dim = patt.test(id);
+
+                    if (this.config.pin !== '') {
+                        client.send('rsc');
+                        client.send(newLine);
+                        client.send(this.config.pin.toString());
+                        client.send(newLine);
+                    }
+                    if(dim === false) {
+                        client.send('rhi');
+                        client.send(newLine);
+                        client.send(newLine);
+                        client.send('rhb');
+                        client.send(newLine);
+                        client.send(no[0]);
+                        client.send(newLine);
+                        if (state.val === true) {
+                            client.send('up');
+                        } else {
+                            client.send('off');
+                        }
+                        client.send(newLine);
+                        client.send(newLine);
+                        client.send('rhe');
+                        client.send(newLine);
+                        client.send(newLine);
+                    }else if(dim === true){
+                        if (state.val === true) {
+
+                            let lvl = id.replace('on', 'level');
+                            this.setState(lvl, 100);
+                        } else if(state.val === false){
+                            let lvl = id.replace('on', 'level');
+                            this.setState(lvl, 0);
+
+                        }
+                    }
+
+                    this.log.info('on');
+                }
+
+                if (res5 === true) {
+                    let helper = id.replace('.level', '');
+                    let no = helper.match(/\d*$/g);
+
+                    if (this.config.pin !== '') {
+                        client.send('rsc');
+                        client.send(newLine);
+                        client.send(this.config.pin.toString());
+                        client.send(newLine);
+                    }
+                    client.send('rhi');
+                    client.send(newLine);
+                    client.send(newLine);
+                    client.send('rhb');
+                    client.send(newLine);
+                    client.send(no[0]);
+                    client.send(newLine);
+                    client.send(state.val.toString());
+                    client.send(newLine);
+                    client.send(newLine);
+                    client.send('rhe');
+                    client.send(newLine);
+                    client.send(newLine);
+
+                    this.log.info('level');
+                }
+
+
+                if (res6 === true) {
+                    let helper = id.replace('.acitivate', '');
+                    let no = helper.match(/\d*$/g);
+
+                    if (this.config.pin !== '') {
+                        client.send('rsc');
+                        client.send(newLine);
+                        client.send(this.config.pin);
+                        client.send(newLine);
+                    }
+                    client.send('rsa');
+                    client.send(newLine);
+                    client.send(no[0]);
+                    client.send(newLine);
+                    client.send(newLine);
+
+                    this.log.info('activate');
+                }
+
             }
 
             //this.log.debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
         } else {
             // The state was deleted
-            this.log.info(`state ${id} deleted`);
+            //this.log.info(`state ${id} deleted`);
         }
     }
 

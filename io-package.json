@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.0.1",
+        "version": "0.1.0",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -13,6 +13,18 @@
                 "it": "versione iniziale creata con Adapter-Studio di Jey Cee",
                 "es": "versión inicial creada con Adapter-Studio por Jey Cee",
                 "pl": "początkowa wersja stworzona za pomocą Adapter-Studio przez Jey Cee"
+            },
+            "0.1.0": {
+                "en": "ready for beta test\n",
+                "de": "bereit für den Beta-Test\n",
+                "ru": "готов к бета-тестированию\n",
+                "pt": "pronto para teste beta\n",
+                "nl": "klaar voor bètatest\n",
+                "fr": "prêt pour le test bêta\n",
+                "it": "pronto per il beta test\n",
+                "es": "listo para la prueba beta\n",
+                "pl": "gotowy do testu beta\n",
+                "zh-cn": "准备进行beta测试\n"
             }
         },
         "title": "HEYtech",
@@ -28,7 +40,7 @@
             "pl": "HEYtech",
             "zh-cn": "HEYtech"
         },
-        "desc":  {
+        "desc": {
             "en": "Connect to and control HEYtech devices. https://rolladensteuerung.de/",
             "de": "Anschließen und Steuern von HEYtech-Geräten. https://rolladensteuerung.de/",
             "ru": "Подключайтесь и управляйте устройствами HEYtech. https://rolladensteuerung.de/",
@@ -74,6 +86,7 @@
         "ip": "",
         "port": "1002",
         "pin": "",
+        "autoDetect": true,
         "typ": "",
         "eBoxes": 0,
         "briSensor": false,

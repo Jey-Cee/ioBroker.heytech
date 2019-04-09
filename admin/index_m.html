@@ -38,6 +38,14 @@
                         ;
                 }
             });
+
+            $('#autoDetect').change(function(){
+               if(this.checked){
+                   $('.auto-detect').addClass('hide');
+               }else{
+                   $('.auto-detect').removeClass('hide');
+               }
+            });
             onChange(false);
             // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
             if (M) M.updateTextFields();
@@ -86,6 +94,12 @@
             </div>
         </div>
         <div class="row">
+            <div class="input-field col s2">
+                <input class="value" type="checkbox" id="autoDetect" checked>
+                <label for="autoDetect" class="translate">Auto Detect</label>
+            </div>
+        </div>
+        <div class="row auto-detect hide">
             <div class="input-field col s3">
                 <select class="value" id="typ">
                     <option value="RS874L">RS874L</option>
@@ -102,7 +116,7 @@
                 <label class="active translate" for="eBoxes">Number of extension boxes</label>
             </div>
         </div>
-        <div class="row">
+        <div class="row auto-detect hide">
             <h5 class="translate">Installed sensors</h5>
 
                 <div class="input-field col s2">

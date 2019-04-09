@@ -19,6 +19,10 @@ Template for adapter development
 
 ## Changelog
 
+### 0.1.0
+* ready for beta test
+
+
 ### 0.0.1
 * (Author) initial release
 
