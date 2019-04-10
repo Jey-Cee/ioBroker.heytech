@@ -1,21 +1,26 @@
 <h1>
-    <img src="admin/template.png" width="64"/>
-    ioBroker.template
+    <img src="admin/heytech.png" width="64"/>
+    ioBroker.heytech
 </h1>
 
-[![NPM version](http://img.shields.io/npm/v/iobroker.template.svg)](https://www.npmjs.com/package/iobroker.template)
-[![Downloads](https://img.shields.io/npm/dm/iobroker.template.svg)](https://www.npmjs.com/package/iobroker.template)
-[![Dependency Status](https://img.shields.io/david/Author/iobroker.template.svg)](https://david-dm.org/Author/iobroker.template)
-[![Known Vulnerabilities](https://snyk.io/test/github/Author/ioBroker.template/badge.svg)](https://snyk.io/test/github/Author/ioBroker.template)
+[![NPM version](http://img.shields.io/npm/v/iobroker.heytech.svg)](https://www.npmjs.com/package/iobroker.heytech)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.heytech.svg)](https://www.npmjs.com/package/iobroker.heytech)
+[![Dependency Status](https://img.shields.io/david/jey-cee/iobroker.heytech.svg)](https://david-dm.org/jey-cee/iobroker.heytech)
+[![Known Vulnerabilities](https://snyk.io/test/github/jey-cee/ioBroker.heytech/badge.svg)](https://snyk.io/test/github/Author/ioBroker.heytech)
 
-[![NPM](https://nodei.co/npm/iobroker.template.png?downloads=true)](https://nodei.co/npm/iobroker.template/)
+[![NPM](https://nodei.co/npm/iobroker.heytech.png?downloads=true)](https://nodei.co/npm/iobroker.heytech/)
 
-**Tests:** Linux/Mac: [![Travis-CI](http://img.shields.io/travis/Author/ioBroker.template/master.svg)](https://travis-ci.org/Author/ioBroker.template)
-Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/Author/ioBroker.template?branch=master&svg=true)](https://ci.appveyor.com/project/Author/ioBroker-template/)
+**Tests:** Linux/Mac: [![Travis-CI](http://img.shields.io/travis/jey-cee/ioBroker.heytech/master.svg)](https://travis-ci.org/jey-cee/ioBroker.heytech)
+Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/jey-cee/ioBroker.heytech?branch=master&svg=true)](https://ci.appveyor.com/project/jey-cee/ioBroker-heytech/)
 
-## template adapter for ioBroker
+## HEYtech adapter for ioBroker
 
-Template for adapter development
+This adapter connects to the HEYtech controller gets automaticly data and can control outputs.
+
+## Manual 
+
+Type in IP, Port and if set the PIN.
+Normaly you can leave the "Auto detect" function on. If this does not work you can choose your hardware manual.
 
 ## Changelog
 
@@ -29,7 +34,7 @@ Template for adapter development
 ## License
 MIT License
 
-Copyright (c) 2019 Author
+Copyright (c) 2019 Jey Cee <jey-cee@live.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
