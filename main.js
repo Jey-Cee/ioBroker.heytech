@@ -90,7 +90,7 @@ function createClient(){
     let smn = '';
 
     client.data.subscribe((data) => {
-            //this.log.debug('Data: ' + data);
+            this.log.debug('Data: ' + data);
             clearTimeout(wait);
 
             let that = this;
@@ -578,7 +578,7 @@ function createClient(){
                             name: 'Actual brightness',
                             type: 'number',
                             role: 'value.brightness',
-                            unit: 'kLux',
+                            unit: 'Lux',
                             read: true,
                             write: false
                         }
@@ -592,7 +592,7 @@ function createClient(){
                             name: 'Average brightness',
                             type: 'number',
                             role: 'value.brightness',
-                            unit: 'kLux',
+                            unit: 'Lux',
                             read: true,
                             write: false
                         }
@@ -715,6 +715,7 @@ function createClient(){
                             name: 'Maximum wind speed',
                             type: 'number',
                             role: 'value',
+                            unit: 'km/h',
                             read: true,
                             write: false
                         }
