@@ -24,7 +24,7 @@
         "telnet-rxjs": "^2.1.0"
     },
     "devDependencies": {
-        "@iobroker/testing": "^1.1.16",
+        "@iobroker/testing": "^1.2.0",
         "@types/chai": "^4.1.7",
         "@types/chai-as-promised": "^7.1.0",
         "@types/gulp": "^4.0.6",
@@ -47,8 +47,8 @@
     "scripts": {
         "test:js": "mocha --opts test/mocha.custom.opts",
         "test:package": "mocha test/package --exit",
-	    "test:unit": "mocha test/unit --exit",
-	    "test:integration": "mocha test/integration --exit",
+	      "test:unit": "mocha test/unit --exit",
+	      "test:integration": "mocha test/integration --exit",
         "test": "npm run test:js && npm run test:package",
         "lint": "npm run lint:ts \"src/**/*.ts\"",
         "lint:ts": "tslint"
