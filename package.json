@@ -45,7 +45,12 @@
     },
     "main": "main.js",
     "scripts": {
-        "gulp": "gulp"
+       "test:js": "mocha --opts test/mocha.custom.opts",
+    "test:package": "mocha test/testPackageFiles.js --exit",
+    "test:iobroker": "mocha test/testStartup.js --exit",
+    "test": "npm run test:js && npm run test:package",
+    "lint": "npm run lint:ts \"src/**/*.ts\"",
+    "lint:ts": "tslint"
     },
     "bugs": {
         "url": "https://github.com/Jey-Cee/ioBroker.heytech/issues"
