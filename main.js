@@ -1095,8 +1095,11 @@ class Heytech extends utils.Adapter {
 
             }
         }
-        cC();
-        client.connect();
+        if(this.config.ip !== '' || this.config.port !== ''){
+            cC();
+            client.connect();
+        }
+
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates('*');
 
