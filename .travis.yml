@@ -5,7 +5,6 @@ os:
 
 language: node_js
 node_js:
-  - '6'
   - '8'
   - '10'
 
@@ -28,5 +27,6 @@ before_script:
   - npm install winston@2.3.1
   - 'npm install https://github.com/ioBroker/ioBroker.js-controller/tarball/master --production'
 script:
-  - npm run test:package
-  - npm run test:iobroker
+   - 'npm run test'
+   - 'npm run test:unit'
+   - 'npm run test:integration'
