@@ -38,69 +38,69 @@ function createClient(){
     } else {
 
         client = Telnet.client(this.config.ip + ':' + this.config.port);
-    }
-
-    client.filter((event) => event instanceof Telnet.Event.Connected)
-        .subscribe(() => {
-            this.log.info('Connected to controller');
 
 
-            if(this.config.pin !== '') {
-                client.send('rsc');
+        client.filter((event) => event instanceof Telnet.Event.Connected)
+            .subscribe(() => {
+                this.log.info('Connected to controller');
+
+
+                if (this.config.pin !== '') {
+                    client.send('rsc');
+                    client.send(newLine);
+                    client.send(this.config.pin.toString());
+                    client.send(newLine);
+                }
+
                 client.send(newLine);
-                client.send(this.config.pin.toString());
+                client.send('sss');
                 client.send(newLine);
+                client.send('sss');
+                client.send(newLine);
+                client.send('smo');
+                client.send(newLine);
+                client.send('sdt');
+                client.send(newLine);
+                client.send('smc');
+                client.send(newLine);
+                client.send('smn');
+                client.send(newLine);
+                client.send('sfi');
+                client.send(newLine);
+
+
+            });
+
+        client.filter((event) => event instanceof Telnet.Event.Disconnected)
+            .subscribe(() => {
+                this.log.info('Disconnected from controller');
+                client.connect()
+            });
+
+        client.subscribe(
+            (event) => {
+                console.log('Received event:', event);
+            },
+            (error) => {
+                console.error('An error occurred:', error);
             }
+        );
 
-            client.send(newLine);
-            client.send('sss');
-            client.send(newLine);
-            client.send('sss');
-            client.send(newLine);
-            client.send('smo');
-            client.send(newLine);
-            client.send('sdt');
-            client.send(newLine);
-            client.send('smc');
-            client.send(newLine);
-            client.send('smn');
-            client.send(newLine);
-            client.send('sfi');
-            client.send(newLine);
+        let wait;
+        let smn = '';
 
-
-        });
-
-    client.filter((event) => event instanceof Telnet.Event.Disconnected)
-        .subscribe(() => {
-            this.log.info('Disconnected from controller');
-            client.connect()
-        });
-
-    client.subscribe(
-        (event) => {
-            console.log('Received event:', event);
-        },
-        (error) => {
-            console.error('An error occurred:', error);
-        }
-    );
-
-    let wait;
-    let smn = '';
-
-    client.data.subscribe((data) => {
+        client.data.subscribe((data) => {
             this.log.debug('Data: ' + data);
             clearTimeout(wait);
 
             let that = this;
 
-        wait = setTimeout(function(){
-            that.log.debug('No data received within last 2 seconds');
-            client.send('skd');
-            client.send(newLine);
-            client.send(newLine);
-        }, 2000);
+            wait = setTimeout(function () {
+                that.log.debug('No data received within last 2 seconds');
+                client.send('skd');
+                client.send(newLine);
+                client.send(newLine);
+            }, 2000);
 
             lastStrings = lastStrings.concat(data);
 
@@ -127,7 +127,7 @@ function createClient(){
                 lastStrings = '';
                 this.log.debug(klimadaten);
                 wKlima(klimadaten);
-            }else if(lastStrings.indexOf(START_SMO) >= 0 && lastStrings.indexOf(ENDE_SMO) >= 0){
+            } else if (lastStrings.indexOf(START_SMO) >= 0 && lastStrings.indexOf(ENDE_SMO) >= 0) {
                 // Model Kennung
                 let modelStr = lastStrings.substring(
                     lastStrings.indexOf(START_SMO) + START_SMO.length,
@@ -135,7 +135,7 @@ function createClient(){
                 );
                 this.log.info('Model: ' + modelStr);
                 modelStr = modelStr.replace('HEYtech ', '');
-                if(this.config.autoDetect === true){
+                if (this.config.autoDetect === true) {
                     this.setObjectNotExists('controller', {
                         type: 'state',
                         common: {
@@ -149,13 +149,13 @@ function createClient(){
                             model: modelStr
                         },
                     });
-                }else{
+                } else {
                     this.extendObject('controller', {"native": {"model": modelStr}});
                 }
 
                 lastStrings = '';
 
-            }else if(lastStrings.indexOf(START_SMC) >= 0 && lastStrings.indexOf(ENDE_SMC) >= 0){
+            } else if (lastStrings.indexOf(START_SMC) >= 0 && lastStrings.indexOf(ENDE_SMC) >= 0) {
                 // Number of channels
                 let noChannelStr = lastStrings.substring(
                     lastStrings.indexOf(START_SMC) + START_SMC.length,
@@ -164,7 +164,7 @@ function createClient(){
                 this.log.debug('Number of Channels :' + noChannelStr);
                 this.extendObject('controller', {"native": {"channels": noChannelsStr}});
                 lastStrings = '';
-            }else if(lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0){
+            } else if (lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0) {
                 // Software Version
                 let svStr = lastStrings.substring(
                     lastStrings.indexOf(START_SFI) + START_SFI.length,
@@ -173,14 +173,14 @@ function createClient(){
                 this.log.info('Software version: ' + svStr);
                 this.extendObject('controller', {"native": {"swversion": svStr}});
                 lastStrings = '';
-            }else if(lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0){
+            } else if (lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
 
                 smn = smn.concat(data);
 
                 let patt = new RegExp(START_STI);
                 let checkEnd = patt.test(data);
 
-                if(checkEnd){
+                if (checkEnd) {
 
                     let channels = smn.match(/\d\d,.*,\d,/gm);
                     wOutputs(channels);
@@ -191,6 +191,7 @@ function createClient(){
             }
 
         });
+    }
 
     let wOutputs = writeOutputs.bind(this);
 
@@ -1095,8 +1096,11 @@ class Heytech extends utils.Adapter {
 
             }
         }
-        cC();
-        client.connect();
+        if(this.config.ip !== '' && this.config.port !== ''){
+            cC();
+            client.connect();
+        }
+
         // in this template all states changes inside the adapters namespace are subscribed
         this.subscribeStates('*');
 
