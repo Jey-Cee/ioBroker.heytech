@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.1.0",
+        "version": "0.1.1",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -25,6 +25,18 @@
                 "es": "listo para la prueba beta\n",
                 "pl": "gotowy do testu beta\n",
                 "zh-cn": "准备进行beta测试\n"
+            },
+            "0.1.1": {
+                "en": "added travis file\n",
+                "de": "Travis-Datei hinzugefügt\n",
+                "ru": "добавлен файл travis\n",
+                "pt": "arquivo travis adicionado\n",
+                "nl": "Travis-bestand toegevoegd\n",
+                "fr": "fichier travis ajouté\n",
+                "it": "aggiunto il file Travis\n",
+                "es": "archivo travis añadido\n",
+                "pl": "dodano plik travis\n",
+                "zh-cn": "添加了travis文件\n"
             }
         },
         "title": "HEYtech",
