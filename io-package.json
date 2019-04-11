@@ -64,7 +64,8 @@
             "pl": "Połącz się i kontroluj urządzenia HEYtech. https://rolladensteuerung.de/",
             "zh-cn": "连接并控制HEYtech设备"
         },
-        "authors": "Jey Cee<jey-cee@live.com>",
+        "authors": ["Jey Cee<jey-cee@live.com>"
+        ],
         "keywords": [
             "iobroker",
             "shutter",
