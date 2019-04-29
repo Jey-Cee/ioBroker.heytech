@@ -1,6 +1,6 @@
 {
     "name": "iobroker.heytech",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Template for adapter development",
     "author": {
         "name": "Jey Cee",
@@ -47,8 +47,8 @@
     "scripts": {
         "test:js": "mocha --opts test/mocha.custom.opts",
         "test:package": "mocha test/package --exit",
-	      "test:unit": "mocha test/unit --exit",
-	      "test:integration": "mocha test/integration --exit",
+        "test:unit": "mocha test/unit --exit",
+        "test:integration": "mocha test/integration --exit",
         "test": "npm run test:js && npm run test:package",
         "lint": "npm run lint:ts \"src/**/*.ts\"",
         "lint:ts": "tslint"

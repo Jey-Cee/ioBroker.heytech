@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.1.1",
+        "version": "0.1.2",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -37,6 +37,18 @@
                 "es": "archivo travis añadido\n",
                 "pl": "dodano plik travis\n",
                 "zh-cn": "添加了travis文件\n"
+            },
+            "0.1.2": {
+                "en": "added LUX calculation\n",
+                "de": "hinzugefügte LUX-Berechnung\n",
+                "ru": "добавлен LUX расчет\n",
+                "pt": "adicionado cálculo LUX\n",
+                "nl": "LUX-berekening toegevoegd\n",
+                "fr": "ajout du calcul LUX\n",
+                "it": "aggiunto il calcolo LUX\n",
+                "es": "cálculo de LUX añadido\n",
+                "pl": "dodano obliczenie LUX\n",
+                "zh-cn": "添加了LUX计算\n"
             }
         },
         "title": "HEYtech",
@@ -64,7 +76,8 @@
             "pl": "Połącz się i kontroluj urządzenia HEYtech. https://rolladensteuerung.de/",
             "zh-cn": "连接并控制HEYtech设备"
         },
-        "authors": ["Jey Cee<jey-cee@live.com>"
+        "authors": [
+            "Jey Cee<jey-cee@live.com>"
         ],
         "keywords": [
             "iobroker",

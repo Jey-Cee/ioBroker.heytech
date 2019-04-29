@@ -584,7 +584,15 @@ function createClient(){
                             write: false
                         }
                     });
-                    that.setState('sensors.bri_actual', {val: data[0], ack: true});
+                    let briV;
+                    if(data[0] < 2900){
+                        briV = data[0]*90;
+                    }else if(data[0] >2900 && data[0] <47100){
+                        briV = data[0]*449;
+                    }else if(data[0] >47100){
+                        briV = data[0]*5114;
+                    }
+                    that.setState('sensors.bri_actual', {val: briV, ack: true});
                 }
                 if(vBriAv !== data[14]){
                     that.setObjectNotExists('sensors.bri_average', {
@@ -598,7 +606,15 @@ function createClient(){
                             write: false
                         }
                     });
-                    that.setState('sensors.bri_average', {val: data[14], ack: true});
+                    let briV;
+                    if(data[14] < 2900){
+                        briV = data[0]*90;
+                    }else if(data[14] >2900 && data[14] <47100){
+                        briV = data[14]*449;
+                    }else if(data[14] >47100){
+                        briV = data[14]*5114;
+                    }
+                    that.setState('sensors.bri_average', {val: briV, ack: true});
                 }
 
             }

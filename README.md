@@ -24,6 +24,10 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 
 ## Changelog
 
+### 0.1.2
+* added LUX calculation
+
+
 ### 0.1.1
 * added travis file
 
