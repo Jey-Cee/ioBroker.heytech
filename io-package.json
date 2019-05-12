@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.1.2",
+        "version": "0.1.3",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -49,6 +49,18 @@
                 "es": "cálculo de LUX añadido\n",
                 "pl": "dodano obliczenie LUX\n",
                 "zh-cn": "添加了LUX计算\n"
+            },
+            "0.1.3": {
+                "en": "update calculation for brightness\n",
+                "de": "Berechnung für Helligkeit aktualisieren\n",
+                "ru": "обновить расчет яркости\n",
+                "pt": "cálculo de atualização para o brilho\n",
+                "nl": "update berekening voor helderheid\n",
+                "fr": "mise à jour du calcul de luminosité\n",
+                "it": "aggiorna il calcolo per la luminosità\n",
+                "es": "cálculo de actualización para el brillo\n",
+                "pl": "obliczanie aktualizacji jasności\n",
+                "zh-cn": "更新亮度计算\n"
             }
         },
         "title": "HEYtech",
