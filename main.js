@@ -585,28 +585,58 @@ function createClient(){
                         }
                     });
                     let briV = 0;
-                    if(data[0] < 11){
-                        briV = data[0]*(0.2/11);
-                    }else if(data[0] > 11 && data[0] < 38){
-                        briV = data[0]*(2/38);
-                    }else if(data[0] > 38 && data[0] < 76){
-                        briV = data[0]*(20/76);
-                    }else if(data[0] > 76 && data[0] < 114){
-                        briV = data[0]*(200/114);
-                    }else if(data[0] > 114 && data[0] < 152){
-                        briV = data[0]*(2000/152);
-                    }else if(data[0] > 152 && data[0] < 190){
-                        briV = data[0]*(20000/190);
-                    }else if(data[0] > 190 && data[0] < 229){
-                        briV = data[0]*(200000/229);
-                    }else if(data[0] > 229 && data[0] < 240){
-                        briV = data[0]*(400000/240);
-                    }else if(data[0] > 240 && data[0] < 251){
-                        briV = data[0]*(800000/251);
-                    }else if(data[0] > 251 && data[0] < 254){
-                        briV = data[0]*(920000/254);
+                    if(data[0] < 19){
+                        briV = data[0]*1;
+                    }else if(data[0] > 19 && data[0] < 29){
+                        briV = data[0]*4;
+                    }else if(data[0] > 29 && data[0] < 39){
+                        briV = data[0]*8;
+                    }else if(data[0] > 39 && data[0] < 49){
+                        briV = data[0]*15;
+                    }else if(data[0] > 49 && data[0] < 59){
+                        briV = data[0]*22;
+                    }else if(data[0] > 59 && data[0] < 69){
+                        briV = data[0]*30;
+                    }else if(data[0] > 69 && data[0] < 79){
+                        briV = data[0]*40;
+                    }else if(data[0] > 79 && data[0] < 89){
+                        briV = data[0]*50;
+                    }else if(data[0] > 89 && data[0] < 99){
+                        briV = data[0]*64;
+                    }else if(data[0] > 99 && data[0] < 109){
+                        briV = data[0]*80;
+                    }else if(data[0] > 109 && data[0] < 119){
+                        briV = data[0]*100;
+                    }else if(data[0] > 119 && data[0] < 129){
+                        briV = data[0]*117;
+                    }else if(data[0] > 129 && data[0] < 139){
+                        briV = data[0]*138;
+                    }else if(data[0] > 139 && data[0] < 149){
+                        briV = data[0]*157;
+                    }else if(data[0] > 149 && data[0] < 159){
+                        briV = data[0]*173;
+                    }else if(data[0] > 159 && data[0] < 169){
+                        briV = data[0]*194;
+                    }else if(data[0] > 169 && data[0] < 179){
+                        briV = data[0]*212;
+                    }else if(data[0] > 179 && data[0] < 189){
+                        briV = data[0]*228;
+                    }else if(data[0] > 189 && data[0] < 199){
+                        briV = data[0]*247;
+                    }else if(data[0] > 199 && data[0] < 209){
+                        briV = data[0]*265;
+                    }else if(data[0] > 209 && data[0] < 219){
+                        briV = data[0]*286;
+                    }else if(data[0] > 219 && data[0] < 229){
+                        briV = data[0]*305;
+                    }else if(data[0] > 229 && data[0] < 239){
+                        briV = data[0]*322;
+                    }else if(data[0] > 239 && data[0] < 249){
+                        briV = data[0]*342;
+                    }else if(data[0] > 249 && data[0] < 259){
+                        briV = data[0]*360;
                     }
-                    that.setState('sensors.bri_actual', {val: briV, ack: true});
+                    that.setState('sensors.bri_actual', {val: Math.round(briV), ack: true});
                 }
                 if(vBriAv !== data[14]){
                     that.setObjectNotExists('sensors.bri_average', {
@@ -621,28 +651,58 @@ function createClient(){
                         }
                     });
                     let briV = 0;
-                    if(data[14] < 11){
-                        briV = data[14]*(0.2/11);
-                    }else if(data[14] > 11 && data[14] < 38){
-                        briV = data[14]*(2/38);
-                    }else if(data[14] > 38 && data[14] < 76){
-                        briV = data[14]*(20/76);
-                    }else if(data[14] > 76 && data[14] < 114){
-                        briV = data[14]*(200/114);
-                    }else if(data[14] > 114 && data[14] < 152){
-                        briV = data[14]*(2000/152);
-                    }else if(data[14] > 152 && data[14] < 190){
-                        briV = data[14]*(20000/190);
-                    }else if(data[14] > 190 && data[14] < 229){
-                        briV = data[14]*(200000/229);
-                    }else if(data[14] > 229 && data[14] < 240){
-                        briV = data[14]*(400000/240);
-                    }else if(data[14] > 240 && data[14] < 251){
-                        briV = data[14]*(800000/251);
-                    }else if(data[14] > 251 && data[14] < 254){
-                        briV = data[14]*(920000/254);
+                    if(data[14] < 19){
+                        briV = data[14]*1;
+                    }else if(data[14] > 19 && data[14] < 29){
+                        briV = data[14]*4;
+                    }else if(data[14] > 29 && data[14] < 39){
+                        briV = data[14]*8;
+                    }else if(data[14] > 39 && data[14] < 49){
+                        briV = data[14]*15;
+                    }else if(data[14] > 49 && data[14] < 59){
+                        briV = data[14]*22;
+                    }else if(data[14] > 59 && data[14] < 69){
+                        briV = data[14]*30;
+                    }else if(data[14] > 69 && data[14] < 79){
+                        briV = data[14]*40;
+                    }else if(data[14] > 79 && data[14] < 89){
+                        briV = data[14]*50;
+                    }else if(data[14] > 89 && data[14] < 99){
+                        briV = data[14]*64;
+                    }else if(data[14] > 99 && data[14] < 109){
+                        briV = data[14]*80;
+                    }else if(data[14] > 109 && data[14] < 119){
+                        briV = data[14]*100;
+                    }else if(data[14] > 119 && data[14] < 129){
+                        briV = data[14]*117;
+                    }else if(data[14] > 129 && data[14] < 139){
+                        briV = data[14]*138;
+                    }else if(data[14] > 139 && data[14] < 149){
+                        briV = data[14]*157;
+                    }else if(data[14] > 149 && data[14] < 159){
+                        briV = data[14]*173;
+                    }else if(data[14] > 159 && data[14] < 169){
+                        briV = data[14]*194;
+                    }else if(data[14] > 169 && data[14] < 179){
+                        briV = data[14]*212;
+                    }else if(data[14] > 179 && data[14] < 189){
+                        briV = data[14]*228;
+                    }else if(data[14] > 189 && data[14] < 199){
+                        briV = data[14]*247;
+                    }else if(data[14] > 199 && data[14] < 209){
+                        briV = data[14]*265;
+                    }else if(data[14] > 209 && data[14] < 219){
+                        briV = data[14]*286;
+                    }else if(data[14] > 219 && data[14] < 229){
+                        briV = data[14]*305;
+                    }else if(data[14] > 229 && data[14] < 239){
+                        briV = data[14]*322;
+                    }else if(data[14] > 239 && data[14] < 249){
+                        briV = data[14]*342;
+                    }else if(data[14] > 249 && data[14] < 259){
+                        briV = data[14]*360;
                     }
-                    that.setState('sensors.bri_average', {val: briV, ack: true});
+                    that.setState('sensors.bri_average', {val: Math.round(briV), ack: true});
                 }
 
             }

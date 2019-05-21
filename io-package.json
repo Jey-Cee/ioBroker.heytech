@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.1.3",
+        "version": "0.1.4",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -61,6 +61,18 @@
                 "es": "cálculo de actualización para el brillo\n",
                 "pl": "obliczanie aktualizacji jasności\n",
                 "zh-cn": "更新亮度计算\n"
+            },
+            "0.1.4": {
+                "en": "update lux calculation (Thanks to stefan)\n",
+                "de": "lux berechnung aktualisieren (Danke an stefan)\n",
+                "ru": "обновить расчет люкса (спасибо Стефану)\n",
+                "pt": "atualização de cálculo lux (graças a stefan)\n",
+                "nl": "update lux berekening (dank aan stefan)\n",
+                "fr": "mise à jour du calcul en lux (merci à stefan)\n",
+                "it": "aggiornare il calcolo di lux (grazie a stefan)\n",
+                "es": "actualizar el cálculo de lux (gracias a stefan)\n",
+                "pl": "zaktualizuj obliczenia luksów (dzięki stefan)\n",
+                "zh-cn": "更新勒克斯计算（感谢stefan）\n"
             }
         },
         "title": "HEYtech",

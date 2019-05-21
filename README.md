@@ -24,6 +24,10 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 
 ## Changelog
 
+### 0.1.4
+* update lux calculation (Thanks to stefan)
+
+
 ### 0.1.3
 * update calculation for brightness
 
