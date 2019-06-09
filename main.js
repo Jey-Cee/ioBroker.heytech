@@ -177,14 +177,12 @@ function createClient(){
 
                 smn = smn.concat(data);
 
-                let patt = new RegExp(START_STI);
-                let checkEnd = patt.test(data);
-
-                if (checkEnd) {
+                if (lastStrings.endsWith(START_STI)) { //check end of smn data
 
                     let channels = smn.match(/\d\d,.*,\d,/gm);
                     wOutputs(channels);
                     smn = '';
+                    lastStrings = '';
                 }
 
 
@@ -219,7 +217,7 @@ function createClient(){
                         vRole = 'device group';
                         break;
                 }
-                
+
                 if(vRole === 'shutter' || vRole === 'group') {
                     that.setObjectNotExists('shutters', {
                         type: 'group',
@@ -359,7 +357,7 @@ function createClient(){
                             }
                         });
                     }
-                    
+
                 }
             }else if(channel[0] > 64){
                 let sceneNo = channel[0] - 64;
@@ -880,10 +878,10 @@ function createClient(){
                 }
 
             }
-            
+
         });
 
-        
+
     }
 }
 
