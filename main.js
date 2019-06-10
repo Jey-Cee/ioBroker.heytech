@@ -414,7 +414,7 @@ function createClient(){
                     });
                 }else if(that.config.autoDetect === true){
                     //get all states that matches the id number
-                    that.getStates('*' + z + '.', function(err, states){
+                    that.getStates('shutters.*', function(err, states){
                         //iterate thru all states
                         let keys = Object.keys(states);
 
@@ -424,7 +424,7 @@ function createClient(){
                             let patt = new RegExp(pArr[p]);
                             for(let x in keys){
                                 let test = patt.test(keys[x]);
-                                if(test === true){
+                                if(test === true || !keys[x].startsWith(`heytech.${that['instance']}.shutters.${z}.`)){
                                     delete states[keys[x]];
                                 }
                             }
