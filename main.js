@@ -26,7 +26,9 @@ const START_STI = 'start_sti';
 
 
 let client = null;
-
+let connected = false;
+let firstRun = true;
+let commandCallback;
 
 function createClient(){
     let lastStrings = '';
@@ -43,7 +45,7 @@ function createClient(){
         client.filter((event) => event instanceof Telnet.Event.Connected)
             .subscribe(() => {
                 this.log.info('Connected to controller');
-
+                connected = true;
 
                 if (this.config.pin !== '') {
                     client.send('rsc');
@@ -51,30 +53,46 @@ function createClient(){
                     client.send(this.config.pin.toString());
                     client.send(newLine);
                 }
-
-                client.send(newLine);
-                client.send('sss');
-                client.send(newLine);
-                client.send('sss');
-                client.send(newLine);
-                client.send('smo');
-                client.send(newLine);
-                client.send('sdt');
-                client.send(newLine);
-                client.send('smc');
-                client.send(newLine);
-                client.send('smn');
-                client.send(newLine);
-                client.send('sfi');
-                client.send(newLine);
-
+                if (firstRun) {
+                    client.send(newLine);
+                    client.send('sss');
+                    client.send(newLine);
+                    client.send('sss');
+                    client.send(newLine);
+                    client.send('smo');
+                    client.send(newLine);
+                    client.send('sdt');
+                    client.send(newLine);
+                    client.send('smc');
+                    client.send(newLine);
+                    client.send('smn');
+                    client.send(newLine);
+                    client.send('sfi');
+                    client.send(newLine);
+                    client.send('skd');
+                    client.send(newLine);
+                    client.send(newLine);
+                    firstRun = false;
+                } else {
+                    if (commandCallback) {
+                        commandCallback();
+                        commandCallback = null;
+                    }
+                    client.send('skd');
+                    client.send(newLine);
+                    client.send(newLine);
+                }
 
             });
 
         client.filter((event) => event instanceof Telnet.Event.Disconnected)
             .subscribe(() => {
                 this.log.info('Disconnected from controller');
-                client.connect()
+                if(this.config.refresh <= 2000){
+                    client.connect()
+                } else {
+                    connected = false;
+                }
             });
 
         client.subscribe(
@@ -96,11 +114,15 @@ function createClient(){
             let that = this;
 
             wait = setTimeout(function () {
-                that.log.debug('No data received within last 2 seconds');
-                client.send('skd');
-                client.send(newLine);
-                client.send(newLine);
-            }, 2000);
+                that.log.debug('No data received within last ' + (that.config.refresh / 1000) + ' seconds');
+                if(!connected){
+                    client.connect();
+                } else {
+                    client.send('skd');
+                    client.send(newLine);
+                    client.send(newLine);
+                }
+            }, that.config.refresh);
 
             lastStrings = lastStrings.concat(data);
 
@@ -116,6 +138,7 @@ function createClient(){
                 lastStrings = '';
                 this.log.debug(rolladenStatus);
                 wStatus(rolladenStatus);
+                client.disconnect();
             } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
                 // Klima-Daten
                 // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
@@ -1270,25 +1293,7 @@ class Heytech extends utils.Adapter {
                     let helper = id.replace('.down', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
-                    client.send('rhi');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhb');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send('down');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhe');
-                    client.send(newLine);
-                    client.send(newLine);
+                    this.sendeHandsteuerungsBefehl(no[0], 'down');
 
                     this.log.info('down ' + no[0]);
                 }
@@ -1297,25 +1302,7 @@ class Heytech extends utils.Adapter {
                     let helper = id.replace('.up', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
-                    client.send('rhi');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhb');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send('up');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhe');
-                    client.send(newLine);
-                    client.send(newLine);
+                    this.sendeHandsteuerungsBefehl(no[0], 'up');
 
                     this.log.info('up ' +no[0]);
                 }
@@ -1324,25 +1311,7 @@ class Heytech extends utils.Adapter {
                     let helper = id.replace('.stop', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
-                    client.send('rhi');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhb');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send('off');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhe');
-                    client.send(newLine);
-                    client.send(newLine);
+                    this.sendeHandsteuerungsBefehl(no[0], 'off');
 
                     this.log.info('stop ' + no[0]);
                 }
@@ -1353,30 +1322,8 @@ class Heytech extends utils.Adapter {
                     let patt = new RegExp('dimmer');
                     let dim = patt.test(id);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
                     if(dim === false) {
-                        client.send('rhi');
-                        client.send(newLine);
-                        client.send(newLine);
-                        client.send('rhb');
-                        client.send(newLine);
-                        client.send(no[0]);
-                        client.send(newLine);
-                        if (state.val === true) {
-                            client.send('up');
-                        } else {
-                            client.send('off');
-                        }
-                        client.send(newLine);
-                        client.send(newLine);
-                        client.send('rhe');
-                        client.send(newLine);
-                        client.send(newLine);
+                        this.sendeHandsteuerungsBefehl(no[0], state.val === true ? 'up' : 'off');
                     }else if(dim === true){
                         if (state.val === true) {
 
@@ -1396,25 +1343,7 @@ class Heytech extends utils.Adapter {
                     let helper = id.replace('.level', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
-                    client.send('rhi');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhb');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send(state.val.toString());
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhe');
-                    client.send(newLine);
-                    client.send(newLine);
+                    this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
 
                     this.log.info('level');
                 }
@@ -1424,17 +1353,7 @@ class Heytech extends utils.Adapter {
                     let helper = id.replace('.acitivate', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin);
-                        client.send(newLine);
-                    }
-                    client.send('rsa');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send(newLine);
+                   this.sendeSzenarioBefehl(no[0]);
 
                     this.log.info('activate');
                 }
@@ -1448,6 +1367,61 @@ class Heytech extends utils.Adapter {
         }
     }
 
+    sendeHandsteuerungsBefehl(rolladenId, befehl) {
+        let handsteuerungAusfuehrung = () => {
+            if (this.config.pin !== '') {
+                client.send('rsc');
+                client.send(newLine);
+                client.send(this.config.pin.toString());
+                client.send(newLine);
+            }
+            client.send('rhi');
+            client.send(newLine);
+            client.send(newLine);
+            client.send('rhb');
+            client.send(newLine);
+            client.send(String(rolladenId));
+            client.send(newLine);
+            client.send(String(befehl));
+            client.send(newLine);
+            client.send(newLine);
+            client.send('rhe');
+            client.send(newLine);
+            client.send(newLine);
+        };
+
+        if (connected) {
+            handsteuerungAusfuehrung();
+        } else {
+            commandCallback = handsteuerungAusfuehrung;
+            client.connect();
+        }
+
+    }
+
+    sendeSzenarioBefehl(rolladenId) {
+        let szenarioAusfuehrung = () => {
+            if (this.config.pin !== '') {
+                client.send('rsc');
+                client.send(newLine);
+                client.send(this.config.pin);
+                client.send(newLine);
+            }
+            client.send('rsa');
+            client.send(newLine);
+            client.send(rolladenId);
+            client.send(newLine);
+            client.send(newLine);
+        };
+
+        if (connected) {
+            szenarioAusfuehrung();
+        } else {
+            commandCallback = szenarioAusfuehrung;
+            client.connect();
+        }
+
+    }
 }
 
 
