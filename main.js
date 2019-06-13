@@ -29,6 +29,7 @@ let client = null;
 let connected = false;
 let firstRun = true;
 let commandCallback;
+let rolladenStatusIsNeededCounter = 0;
 
 function createClient(){
     let lastStrings = '';
@@ -71,6 +72,8 @@ function createClient(){
                     client.send(newLine);
                     client.send('skd');
                     client.send(newLine);
+                    client.send('sop');
+                    client.send(newLine);
                     client.send(newLine);
                     firstRun = false;
                 } else {
@@ -80,6 +83,8 @@ function createClient(){
                     }
                     client.send('skd');
                     client.send(newLine);
+                    client.send('sop');
+                    client.send(newLine);
                     client.send(newLine);
                 }
 
@@ -88,11 +93,7 @@ function createClient(){
         client.filter((event) => event instanceof Telnet.Event.Disconnected)
             .subscribe(() => {
                 this.log.info('Disconnected from controller');
-                if(this.config.refresh <= 2000){
-                    client.connect()
-                } else {
-                    connected = false;
-                }
+                connected = false;
             });
 
         client.subscribe(
@@ -113,16 +114,28 @@ function createClient(){
 
             let that = this;
 
+            let timeoutIntervall = that.config.refresh;
+            if (rolladenStatusIsNeededCounter > 0) {
+                timeoutIntervall = 2000;
+            }
             wait = setTimeout(function () {
                 that.log.debug('No data received within last ' + (that.config.refresh / 1000) + ' seconds');
+                rolladenStatusIsNeededCounter--;
                 if(!connected){
+                    client.disconnect();
                     client.connect();
                 } else {
-                    client.send('skd');
-                    client.send(newLine);
-                    client.send(newLine);
+                    if (rolladenStatusIsNeededCounter > 0) {
+                        client.send('sop');
+                        client.send(newLine);
+                        client.send(newLine);
+                    } else {
+                        client.send('skd');
+                        client.send(newLine);
+                        client.send(newLine);
+                    }
                 }
-            }, that.config.refresh);
+            }, timeoutIntervall);
 
             lastStrings = lastStrings.concat(data);
 
@@ -138,7 +151,9 @@ function createClient(){
                 lastStrings = '';
                 this.log.debug(rolladenStatus);
                 wStatus(rolladenStatus);
-                client.disconnect();
+                if (rolladenStatusIsNeededCounter <= 0) {
+                    client.disconnect();
+                }
             } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
                 // Klima-Daten
                 // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
@@ -1270,7 +1285,7 @@ class Heytech extends utils.Adapter {
         let now = d.getTime();
         let diff = now - start;
 
-        if (state && diff > 30000) {
+        if (state && diff > 3000) {
             // The state was changed
             let patt1 = new RegExp('down');
             let patt2 = new RegExp('up');
@@ -1389,11 +1404,13 @@ class Heytech extends utils.Adapter {
             client.send(newLine);
             client.send(newLine);
         };
+        rolladenStatusIsNeededCounter = 10;
 
         if (connected) {
             handsteuerungAusfuehrung();
         } else {
             commandCallback = handsteuerungAusfuehrung;
+            client.disconnect();
             client.connect();
         }
 
@@ -1412,12 +1429,18 @@ class Heytech extends utils.Adapter {
             client.send(rolladenId);
             client.send(newLine);
             client.send(newLine);
+            client.send('sop');
+            client.send(newLine);
+            client.send(newLine);
         };
+
+        rolladenStatusIsNeededCounter = 10;
 
         if (connected) {
             szenarioAusfuehrung();
         } else {
             commandCallback = szenarioAusfuehrung;
+            client.disconnect();
             client.connect();
         }
 
