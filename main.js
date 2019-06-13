@@ -27,10 +27,20 @@ const START_STI = 'start_sti';
 
 let client = null;
 let connected = false;
-let firstRun = true;
 let commandCallback;
-const ROLLADEN_STATUS_UPDATE_COUNT = 20;
+const ROLLADEN_STATUS_UPDATE_COUNT = 30;
 let rolladenStatusIsNeededCounter = 0;
+
+let readSop = false;
+let readSkd = false;
+let readSmo = false;
+let readSmc = false;
+let readSfi = false;
+let readSmn = false;
+
+function firstRunDone() {
+    return readSop && readSkd && readSmo && readSmc && readSfi && readSmn;
+}
 
 function createClient(){
     let lastStrings = '';
@@ -55,7 +65,7 @@ function createClient(){
                     client.send(this.config.pin.toString());
                     client.send(newLine);
                 }
-                if (firstRun) {
+                if (!firstRunDone()) {
                     client.send(newLine);
                     client.send('sss');
                     client.send(newLine);
@@ -76,7 +86,6 @@ function createClient(){
                     client.send('sop');
                     client.send(newLine);
                     client.send(newLine);
-                    firstRun = false;
                 } else {
                     if (commandCallback) {
                         commandCallback();
@@ -152,7 +161,8 @@ function createClient(){
                 lastStrings = '';
                 this.log.debug(rolladenStatus);
                 wStatus(rolladenStatus);
-                if (rolladenStatusIsNeededCounter <= 0) {
+                readSop = true;
+                if (firstRunDone() && rolladenStatusIsNeededCounter <= 0) {
                     client.disconnect();
                 }
             } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
@@ -166,6 +176,7 @@ function createClient(){
                 lastStrings = '';
                 this.log.debug(klimadaten);
                 wKlima(klimadaten);
+                readSkd = true;
             } else if (lastStrings.indexOf(START_SMO) >= 0 && lastStrings.indexOf(ENDE_SMO) >= 0) {
                 // Model Kennung
                 let modelStr = lastStrings.substring(
@@ -193,7 +204,7 @@ function createClient(){
                 }
 
                 lastStrings = '';
-
+                readSmo = true;
             } else if (lastStrings.indexOf(START_SMC) >= 0 && lastStrings.indexOf(ENDE_SMC) >= 0) {
                 // Number of channels
                 let noChannelStr = lastStrings.substring(
@@ -203,6 +214,7 @@ function createClient(){
                 this.log.debug('Number of Channels :' + noChannelStr);
                 this.extendObject('controller', {"native": {"channels": noChannelsStr}});
                 lastStrings = '';
+                readSmc = true;
             } else if (lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0) {
                 // Software Version
                 let svStr = lastStrings.substring(
@@ -212,6 +224,7 @@ function createClient(){
                 this.log.info('Software version: ' + svStr);
                 this.extendObject('controller', {"native": {"swversion": svStr}});
                 lastStrings = '';
+                readSfi = true;
             } else if (lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
 
                 smn = smn.concat(data);
@@ -222,6 +235,7 @@ function createClient(){
                     wOutputs(channels);
                     smn = '';
                     lastStrings = '';
+                    readSmn = true;
                 }
 
 
