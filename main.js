@@ -29,6 +29,7 @@ let client = null;
 let connected = false;
 let firstRun = true;
 let commandCallback;
+const ROLLADEN_STATUS_UPDATE_COUNT = 20;
 let rolladenStatusIsNeededCounter = 0;
 
 function createClient(){
@@ -98,7 +99,7 @@ function createClient(){
 
         client.subscribe(
             (event) => {
-                console.log('Received event:', event);
+                // console.log('Received event:', event);
             },
             (error) => {
                 console.error('An error occurred:', error);
@@ -116,10 +117,10 @@ function createClient(){
 
             let timeoutIntervall = that.config.refresh;
             if (rolladenStatusIsNeededCounter > 0) {
-                timeoutIntervall = 2000;
+                timeoutIntervall = 500;
             }
             wait = setTimeout(function () {
-                that.log.debug('No data received within last ' + (that.config.refresh / 1000) + ' seconds');
+                that.log.debug('No data received within last ' + (timeoutIntervall / 1000) + ' seconds');
                 rolladenStatusIsNeededCounter--;
                 if(!connected){
                     client.disconnect();
@@ -1404,7 +1405,7 @@ class Heytech extends utils.Adapter {
             client.send(newLine);
             client.send(newLine);
         };
-        rolladenStatusIsNeededCounter = 10;
+        rolladenStatusIsNeededCounter = ROLLADEN_STATUS_UPDATE_COUNT;
 
         if (connected) {
             handsteuerungAusfuehrung();
@@ -1434,7 +1435,7 @@ class Heytech extends utils.Adapter {
             client.send(newLine);
         };
 
-        rolladenStatusIsNeededCounter = 10;
+        rolladenStatusIsNeededCounter = ROLLADEN_STATUS_UPDATE_COUNT;
 
         if (connected) {
             szenarioAusfuehrung();
