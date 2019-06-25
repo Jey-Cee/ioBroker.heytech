@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.1.5",
+        "version": "0.1.6",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -74,7 +74,7 @@
                 "pl": "zaktualizuj obliczenia luksów (dzięki stefan)\n",
                 "zh-cn": "更新勒克斯计算（感谢stefan）\n"
             },
-            "0.1.4": {
+            "0.1.5": {
                 "en": "telnet connection will automaticly reconnect on refresh intervall to check weather and shutter status\n",
                 "de": "die Telnet-Verbindung wird nach einer Aktualisierungsphase automatisch wiederhergestellt, um den Wetter- und Verschlusszustand zu überprüfen.\n"
             }

@@ -52,7 +52,7 @@ function createClient() {
         }, this.config.refresh || 300000);
 
         client.filter((event) => event instanceof Telnet.Event.Connected)
-            .subscribe(() => {
+            .subscribe(async () => {
                 const that = this;
 
                 function firstRunDone() {
@@ -78,37 +78,35 @@ function createClient() {
                     client.send(this.config.pin.toString());
                     client.send(newLine);
                 }
-                if (!firstRunDone()) {
-                    client.send('smn');
+                while (!firstRunDone()) {
                     client.send(newLine);
-                    setTimeout(() => {
-                        client.send('sfi');
+                    client.send('sss');
+                    client.send(newLine);
+                    client.send('sss');
                         client.send(newLine);
-                    }, 2500);
-                    setTimeout(() => {
+                    if (!readSmo) {
                         client.send('smo');
                         client.send(newLine);
-                    }, 3000);
-                    setTimeout(() => {
-                        client.send('sfi');
+                    }
+                    client.send('sdt');
                         client.send(newLine);
-                    }, 3500);
-                    setTimeout(() => {
+                    if (!readSmc) {
                         client.send('smc');
                         client.send(newLine);
-                    }, 5000);
-                    setTimeout(() => {
-                        client.send('sss');
+                    }
+                    if (!readSfi) {
+                        client.send('sfi');
                         client.send(newLine);
-                        client.send('sss');
+                    }
+                    if (!readSmn) {
+                        client.send('smn');
                         client.send(newLine);
-                        client.send('sdt');
-                        client.send(newLine);
-                    }, 5500);
-                    setTimeout(() => {
+                    }
+                    if (!readSkd) {
                         client.send('skd');
                         client.send(newLine);
-                    }, 6000);
+                    }
+                    await this.sleep(2000);
                 }
 
                 if (commandCallbacks.length > 0) {
@@ -150,9 +148,19 @@ function createClient() {
             //this.log.debug('Data: ' + data);
 
             lastStrings = lastStrings.concat(data);
-
-
-            if (lastStrings.indexOf(START_SOP) >= 0 && lastStrings.indexOf(ENDE_SOP) >= 0) {
+            if (!readSmn && lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
+                if (lastStrings.endsWith(START_STI)) { //check end of smn data
+                    smn = smn.concat(data); // erst hier concaten, weil ansonsten das if lastStrings.endsWith nicht mehr stimmt, weil die telnet Verbindung schon wieder was gesendet hat...
+                    let channels = smn.match(/\d\d,.*,\d,/gm);
+                    wOutputs(channels);
+                    smn = '';
+                    lastStrings = '';
+                    this.log.debug('Shutters gelesen');
+                    readSmn = true;
+                } else {
+                    smn = smn.concat(data);
+                }
+            } else if (lastStrings.indexOf(START_SOP) >= 0 && lastStrings.indexOf(ENDE_SOP) >= 0) {
                 // SOP  Oeffnungs-Prozent
                 // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
                 let statusStr = lastStrings.substring(
@@ -190,7 +198,7 @@ function createClient() {
                         type: 'state',
                         common: {
                             name: modelStr,
-                            type: 'boolean',
+                            type: 'string',
                             role: 'indicator',
                             read: true,
                             write: false
@@ -225,20 +233,6 @@ function createClient() {
                 this.extendObject('controller', {"native": {"swversion": svStr}});
                 lastStrings = '';
                 readSfi = true;
-            } else if (lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
-                if (lastStrings.endsWith(START_STI)) { //check end of smn data
-                    smn = smn.concat(data); // erst hier concaten, weil ansonsten das if lastStrings.endsWith nicht mehr stimmt, weil die telnet Verbindung schon wieder was gesendet hat...
-                    let channels = smn.match(/\d\d,.*,\d,/gm);
-                    wOutputs(channels);
-                    smn = '';
-                    lastStrings = '';
-                    readSmn = true;
-                    this.log.debug('Shutters gelesen');
-                } else {
-                    smn = smn.concat(data);
-                }
-
-
             }
 
         });
@@ -333,6 +327,17 @@ function createClient() {
                             write: false
                         }
                     });
+                    // that.setObjectNotExists('shutters.' + number + '.level', {
+                    //     type: 'state',
+                    //     common: {
+                    //         name: channel[1] + ' level',
+                    //         type: 'number',
+                    //         role: 'level.blind',
+                    //         unit: '%',
+                    //         read: true,
+                    //         write: true
+                    //     }
+                    // });
                 } else if (vRole === 'device' || vRole === 'device group') {
                     let patt = new RegExp('~');
                     let dimmer = patt.test(channel[1]);
@@ -1295,8 +1300,11 @@ class Heytech extends utils.Adapter {
      */
     onStateChange(id, state) {
 
+        let d = new Date();
+        let now = d.getTime();
+        let diff = now - start;
 
-        if (state) {
+        if (state && diff > 10000 && readSmn) {
             // The state was changed
             let patt1 = new RegExp('down');
             let patt2 = new RegExp('up');
@@ -1368,10 +1376,17 @@ class Heytech extends utils.Adapter {
                 if (res5 === true) {
                     let helper = id.replace('.level', '');
                     let no = helper.match(/\d*$/g);
+                    let patt = new RegExp('shutters');
+                    let shutter = patt.test(id);
 
+                    if (shutter === true) {
+                        this.gotoShutterPosition(no[0], state.val);
+                    } else {
                     this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
+                    }
 
-                    this.log.info('level');
+
+                    this.log.info('level: '+ no[0] +' '+ state.val);
                 }
 
 
@@ -1434,6 +1449,34 @@ class Heytech extends utils.Adapter {
             client.connect();
         }
 
+    }
+
+    sleep(milliseconds) {
+        return new Promise(resolve => setTimeout(resolve, milliseconds))
+    }
+
+    async gotoShutterPosition(rolladenId, prozent) {
+        // if(rolladenId !== 10) {
+        //     return;
+        // }
+        // // 100 = auf
+        // // 0 = zu
+        // const ziel = Number(prozent);
+        // let aktuellePosition = Number(await this.getStateAsync(`shutters.${rolladenId}status`));
+        // let direction = 'up';
+        // if (aktuellePosition > ziel) {
+        //     direction = 'down';
+        // } else if( aktuellePosition === ziel) {
+        //     direction = 'off';
+        // }
+        //
+        // this.sendeHandsteuerungsBefehl(rolladenId, direction);
+        // while (!((ziel - 5) < aktuellePosition && aktuellePosition < (ziel + 5))) {
+        //     aktuellePosition = Number(await this.getStateAsync(`shutters.${rolladenId}status`));
+        //     await this.sleep(250);
+        // }
+        //
+        // this.sendeHandsteuerungsBefehl(rolladenId, 'off');
     }
 
     sendeRefreshBefehl() {
