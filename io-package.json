@@ -136,7 +136,7 @@
         "ip": "",
         "port": "1002",
         "pin": "",
-        "refresh": 60000,
+        "refresh": 300000,
         "autoDetect": true,
         "typ": "",
         "eBoxes": 0,
