@@ -1460,7 +1460,7 @@ class Heytech extends utils.Adapter {
     }
 
     async gotoShutterPosition(rolladenId, prozent) {
-        if(rolladenId !== '10') {
+        if(rolladenId !== '10' && rolladenId !== '11') {
             return;
         }
         // 100 = auf
