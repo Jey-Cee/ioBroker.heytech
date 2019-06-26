@@ -327,17 +327,17 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setObjectNotExists('shutters.' + number + '.level', {
-                        type: 'state',
-                        common: {
-                            name: channel[1] + ' level',
-                            type: 'number',
-                            role: 'level.blind',
-                            unit: '%',
-                            read: true,
-                            write: true
-                        }
-                    });
+                    // that.setObjectNotExists('shutters.' + number + '.level', {
+                    //     type: 'state',
+                    //     common: {
+                    //         name: channel[1] + ' level',
+                    //         type: 'number',
+                    //         role: 'level.blind',
+                    //         unit: '%',
+                    //         read: true,
+                    //         write: true
+                    //     }
+                    // });
                 } else if (vRole === 'device' || vRole === 'device group') {
                     let patt = new RegExp('~');
                     let dimmer = patt.test(channel[1]);
@@ -1460,29 +1460,29 @@ class Heytech extends utils.Adapter {
     }
 
     async gotoShutterPosition(rolladenId, prozent) {
-        if(rolladenId !== '10' && rolladenId !== '11') {
-            return;
-        }
-        // 100 = auf
-        // 0 = zu
-        const ziel = Number(prozent);
-        let status = await this.getStateAsync(`shutters.${rolladenId}.status`);
-        let aktuellePosition = Number(status.val);
-        console.log(aktuellePosition);
-        let direction = 'up';
-        if (aktuellePosition > ziel) {
-            direction = 'down';
-        } else if( aktuellePosition === ziel) {
-            direction = 'off';
-        }
-
-        this.sendeHandsteuerungsBefehl(rolladenId, direction);
-        while (!((ziel - 5) < aktuellePosition && aktuellePosition < (ziel + 5))) {
-            aktuellePosition = Number((await this.getStateAsync(`shutters.${rolladenId}.status`)).val);
-            await this.sleep(250);
-        }
-
-        this.sendeHandsteuerungsBefehl(rolladenId, 'off');
+        // if(rolladenId !== '10' && rolladenId !== '11') {
+        //     return;
+        // }
+        // // 100 = auf
+        // // 0 = zu
+        // const ziel = Number(prozent);
+        // let status = await this.getStateAsync(`shutters.${rolladenId}.status`);
+        // let aktuellePosition = Number(status.val);
+        // console.log(aktuellePosition);
+        // let direction = 'up';
+        // if (aktuellePosition > ziel) {
+        //     direction = 'down';
+        // } else if( aktuellePosition === ziel) {
+        //     direction = 'off';
+        // }
+        //
+        // this.sendeHandsteuerungsBefehl(rolladenId, direction);
+        // while (!((ziel - 5) < aktuellePosition && aktuellePosition < (ziel + 5))) {
+        //     aktuellePosition = Number((await this.getStateAsync(`shutters.${rolladenId}.status`)).val);
+        //     await this.sleep(250);
+        // }
+        //
+        // this.sendeHandsteuerungsBefehl(rolladenId, 'off');
     }
 
     sendeRefreshBefehl() {
