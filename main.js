@@ -27,6 +27,7 @@ const ENDE_SMN_START_STI = 'ende_smn\r\nstart_sti';
 
 let client = null;
 let connected = false;
+let connecting = false;
 let commandCallbacks = [];
 
 let readSop = false;
@@ -53,6 +54,8 @@ function createClient() {
 
         client.filter((event) => event instanceof Telnet.Event.Connected)
             .subscribe(async () => {
+                connected = true;
+                connecting = false;
                 const that = this;
 
                 function firstRunDone() {
@@ -70,7 +73,7 @@ function createClient() {
                 }
 
                 this.log.info('Connected to controller');
-                connected = true;
+
 
                 if (this.config.pin !== '') {
                     client.send('rsc');
@@ -83,13 +86,13 @@ function createClient() {
                     client.send('sss');
                     client.send(newLine);
                     client.send('sss');
-                        client.send(newLine);
+                    client.send(newLine);
                     if (!readSmo) {
                         client.send('smo');
                         client.send(newLine);
                     }
                     client.send('sdt');
-                        client.send(newLine);
+                    client.send(newLine);
                     if (!readSmc) {
                         client.send('smc');
                         client.send(newLine);
@@ -131,6 +134,7 @@ function createClient() {
             .subscribe(() => {
                 this.log.info('Disconnected from controller');
                 connected = false;
+                connecting = false;
             });
 
         client.subscribe(
@@ -150,7 +154,7 @@ function createClient() {
             lastStrings = lastStrings.concat(data);
             // this.log.debug(lastStrings);
             if (!readSmn && lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
-                if (lastStrings.indexOf(ENDE_SMN_START_STI) > 0 ) { //check end of smn data
+                if (lastStrings.indexOf(ENDE_SMN_START_STI) > 0) { //check end of smn data
                     smn = smn.concat(data); // erst hier concaten, weil ansonsten das if lastStrings.endsWith nicht mehr stimmt, weil die telnet Verbindung schon wieder was gesendet hat...
                     let channels = smn.match(/\d\d,.*,\d,/gm);
                     wOutputs(channels);
@@ -173,7 +177,7 @@ function createClient() {
                 // this.log.debug(rolladenStatus);
                 //check rolladenStatus
                 const statusKaputt = rolladenStatus.some(value => isNaN(value));
-                if(!statusKaputt){
+                if (!statusKaputt) {
                     this.log.debug('Rolladenstatus erhalten');
                     wStatus(rolladenStatus);
                     readSop = true;
@@ -187,7 +191,7 @@ function createClient() {
                 );
                 const klimadaten = klimaStr.split(',');
                 lastStrings = '';
-                this.log.debug('Klima gelesen');
+                this.log.debug('Klima gelesen: ' + klimadaten);
                 wKlima(klimadaten);
                 readSkd = true;
             } else if (lastStrings.indexOf(START_SMO) >= 0 && lastStrings.indexOf(ENDE_SMO) >= 0) {
@@ -1391,11 +1395,11 @@ class Heytech extends utils.Adapter {
                     if (shutter === true) {
                         this.gotoShutterPosition(no[0], state.val);
                     } else {
-                    this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
+                        this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
                     }
 
 
-                    this.log.info('level: '+ no[0] +' '+ state.val);
+                    this.log.info('level: ' + no[0] + ' ' + state.val);
                 }
 
 
@@ -1453,9 +1457,14 @@ class Heytech extends utils.Adapter {
             handsteuerungAusfuehrung();
             this.checkShutterStatus();
         } else {
-            client.disconnect();
+            if (!connecting) {
+                client.disconnect();
+            }
             commandCallbacks.push(handsteuerungAusfuehrung);
-            client.connect();
+            if (!connecting) {
+                connecting = true;
+                client.connect();
+            }
         }
 
     }
@@ -1504,9 +1513,14 @@ class Heytech extends utils.Adapter {
         if (connected) {
             refreshBefehl();
         } else {
-            client.disconnect();
+            if (!connecting) {
+                client.disconnect();
+            }
             commandCallbacks.push(refreshBefehl);
-            client.connect();
+            if (!connecting) {
+                connecting = true;
+                client.connect();
+            }
         }
 
     }
@@ -1532,9 +1546,14 @@ class Heytech extends utils.Adapter {
             szenarioAusfuehrung();
             this.checkShutterStatus();
         } else {
-            client.disconnect();
+            if (!connecting) {
+                client.disconnect();
+            }
             commandCallbacks.push(szenarioAusfuehrung);
-            client.connect();
+            if (!connecting) {
+                connecting = true;
+                client.connect();
+            }
         }
 
     }
