@@ -22,7 +22,7 @@ const START_SFI = 'start_sfi';
 const ENDE_SFI = 'ende_sfi';
 const START_SMN = 'start_smn';
 const ENDE_SMN = 'ende_smn';
-const START_STI = 'start_sti';
+const ENDE_SMN_START_STI = 'ende_smn\r\nstart_sti';
 
 
 let client = null;
@@ -148,8 +148,9 @@ function createClient() {
             //this.log.debug('Data: ' + data);
 
             lastStrings = lastStrings.concat(data);
+            // this.log.debug(lastStrings);
             if (!readSmn && lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
-                if (lastStrings.endsWith(START_STI)) { //check end of smn data
+                if (lastStrings.indexOf(ENDE_SMN_START_STI) > 0 ) { //check end of smn data
                     smn = smn.concat(data); // erst hier concaten, weil ansonsten das if lastStrings.endsWith nicht mehr stimmt, weil die telnet Verbindung schon wieder was gesendet hat...
                     let channels = smn.match(/\d\d,.*,\d,/gm);
                     wOutputs(channels);
@@ -164,21 +165,25 @@ function createClient() {
                 // SOP  Oeffnungs-Prozent
                 // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
                 let statusStr = lastStrings.substring(
-                    lastStrings.indexOf(START_SOP) + START_SOP.length,
-                    lastStrings.indexOf(ENDE_SOP)
+                    lastStrings.lastIndexOf(START_SOP) + START_SOP.length,
+                    lastStrings.lastIndexOf(ENDE_SOP)
                 );
                 const rolladenStatus = statusStr.split(',');
                 lastStrings = '';
                 // this.log.debug(rolladenStatus);
-                this.log.debug('Rolladenstatus erhalten')
-                wStatus(rolladenStatus);
-                readSop = true;
+                //check rolladenStatus
+                const statusKaputt = rolladenStatus.some(value => Number(value) === NaN);
+                if(!statusKaputt){
+                    this.log.debug('Rolladenstatus erhalten');
+                    wStatus(rolladenStatus);
+                    readSop = true;
+                }
             } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
                 // Klima-Daten
                 // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
                 let klimaStr = lastStrings.substring(
-                    lastStrings.indexOf(START_SKD) + START_SKD.length,
-                    lastStrings.indexOf(ENDE_SKD)
+                    lastStrings.lastIndexOf(START_SKD) + START_SKD.length,
+                    lastStrings.lastIndexOf(ENDE_SKD)
                 );
                 const klimadaten = klimaStr.split(',');
                 lastStrings = '';
@@ -188,8 +193,8 @@ function createClient() {
             } else if (lastStrings.indexOf(START_SMO) >= 0 && lastStrings.indexOf(ENDE_SMO) >= 0) {
                 // Model Kennung
                 let modelStr = lastStrings.substring(
-                    lastStrings.indexOf(START_SMO) + START_SMO.length,
-                    lastStrings.indexOf(ENDE_SMO)
+                    lastStrings.lastIndexOf(START_SMO) + START_SMO.length,
+                    lastStrings.lastIndexOf(ENDE_SMO)
                 );
                 this.log.info('Model: ' + modelStr);
                 modelStr = modelStr.replace('HEYtech ', '');
@@ -216,8 +221,8 @@ function createClient() {
             } else if (lastStrings.indexOf(START_SMC) >= 0 && lastStrings.indexOf(ENDE_SMC) >= 0) {
                 // Number of channels
                 let noChannelStr = lastStrings.substring(
-                    lastStrings.indexOf(START_SMC) + START_SMC.length,
-                    lastStrings.indexOf(ENDE_SMC)
+                    lastStrings.lastIndexOf(START_SMC) + START_SMC.length,
+                    lastStrings.lastIndexOf(ENDE_SMC)
                 );
                 this.log.debug('Number of Channels :' + noChannelStr);
                 this.extendObject('controller', {"native": {"channels": noChannelStr}});
@@ -226,8 +231,8 @@ function createClient() {
             } else if (lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0) {
                 // Software Version
                 let svStr = lastStrings.substring(
-                    lastStrings.indexOf(START_SFI) + START_SFI.length,
-                    lastStrings.indexOf(ENDE_SFI)
+                    lastStrings.lastIndexOf(START_SFI) + START_SFI.length,
+                    lastStrings.lastIndexOf(ENDE_SFI)
                 );
                 this.log.info('Software version: ' + svStr);
                 this.extendObject('controller', {"native": {"swversion": svStr}});
