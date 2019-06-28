@@ -172,7 +172,7 @@ function createClient() {
                 lastStrings = '';
                 // this.log.debug(rolladenStatus);
                 //check rolladenStatus
-                const statusKaputt = rolladenStatus.some(value => Number(value) === NaN);
+                const statusKaputt = rolladenStatus.some(value => isNaN(value));
                 if(!statusKaputt){
                     this.log.debug('Rolladenstatus erhalten');
                     wStatus(rolladenStatus);
