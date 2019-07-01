@@ -177,10 +177,13 @@ function createClient() {
                 // this.log.debug(rolladenStatus);
                 //check rolladenStatus
                 const statusKaputt = rolladenStatus.some(value => isNaN(value));
+                //this.log.debug(statusKaputt);
                 if (!statusKaputt) {
                     this.log.debug('Rolladenstatus erhalten');
                     wStatus(rolladenStatus);
                     readSop = true;
+                } else {
+                    this.log.error('Rolladenstatus konnte nicht interpretiert werden: ' + statusStr)
                 }
             } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
                 // Klima-Daten
