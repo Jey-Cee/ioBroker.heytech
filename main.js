@@ -172,7 +172,7 @@ function createClient() {
                     lastStrings.lastIndexOf(START_SOP) + START_SOP.length,
                     lastStrings.lastIndexOf(ENDE_SOP)
                 );
-                const rolladenStatus = statusStr.split(',');
+                const rolladenStatus = statusStr.split(',').slice(0 ,32);
                 lastStrings = '';
                 // this.log.debug(rolladenStatus);
                 //check rolladenStatus
