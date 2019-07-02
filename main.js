@@ -169,8 +169,8 @@ function createClient() {
                 // SOP  Oeffnungs-Prozent
                 // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
                 let statusStr = lastStrings.substring(
-                    lastStrings.lastIndexOf(START_SOP) + START_SOP.length,
-                    lastStrings.lastIndexOf(ENDE_SOP)
+                    lastStrings.indexOf(START_SOP) + START_SOP.length,
+                    lastStrings.indexOf(ENDE_SOP, lastStrings.indexOf(START_SOP))
                 );
                 const rolladenStatus = statusStr.split(',').slice(0 ,32);
                 lastStrings = '';
