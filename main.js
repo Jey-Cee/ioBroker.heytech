@@ -189,8 +189,8 @@ function createClient() {
                 // Klima-Daten
                 // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
                 let klimaStr = lastStrings.substring(
-                    lastStrings.lastIndexOf(START_SKD) + START_SKD.length,
-                    lastStrings.lastIndexOf(ENDE_SKD)
+                    lastStrings.indexOf(START_SKD) + START_SKD.length,
+                    lastStrings.indexOf(ENDE_SKD, lastStrings.indexOf(START_SKD))
                 );
                 const klimadaten = klimaStr.split(',');
                 lastStrings = '';
@@ -200,8 +200,8 @@ function createClient() {
             } else if (lastStrings.indexOf(START_SMO) >= 0 && lastStrings.indexOf(ENDE_SMO) >= 0) {
                 // Model Kennung
                 let modelStr = lastStrings.substring(
-                    lastStrings.lastIndexOf(START_SMO) + START_SMO.length,
-                    lastStrings.lastIndexOf(ENDE_SMO)
+                    lastStrings.indexOf(START_SMO) + START_SMO.length,
+                    lastStrings.indexOf(ENDE_SMO, lastStrings.indexOf(START_SMO))
                 );
                 this.log.info('Model: ' + modelStr);
                 modelStr = modelStr.replace('HEYtech ', '');
@@ -228,8 +228,8 @@ function createClient() {
             } else if (lastStrings.indexOf(START_SMC) >= 0 && lastStrings.indexOf(ENDE_SMC) >= 0) {
                 // Number of channels
                 let noChannelStr = lastStrings.substring(
-                    lastStrings.lastIndexOf(START_SMC) + START_SMC.length,
-                    lastStrings.lastIndexOf(ENDE_SMC)
+                    lastStrings.indexOf(START_SMC) + START_SMC.length,
+                    lastStrings.indexOf(ENDE_SMC, lastStrings.indexOf(START_SMC))
                 );
                 this.log.debug('Number of Channels :' + noChannelStr);
                 this.extendObject('controller', {"native": {"channels": noChannelStr}});
@@ -238,8 +238,8 @@ function createClient() {
             } else if (lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0) {
                 // Software Version
                 let svStr = lastStrings.substring(
-                    lastStrings.lastIndexOf(START_SFI) + START_SFI.length,
-                    lastStrings.lastIndexOf(ENDE_SFI)
+                    lastStrings.indexOf(START_SFI) + START_SFI.length,
+                    lastStrings.indexOf(ENDE_SFI, lastStrings.indexOf(START_SFI))
                 );
                 this.log.info('Software version: ' + svStr);
                 this.extendObject('controller', {"native": {"swversion": svStr}});
