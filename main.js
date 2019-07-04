@@ -169,22 +169,28 @@ function createClient() {
             } else if (lastStrings.indexOf(START_SOP) >= 0 && lastStrings.indexOf(ENDE_SOP) >= 0) {
                 // SOP  Oeffnungs-Prozent
                 // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
-                let statusStr = lastStrings.substring(
-                    lastStrings.indexOf(START_SOP) + START_SOP.length,
-                    lastStrings.indexOf(ENDE_SOP, lastStrings.indexOf(START_SOP))
-                );
-                const rolladenStatus = statusStr.split(',').slice(0 ,32);
-                lastStrings = '';
-                // this.log.debug(rolladenStatus);
-                //check rolladenStatus
-                const statusKaputt = rolladenStatus.some(value => isNaN(value));
-                if (!statusKaputt) {
-                    this.log.debug('Rolladenstatus erhalten');
-                    wStatus(rolladenStatus);
-                    readSop = true;
-                } else {
-                    this.log.error('Rolladenstatus konnte nicht interpretiert werden: ' + statusStr)
+
+                // let statusStr = lastStrings.substring(
+                //     lastStrings.indexOf(START_SOP) + START_SOP.length,
+                //     lastStrings.indexOf(ENDE_SOP, lastStrings.indexOf(START_SOP))
+                // );
+                const regexpResults = lastStrings.match('t_sop([^]+)ende_sop');
+                if(regexpResults && regexpResults.length > 0){
+                    const statusStr = regexpResults[regexpResults.length - 1].replace('t_sop', '').replace(ENDE_SOP, '');
+                    const rolladenStatus = statusStr.split(',').slice(0 ,32);
+                    lastStrings = '';
+                    // this.log.debug(rolladenStatus);
+                    //check rolladenStatus
+                    const statusKaputt = rolladenStatus.some(value => isNaN(value));
+                    if (!statusKaputt) {
+                        this.log.debug('Rolladenstatus erhalten');
+                        wStatus(rolladenStatus);
+                        readSop = true;
+                    } else {
+                        this.log.error('Rolladenstatus konnte nicht interpretiert werden: ' + statusStr)
+                    }
                 }
+
             } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
                 // Klima-Daten
                 // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
