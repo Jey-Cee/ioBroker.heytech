@@ -37,6 +37,7 @@ let readSmc = false;
 let readSfi = false;
 let readSmn = false;
 
+let actualPercents = {};
 
 function createClient() {
     let lastStrings = '';
@@ -177,7 +178,6 @@ function createClient() {
                 // this.log.debug(rolladenStatus);
                 //check rolladenStatus
                 const statusKaputt = rolladenStatus.some(value => isNaN(value));
-                //this.log.debug(statusKaputt);
                 if (!statusKaputt) {
                     this.log.debug('Rolladenstatus erhalten');
                     wStatus(rolladenStatus);
@@ -339,17 +339,17 @@ function createClient() {
                             write: false
                         }
                     });
-                    // that.setObjectNotExists('shutters.' + number + '.level', {
-                    //     type: 'state',
-                    //     common: {
-                    //         name: channel[1] + ' level',
-                    //         type: 'number',
-                    //         role: 'level.blind',
-                    //         unit: '%',
-                    //         read: true,
-                    //         write: true
-                    //     }
-                    // });
+                    that.setObjectNotExists('shutters.' + number + '.percent', {
+                        type: 'state',
+                        common: {
+                            name: channel[1] + ' percent',
+                            type: 'number',
+                            role: 'level.blind',
+                            unit: '%',
+                            read: true,
+                            write: true
+                        }
+                    });
                 } else if (vRole === 'device' || vRole === 'device group') {
                     let patt = new RegExp('~');
                     let dimmer = patt.test(channel[1]);
@@ -474,6 +474,10 @@ function createClient() {
 
         for (let i = 0; i < data.length; i++) {
             let z = i + 1;
+            const percent = Number(data[i]);
+            if(!isNaN(percent)){
+                actualPercents[String(z)] = percent;
+            }
             if (that.config.autoDetect === false) {
                 that.getState('outputs.' + z + '.status', function (err, state) {
                     if (err) {
@@ -1328,6 +1332,7 @@ class Heytech extends utils.Adapter {
             let patt4 = new RegExp('on');
             let patt5 = new RegExp('level');
             let patt6 = new RegExp('activate');
+            let patt7 = new RegExp('percent');
 
             let res1 = patt1.test(id);
             let res2 = patt2.test(id);
@@ -1335,6 +1340,7 @@ class Heytech extends utils.Adapter {
             let res4 = patt4.test(id);
             let res5 = patt5.test(id);
             let res6 = patt6.test(id);
+            let res7 = patt7.test(id);
 
             if (client === null) {
                 cC();
@@ -1396,7 +1402,7 @@ class Heytech extends utils.Adapter {
                     let shutter = patt.test(id);
 
                     if (shutter === true) {
-                        this.gotoShutterPosition(no[0], state.val);
+                        // this.gotoShutterPosition(no[0], state.val);
                     } else {
                         this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
                     }
@@ -1413,6 +1419,19 @@ class Heytech extends utils.Adapter {
                     this.sendeSzenarioBefehl(no[0]);
 
                     this.log.info('activate');
+                }
+
+                if (res7 === true) {
+                    let helper = id.replace('.percent', '');
+                    let no = helper.match(/\d*$/g);
+                    let patt = new RegExp('shutters');
+                    let shutter = patt.test(id);
+
+                    if (shutter === true) {
+                        this.gotoShutterPosition(no[0], state.val);
+                    }
+
+                    this.log.info('percent: ' + no[0] + ' ' + state.val);
                 }
 
             }
@@ -1477,29 +1496,41 @@ class Heytech extends utils.Adapter {
     }
 
     async gotoShutterPosition(rolladenId, prozent) {
-        // if(rolladenId !== '10' && rolladenId !== '11') {
-        //     return;
-        // }
-        // // 100 = auf
-        // // 0 = zu
-        // const ziel = Number(prozent);
+        // 100 = auf
+        // 0 = zu
+        const ziel = Number(prozent);
+
+        if (rolladenId === '11') {
+            if (ziel === 100) {
+                this.sendeHandsteuerungsBefehl(rolladenId, 'up');
+            } else if (ziel === 0) {
+                this.sendeHandsteuerungsBefehl(rolladenId, 'down');
+            } else {
         // let status = await this.getStateAsync(`shutters.${rolladenId}.status`);
         // let aktuellePosition = Number(status.val);
-        // console.log(aktuellePosition);
-        // let direction = 'up';
-        // if (aktuellePosition > ziel) {
-        //     direction = 'down';
-        // } else if( aktuellePosition === ziel) {
-        //     direction = 'off';
-        // }
-        //
-        // this.sendeHandsteuerungsBefehl(rolladenId, direction);
+                let status = actualPercents[String(rolladenId)];
+                let aktuellePosition = Number(status);
+                const staerPositionVorAusFuehrung = aktuellePosition;
+                console.log(aktuellePosition);
+                let direction = 'up';
+                if (aktuellePosition > ziel) {
+                    direction = 'down';
+                } else if (aktuellePosition === ziel) {
+                    direction = 'off';
+                }
+
+                this.sendeHandsteuerungsBefehl(rolladenId, direction);
         // while (!((ziel - 5) < aktuellePosition && aktuellePosition < (ziel + 5))) {
+                while ((direction === 'down' && aktuellePosition > ziel) || (direction === 'up' && aktuellePosition < ziel)) {
         //     aktuellePosition = Number((await this.getStateAsync(`shutters.${rolladenId}.status`)).val);
-        //     await this.sleep(250);
-        // }
-        //
-        // this.sendeHandsteuerungsBefehl(rolladenId, 'off');
+                    status = actualPercents[String(rolladenId)];
+                    aktuellePosition = Number(status);
+                    await this.sleep(250);
+                }
+
+                this.sendeHandsteuerungsBefehl(rolladenId, 'off');
+            }
+        }
     }
 
     sendeRefreshBefehl() {
