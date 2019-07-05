@@ -125,15 +125,12 @@ function createClient() {
                 if (commandCallbacks.length > 0) {
                     this.checkShutterStatus();
 
-                    let zeitverzoegerung = 0;
                     let commandCallback;
                     do {
                         commandCallback = commandCallbacks.shift();
                         if (commandCallback) {
-                            setTimeout(() => {
                                 commandCallback();
-                            }, zeitverzoegerung);
-                            zeitverzoegerung += 500;
+                            await this.sleep(500);
                         }
                     } while (commandCallbacks.length > 0);
                 }
