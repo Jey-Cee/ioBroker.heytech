@@ -39,6 +39,15 @@ let readSmn = false;
 
 let actualPercents = {};
 
+const memoizeDebounce = function (func, wait = 0, options = {}) {
+    var mem = _.memoize(function () {
+        return _.debounce(func, wait, options)
+    }, options.resolver);
+    return function () {
+        mem.apply(this, arguments).apply(this, arguments)
+    }
+};
+
 function createClient() {
     let lastStrings = '';
 
@@ -175,9 +184,9 @@ function createClient() {
                 //     lastStrings.indexOf(ENDE_SOP, lastStrings.indexOf(START_SOP))
                 // );
                 const regexpResults = lastStrings.match('t_sop([^]+)ende_sop');
-                if(regexpResults && regexpResults.length > 0){
+                if (regexpResults && regexpResults.length > 0) {
                     const statusStr = regexpResults[regexpResults.length - 1].replace('t_sop', '').replace(ENDE_SOP, '');
-                    const rolladenStatus = statusStr.split(',').slice(0 ,32);
+                    const rolladenStatus = statusStr.split(',').slice(0, 32);
                     lastStrings = '';
                     // this.log.debug(rolladenStatus);
                     //check rolladenStatus
@@ -481,7 +490,7 @@ function createClient() {
         for (let i = 0; i < data.length; i++) {
             let z = i + 1;
             const percent = Number(data[i]);
-            if(!isNaN(percent)){
+            if (!isNaN(percent)) {
                 actualPercents[String(z)] = percent;
             }
             if (that.config.autoDetect === false) {
@@ -1434,7 +1443,7 @@ class Heytech extends utils.Adapter {
                     let shutter = patt.test(id);
 
                     if (shutter === true) {
-                        this.gotoShutterPosition(no[0], state.val);
+                        memoizeDebounce(this.gotoShutterPosition(no[0], state.val), 500);
                     }
 
                     this.log.info('percent: ' + no[0] + ' ' + state.val);
@@ -1506,36 +1515,31 @@ class Heytech extends utils.Adapter {
         // 0 = zu
         const ziel = Number(prozent);
 
-        if (rolladenId === '11') {
-            if (ziel === 100) {
-                this.sendeHandsteuerungsBefehl(rolladenId, 'up');
-            } else if (ziel === 0) {
-                this.sendeHandsteuerungsBefehl(rolladenId, 'down');
-            } else {
-        // let status = await this.getStateAsync(`shutters.${rolladenId}.status`);
-        // let aktuellePosition = Number(status.val);
-                let status = actualPercents[String(rolladenId)];
-                let aktuellePosition = Number(status);
-                const staerPositionVorAusFuehrung = aktuellePosition;
-                console.log(aktuellePosition);
-                let direction = 'up';
-                if (aktuellePosition > ziel) {
-                    direction = 'down';
-                } else if (aktuellePosition === ziel) {
-                    direction = 'off';
-                }
-
-                this.sendeHandsteuerungsBefehl(rolladenId, direction);
-        // while (!((ziel - 5) < aktuellePosition && aktuellePosition < (ziel + 5))) {
-                while ((direction === 'down' && aktuellePosition > ziel) || (direction === 'up' && aktuellePosition < ziel)) {
-        //     aktuellePosition = Number((await this.getStateAsync(`shutters.${rolladenId}.status`)).val);
-                    status = actualPercents[String(rolladenId)];
-                    aktuellePosition = Number(status);
-                    await this.sleep(250);
-                }
-
-                this.sendeHandsteuerungsBefehl(rolladenId, 'off');
+        if (ziel === 100) {
+            this.sendeHandsteuerungsBefehl(rolladenId, 'up');
+        } else if (ziel === 0) {
+            this.sendeHandsteuerungsBefehl(rolladenId, 'down');
+        } else {
+            let status = actualPercents[String(rolladenId)];
+            let aktuellePosition = Number(status);
+            const staerPositionVorAusFuehrung = aktuellePosition;
+            console.log(aktuellePosition);
+            let direction = 'up';
+            if (aktuellePosition > ziel) {
+                direction = 'down';
+            } else if (aktuellePosition === ziel) {
+                direction = 'off';
             }
+
+            this.sendeHandsteuerungsBefehl(rolladenId, direction);
+
+            while ((direction === 'down' && aktuellePosition > ziel) || (direction === 'up' && aktuellePosition < ziel)) {
+                status = actualPercents[String(rolladenId)];
+                aktuellePosition = Number(status);
+                await this.sleep(250);
+            }
+
+            this.sendeHandsteuerungsBefehl(rolladenId, 'off');
         }
     }
 
