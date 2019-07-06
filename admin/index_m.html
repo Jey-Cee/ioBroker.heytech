@@ -29,22 +29,22 @@
                     // do not call onChange direct, because onChange could expect some arguments
                     $key.prop('checked', settings[id])
                         .on('change', () => onChange())
-                        ;
+                    ;
                 } else {
                     // do not call onChange direct, because onChange could expect some arguments
                     $key.val(settings[id])
                         .on('change', () => onChange())
                         .on('keyup', () => onChange())
-                        ;
+                    ;
                 }
             });
 
             $('#autoDetect').change(function(){
-               if(this.checked){
-                   $('.auto-detect').addClass('hide');
-               }else{
-                   $('.auto-detect').removeClass('hide');
-               }
+                if(this.checked){
+                    $('.auto-detect').addClass('hide');
+                }else{
+                    $('.auto-detect').removeClass('hide');
+                }
             });
             onChange(false);
             // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
@@ -67,94 +67,137 @@
         }
     </script>
 
+    <!--    Geräte Gruppen-->
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".add-row").click(function(){
+                var name = $("#name").val();
+                var shutters = $("#shutters").val();
+                var markup = "<tr><td><input type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
+                $("table tbody").append(markup);
+            });
+
+            // Find and remove selected table rows
+            $(".delete-row").click(function(){
+                $("table tbody").find('input[name="record"]').each(function(){
+                    if($(this).is(":checked")){
+                        $(this).parents("tr").remove();
+                    }
+                });
+            });
+        });
+    </script>
+
 </head>
 
 <body>
 
-    <div class="m adapter-container">
+<div class="m adapter-container">
 
-        <div class="row">
-            <div class="col s12 m4 l2">
-                <img src="heytech.png" class="logo">
-            </div>
+    <div class="row">
+        <div class="col s12 m4 l2">
+            <img src="heytech.png" class="logo">
         </div>
+    </div>
 
-        <div class="row">
-            <div class="col s3 input-field">
-                <input type="text" class="value" id="ip" />
-                <label for="ip" class="translate">IP</label>
-            </div>
-            <div class="col s3 input-field">
-                <input type="number" class="value" id="port" />
-                <label for="port" class="translate">Port</label>
-            </div>
-            <div class="col s3 input-field">
-                <input type="number" class="value" id="pin" />
-                <label for="pin" class="translate">PIN</label>
-            </div>
-            <div class="col s3 input-field">
-                <input type="number" class="value" id="refresh" />
-                <label for="refresh" class="translate">Refresh (in ms)</label>
-            </div>
+    <div class="row">
+        <div class="col s3 input-field">
+            <input type="text" class="value" id="ip" />
+            <label for="ip" class="translate">IP</label>
         </div>
-        <div class="row">
-            <div class="input-field col s2">
-                <input class="value" type="checkbox" id="autoDetect" checked>
-                <label for="autoDetect" class="translate">Auto Detect</label>
-            </div>
+        <div class="col s3 input-field">
+            <input type="number" class="value" id="port" />
+            <label for="port" class="translate">Port</label>
         </div>
-        <div class="row auto-detect hide">
-            <div class="input-field col s3">
-                <select class="value" id="typ">
-                    <option value="RS874L">RS874L</option>
-                    <option value="RS879">RS879</option>
-                    <option value="RS879S">RS879S</option>
-                    <option value="RS879M">RS879M</option>
-                    <option value="WS879">WS879</option>
-                    <option value="WS879M">WS879M</option>
-                </select>
-                <label for="typ" class="translate">Typ</label>
-            </div>
-            <div class="input-field col s3">
-                <input value="0" id="eBoxes" type="number" min="0" max="3" class="value validate">
-                <label class="active translate" for="eBoxes">Number of extension boxes</label>
-            </div>
+        <div class="col s3 input-field">
+            <input type="number" class="value" id="pin" />
+            <label for="pin" class="translate">PIN</label>
         </div>
-        <div class="row auto-detect hide">
-            <h5 class="translate">Installed sensors</h5>
+        <div class="col s3 input-field">
+            <input type="number" class="value" id="refresh" />
+            <label for="refresh" class="translate">Refresh (in ms)</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="input-field col s2">
+            <input class="value" type="checkbox" id="autoDetect" checked>
+            <label for="autoDetect" class="translate">Auto Detect</label>
+        </div>
+    </div>
+    <div class="row auto-detect hide">
+        <div class="input-field col s3">
+            <select class="value" id="typ">
+                <option value="RS874L">RS874L</option>
+                <option value="RS879">RS879</option>
+                <option value="RS879S">RS879S</option>
+                <option value="RS879M">RS879M</option>
+                <option value="WS879">WS879</option>
+                <option value="WS879M">WS879M</option>
+            </select>
+            <label for="typ" class="translate">Typ</label>
+        </div>
+        <div class="input-field col s3">
+            <input value="0" id="eBoxes" type="number" min="0" max="3" class="value validate">
+            <label class="active translate" for="eBoxes">Number of extension boxes</label>
+        </div>
+    </div>
+    <div class="row auto-detect hide">
+        <h5 class="translate">Installed sensors</h5>
 
-                <div class="input-field col s2">
-                            <input class="value" type="checkbox" id="briSensor">
-                            <label for="briSensor" class="translate">Brightness</label>
-                </div>
-                <div class="input-field col s2">
-                            <input class="value" type="checkbox" id="oTempSensor"/>
-                            <label for="oTempSensor" class="translate">Outdoor Temperature</label>
-                </div>
-                <div class="input-field col s2">
-                            <input class="value" type="checkbox" id="iTempSensor"/>
-                            <label for="iTempSensor" class="translate">Indoor Temperature</label>
-                </div>
-                <div class="input-field col s2">
-                            <input class="value" type="checkbox" id="humiditySensor"/>
-                            <label for="humiditySensor" class="translate">Temperature and humidity</label>
-                </div>
-                <div class="input-field col s2">
-                            <input class="value" type="checkbox" id="rainSensor"/>
-                            <label for="rainSensor" class="translate">Rain</label>
-                </div>
-                <div class="input-field col s2">
-                            <input class="value" type="checkbox" id="windSensor"/>
-                            <label for="windSensor" class="translate">Wind</label>
-                </div>
-                <div class="input-field col s2">
-                            <input class="value" type="checkbox" id="alarmSensor"/>
-                            <label for="alarmSensor" class="translate">Alarm contact</label>
-                </div>
-
+        <div class="input-field col s2">
+            <input class="value" type="checkbox" id="briSensor">
+            <label for="briSensor" class="translate">Brightness</label>
+        </div>
+        <div class="input-field col s2">
+            <input class="value" type="checkbox" id="oTempSensor"/>
+            <label for="oTempSensor" class="translate">Outdoor Temperature</label>
+        </div>
+        <div class="input-field col s2">
+            <input class="value" type="checkbox" id="iTempSensor"/>
+            <label for="iTempSensor" class="translate">Indoor Temperature</label>
+        </div>
+        <div class="input-field col s2">
+            <input class="value" type="checkbox" id="humiditySensor"/>
+            <label for="humiditySensor" class="translate">Temperature and humidity</label>
+        </div>
+        <div class="input-field col s2">
+            <input class="value" type="checkbox" id="rainSensor"/>
+            <label for="rainSensor" class="translate">Rain</label>
+        </div>
+        <div class="input-field col s2">
+            <input class="value" type="checkbox" id="windSensor"/>
+            <label for="windSensor" class="translate">Wind</label>
+        </div>
+        <div class="input-field col s2">
+            <input class="value" type="checkbox" id="alarmSensor"/>
+            <label for="alarmSensor" class="translate">Alarm contact</label>
         </div>
 
     </div>
+    <div class="row">
+        <div class="input-field col s2">
+            <label for="addGroups" class="translate">Shutter Groups</label>
+            <form id="addGroups">
+                <input type="text" id="name" placeholder="Name">
+                <input type="text" id="shutters" placeholder="Shutters comma separated">
+                <input type="button" class="add-row" value="Add Group">
+            </form>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Select to delete</th>
+                        <th>Name</th>
+                        <th>Shutters</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+            <button type="button" class="delete-row">Delete Row</button>
+        </div>
+    </div>
+</div>
 
 </body>
 
