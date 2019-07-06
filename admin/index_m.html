@@ -63,6 +63,21 @@
                     obj[$this.attr('id')] = $this.val();
                 }
             });
+            var table = document.getElementById('groupsTable'),
+                rows = table.getElementsByTagName('tr'),
+                i, j, cells, name, shutters, shutterGroups = [];
+
+            for (i = 0, j = rows.length; i < j; ++i) {
+                cells = rows[i].getElementsByTagName('td');
+                if (!cells.length) {
+                    continue;
+                }
+                name = cells[0].innerHTML;
+                shutters = cells[1].innerHTML.replace(/ /g, '').split(',');
+                shutterGroups.push({name, shutters});
+            }
+            obj['groups'] = shutterGroups;
+            console.log(obj);
             callback(obj);
         }
     </script>
@@ -175,14 +190,14 @@
 
     </div>
     <div class="row">
-        <div class="input-field col s2">
+        <div class="input-field col s4">
             <label for="addGroups" class="translate">Shutter Groups</label>
             <form id="addGroups">
                 <input type="text" id="name" placeholder="Name">
                 <input type="text" id="shutters" placeholder="Shutters comma separated">
                 <input type="button" class="add-row" value="Add Group">
             </form>
-            <table>
+            <table id="groupsTable">
                 <thead>
                     <tr>
                         <th>Select to delete</th>

@@ -17,6 +17,8 @@ form{
 }
 form input, button{
     padding: 5px;
+    opacity: inherit;
+    pointer-events: inherit;
 }
 table{
     width: 100%;
