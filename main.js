@@ -7,7 +7,7 @@
 const utils = require('@iobroker/adapter-core');
 
 const _ = require('lodash');
-const { Telnet } = require('telnet-rxjs');
+const {Telnet} = require('telnet-rxjs');
 
 const newLine = String.fromCharCode(13);
 const START_SOP = 'start_sop';
@@ -16,19 +16,29 @@ const START_SKD = 'start_skd';
 const ENDE_SKD = 'ende_skd';
 const START_SMO = 'start_smo';
 const ENDE_SMO = 'ende_smo';
-const START_SMC = 'start_smo';
+const START_SMC = 'start_smc';
 const ENDE_SMC = 'ende_smc';
 const START_SFI = 'start_sfi';
 const ENDE_SFI = 'ende_sfi';
 const START_SMN = 'start_smn';
 const ENDE_SMN = 'ende_smn';
-const START_STI = 'start_sti';
+const ENDE_SMN_START_STI = 'ende_smn\r\nstart_sti';
 
 
 let client = null;
+let connected = false;
+let connecting = false;
+let commandCallbacks = [];
+
+let readSop = false;
+let readSkd = false;
+let readSmo = false;
+let readSmc = false;
+let readSfi = false;
+let readSmn = false;
 
 
-function createClient(){
+function createClient() {
     let lastStrings = '';
 
     if (this.config.ip === "" || this.config.ip === null || this.config.ip === undefined) {
@@ -38,10 +48,30 @@ function createClient(){
     } else {
 
         client = Telnet.client(this.config.ip + ':' + this.config.port);
-
+        setInterval(() => {
+            this.sendeRefreshBefehl();
+        }, this.config.refresh || 300000);
 
         client.filter((event) => event instanceof Telnet.Event.Connected)
-            .subscribe(() => {
+            .subscribe(async () => {
+                connected = true;
+                connecting = false;
+                const that = this;
+
+                function firstRunDone() {
+                    const result = readSop && readSkd && readSmo && readSmc && readSfi && readSmn;
+                    that.log.debug('FIRST RUN DONE?: ' + (result));
+                    if (!result) {
+                        that.log.debug('readSop: ' + readSop);
+                        that.log.debug('readSkd: ' + readSkd);
+                        that.log.debug('readSmo: ' + readSmo);
+                        that.log.debug('readSmc: ' + readSmc);
+                        that.log.debug('readSfi: ' + readSfi);
+                        that.log.debug('readSmn: ' + readSmn);
+                    }
+                    return result;
+                }
+
                 this.log.info('Connected to controller');
 
 
@@ -51,87 +81,127 @@ function createClient(){
                     client.send(this.config.pin.toString());
                     client.send(newLine);
                 }
+                while (!firstRunDone()) {
+                    client.send(newLine);
+                    client.send('sss');
+                    client.send(newLine);
+                    client.send('sss');
+                    client.send(newLine);
+                    if (!readSmo) {
+                        client.send('smo');
+                        client.send(newLine);
+                    }
+                    client.send('sdt');
+                    client.send(newLine);
+                    if (!readSmc) {
+                        client.send('smc');
+                        client.send(newLine);
+                    }
+                    if (!readSfi) {
+                        client.send('sfi');
+                        client.send(newLine);
+                    }
+                    if (!readSmn) {
+                        client.send('smn');
+                        client.send(newLine);
+                    }
+                    if (!readSkd) {
+                        client.send('skd');
+                        client.send(newLine);
+                    }
+                    await this.sleep(2000);
+                }
 
-                client.send(newLine);
-                client.send('sss');
-                client.send(newLine);
-                client.send('sss');
-                client.send(newLine);
-                client.send('smo');
-                client.send(newLine);
-                client.send('sdt');
-                client.send(newLine);
-                client.send('smc');
-                client.send(newLine);
-                client.send('smn');
-                client.send(newLine);
-                client.send('sfi');
-                client.send(newLine);
+                if (commandCallbacks.length > 0) {
+                    this.checkShutterStatus();
 
+                    let zeitverzoegerung = 0;
+                    let commandCallback;
+                    do {
+                        commandCallback = commandCallbacks.shift();
+                        if (commandCallback) {
+                            setTimeout(() => {
+                                commandCallback();
+                            }, zeitverzoegerung);
+                            zeitverzoegerung += 500;
+                        }
+                    } while (commandCallbacks.length > 0);
+                }
 
             });
 
         client.filter((event) => event instanceof Telnet.Event.Disconnected)
             .subscribe(() => {
                 this.log.info('Disconnected from controller');
-                client.connect()
+                connected = false;
+                connecting = false;
             });
 
         client.subscribe(
             (event) => {
-                console.log('Received event:', event);
+                // console.log('Received event:', event);
             },
             (error) => {
                 console.error('An error occurred:', error);
             }
         );
 
-        let wait;
         let smn = '';
 
         client.data.subscribe((data) => {
-            this.log.debug('Data: ' + data);
-            clearTimeout(wait);
-
-            let that = this;
-
-            wait = setTimeout(function () {
-                that.log.debug('No data received within last 2 seconds');
-                client.send('skd');
-                client.send(newLine);
-                client.send(newLine);
-            }, 2000);
+            //this.log.debug('Data: ' + data);
 
             lastStrings = lastStrings.concat(data);
-
-
-            if (lastStrings.indexOf(START_SOP) >= 0 && lastStrings.indexOf(ENDE_SOP) >= 0) {
+            // this.log.debug(lastStrings);
+            if (!readSmn && lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
+                if (lastStrings.indexOf(ENDE_SMN_START_STI) > 0) { //check end of smn data
+                    smn = smn.concat(data); // erst hier concaten, weil ansonsten das if lastStrings.endsWith nicht mehr stimmt, weil die telnet Verbindung schon wieder was gesendet hat...
+                    let channels = smn.match(/\d\d,.*,\d,/gm);
+                    wOutputs(channels);
+                    smn = '';
+                    lastStrings = '';
+                    this.log.debug('Shutters gelesen');
+                    readSmn = true;
+                } else {
+                    smn = smn.concat(data);
+                }
+            } else if (lastStrings.indexOf(START_SOP) >= 0 && lastStrings.indexOf(ENDE_SOP) >= 0) {
                 // SOP  Oeffnungs-Prozent
                 // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
                 let statusStr = lastStrings.substring(
                     lastStrings.indexOf(START_SOP) + START_SOP.length,
-                    lastStrings.indexOf(ENDE_SOP)
+                    lastStrings.indexOf(ENDE_SOP, lastStrings.indexOf(START_SOP))
                 );
-                const rolladenStatus = statusStr.split(',');
+                const rolladenStatus = statusStr.split(',').slice(0 ,32);
                 lastStrings = '';
-                this.log.debug(rolladenStatus);
-                wStatus(rolladenStatus);
+                // this.log.debug(rolladenStatus);
+                //check rolladenStatus
+                const statusKaputt = rolladenStatus.some(value => isNaN(value));
+                //this.log.debug(statusKaputt);
+                if (!statusKaputt) {
+                    this.log.debug('Rolladenstatus erhalten');
+                    wStatus(rolladenStatus);
+                    readSop = true;
+                } else {
+                    this.log.error('Rolladenstatus konnte nicht interpretiert werden: ' + statusStr)
+                }
             } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
                 // Klima-Daten
                 // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
                 let klimaStr = lastStrings.substring(
                     lastStrings.indexOf(START_SKD) + START_SKD.length,
-                    lastStrings.indexOf(ENDE_SKD)
+                    lastStrings.indexOf(ENDE_SKD, lastStrings.indexOf(START_SKD))
                 );
                 const klimadaten = klimaStr.split(',');
                 lastStrings = '';
-                this.log.debug(klimadaten);
+                this.log.debug('Klima gelesen: ' + klimadaten);
                 wKlima(klimadaten);
+                readSkd = true;
             } else if (lastStrings.indexOf(START_SMO) >= 0 && lastStrings.indexOf(ENDE_SMO) >= 0) {
                 // Model Kennung
                 let modelStr = lastStrings.substring(
                     lastStrings.indexOf(START_SMO) + START_SMO.length,
-                    lastStrings.indexOf(ENDE_SMO)
+                    lastStrings.indexOf(ENDE_SMO, lastStrings.indexOf(START_SMO))
                 );
                 this.log.info('Model: ' + modelStr);
                 modelStr = modelStr.replace('HEYtech ', '');
@@ -140,7 +210,7 @@ function createClient(){
                         type: 'state',
                         common: {
                             name: modelStr,
-                            type: 'boolean',
+                            type: 'string',
                             role: 'indicator',
                             read: true,
                             write: false
@@ -154,38 +224,27 @@ function createClient(){
                 }
 
                 lastStrings = '';
-
+                readSmo = true;
             } else if (lastStrings.indexOf(START_SMC) >= 0 && lastStrings.indexOf(ENDE_SMC) >= 0) {
                 // Number of channels
                 let noChannelStr = lastStrings.substring(
                     lastStrings.indexOf(START_SMC) + START_SMC.length,
-                    lastStrings.indexOf(ENDE_SMC)
+                    lastStrings.indexOf(ENDE_SMC, lastStrings.indexOf(START_SMC))
                 );
                 this.log.debug('Number of Channels :' + noChannelStr);
-                this.extendObject('controller', {"native": {"channels": noChannelsStr}});
+                this.extendObject('controller', {"native": {"channels": noChannelStr}});
                 lastStrings = '';
+                readSmc = true;
             } else if (lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0) {
                 // Software Version
                 let svStr = lastStrings.substring(
                     lastStrings.indexOf(START_SFI) + START_SFI.length,
-                    lastStrings.indexOf(ENDE_SFI)
+                    lastStrings.indexOf(ENDE_SFI, lastStrings.indexOf(START_SFI))
                 );
                 this.log.info('Software version: ' + svStr);
                 this.extendObject('controller', {"native": {"swversion": svStr}});
                 lastStrings = '';
-            } else if (lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
-
-                smn = smn.concat(data);
-
-                if (lastStrings.endsWith(START_STI)) { //check end of smn data
-
-                    let channels = smn.match(/\d\d,.*,\d,/gm);
-                    wOutputs(channels);
-                    smn = '';
-                    lastStrings = '';
-                }
-
-
+                readSfi = true;
             }
 
         });
@@ -193,17 +252,17 @@ function createClient(){
 
     let wOutputs = writeOutputs.bind(this);
 
-    function writeOutputs(data){
+    function writeOutputs(data) {
         let that = this;
         let n = data.length;
 
         for (let i = 0; i < n; i++) {
             let z = i + 1;
             let channel = data[i].split(',');
-            if(channel[0] < 65) {
+            if (channel[0] < 65) {
                 let number = parseInt(channel[0]);
                 let vRole;
-                switch (channel[2]){
+                switch (channel[2]) {
                     case '1':
                         vRole = 'shutter';
                         break;
@@ -218,7 +277,7 @@ function createClient(){
                         break;
                 }
 
-                if(vRole === 'shutter' || vRole === 'group') {
+                if (vRole === 'shutter' || vRole === 'group') {
                     that.setObjectNotExists('shutters', {
                         type: 'group',
                         common: {
@@ -280,11 +339,22 @@ function createClient(){
                             write: false
                         }
                     });
-                }else if(vRole === 'device' || vRole === 'device group'){
+                    // that.setObjectNotExists('shutters.' + number + '.level', {
+                    //     type: 'state',
+                    //     common: {
+                    //         name: channel[1] + ' level',
+                    //         type: 'number',
+                    //         role: 'level.blind',
+                    //         unit: '%',
+                    //         read: true,
+                    //         write: true
+                    //     }
+                    // });
+                } else if (vRole === 'device' || vRole === 'device group') {
                     let patt = new RegExp('~');
                     let dimmer = patt.test(channel[1]);
 
-                    if(dimmer === false) {
+                    if (dimmer === false) {
                         that.setObjectNotExists('devices', {
                             type: 'group',
                             common: {
@@ -315,7 +385,7 @@ function createClient(){
                                 write: true
                             }
                         });
-                    }else if(dimmer === true){
+                    } else if (dimmer === true) {
                         that.setObjectNotExists('dimmer', {
                             type: 'group',
                             common: {
@@ -359,7 +429,7 @@ function createClient(){
                     }
 
                 }
-            }else if(channel[0] > 64){
+            } else if (channel[0] > 64) {
                 let sceneNo = channel[0] - 64;
                 that.setObjectNotExists('scenes', {
                     type: 'group',
@@ -398,102 +468,106 @@ function createClient(){
 
     let wStatus = writeStatus.bind(this);
 
-    function writeStatus(data){
+    function writeStatus(data) {
 
         let that = this;
 
-            for (let i = 0; i < data.length; i++) {
-                let z = i + 1;
-                if(that.config.autoDetect === false) {
-                    that.getState('outputs.' + z + '.status', function (err, state) {
-                        if (err) {
-                            that.log.error(err);
-                        } else if (state !== null && state.val !== data[i]) {
-                            that.setState('outputs.' + z + '.status', {val: data[i], ack: true});
-                        }
-                    });
-                }else if(that.config.autoDetect === true){
-                    //get all states that matches the id number
-                    that.getStates('shutters.*', function(err, states){
-                        //iterate thru all states
-                        let keys = Object.keys(states);
+        for (let i = 0; i < data.length; i++) {
+            let z = i + 1;
+            if (that.config.autoDetect === false) {
+                that.getState('outputs.' + z + '.status', function (err, state) {
+                    if (err) {
+                        that.log.error(err);
+                    } else if (state !== null && state.val !== data[i]) {
+                        that.setState('outputs.' + z + '.status', {val: data[i], ack: true});
+                    }
+                });
+            } else if (that.config.autoDetect === true) {
+                //get all states that matches the id number
+                that.getStates('shutters.*', function (err, states) {
+                    //iterate thru all states
+                    let keys = Object.keys(states);
 
-                        //remove all states that are not for show values and scenes
-                        let pArr = ['down', 'up', 'stop', 'scenes', 'undefined'];
-                        for(let p in pArr){
-                            let patt = new RegExp(pArr[p]);
-                            for(let x in keys){
-                                let test = patt.test(keys[x]);
-                                if(test === true || !keys[x].startsWith(`heytech.${that['instance']}.shutters.${z}.`)){
-                                    delete states[keys[x]];
-                                }
+                    //remove all states that are not for show values and scenes
+                    let pArr = ['down', 'up', 'stop', 'scenes', 'undefined'];
+                    for (let p in pArr) {
+                        let patt = new RegExp(pArr[p]);
+                        for (let x in keys) {
+                            let test = patt.test(keys[x]);
+                            if (test === true || !keys[x].startsWith(`heytech.${that['instance']}.shutters.${z}.`)) {
+                                delete states[keys[x]];
                             }
-
                         }
 
-                        keys = Object.keys(states);
+                    }
 
-                            for(let x = 0; x < keys.length; x++){
-                                if(keys[x] === 'undefined' || keys[x] === undefined){
+                    keys = Object.keys(states);
 
-                                }else{
-                                    let key = keys[x].replace(/\w*\.\d.\w*\./g, '');
-                                    key = key.replace(/\.\w+$/g, '');
-                                    key = parseInt(key);
+                    for (let x = 0; x < keys.length; x++) {
+                        if (keys[x] === 'undefined' || keys[x] === undefined) {
 
-                                    if(states[keys[x]] === undefined){
+                        } else {
+                            let key = keys[x].replace(/\w*\.\d.\w*\./g, '');
+                            key = key.replace(/\.\w+$/g, '');
+                            key = parseInt(key);
 
-                                    }else{
-                                        let oldVal = null;
-                                        let ts = 0;
-                                        if(states[keys[x]] !== null){
-                                            oldVal = JSON.stringify(states[keys[x]]['val']);
-                                            oldVal = oldVal.replace(/"/g, '');
-                                            oldVal = oldVal.toString();
-                                        }
-                                        if(states[keys[x]] !== null){
-                                            ts = states[keys[x]]['ts'];
-                                            //that.log.info(ts);
-                                        }
+                            if (states[keys[x]] === undefined) {
 
-                                        ts = parseInt(ts);
-                                        let wait = 1500;
-                                        let d = new Date();
-                                        let time = d.getTime();
+                            } else {
+                                let oldVal = null;
+                                let ts = 0;
+                                if (states[keys[x]] !== null) {
+                                    oldVal = JSON.stringify(states[keys[x]]['val']);
+                                    oldVal = oldVal.replace(/"/g, '');
+                                    oldVal = oldVal.toString();
+                                }
+                                if (states[keys[x]] !== null) {
+                                    ts = states[keys[x]]['ts'];
+                                    //that.log.info(ts);
+                                }
 
-                                        let newVal = data[i];
-                                        if(key === z && time - ts > wait){
-                                            let test = keys[x].match(/\w+$/g);
-                                            test = test.toString();
-                                            if((test === 'status' || test === 'level') && oldVal !== newVal){
-                                                that.setState(keys[x], {val: data[i], ack: true});
-                                            }else if(test === 'on'){
+                                ts = parseInt(ts);
+                                let wait = 1000;
+                                let d = new Date();
+                                let time = d.getTime();
 
-                                                if(parseInt(data[i]) === 0 && (oldVal !== 'false' || oldVal === null)){
-                                                    that.setState(keys[x], {val: false, ack: true});
-                                                }else if(parseInt(data[i]) === 100 && (oldVal !== 'true' || oldVal === null)){
-                                                    that.setState(keys[x], {val: true, ack: true});
-                                                }
-                                            }
+                                let newVal = data[i];
+                                if (key === z && time - ts > wait) {
+                                    let test = keys[x].match(/\w+$/g);
+                                    test = test.toString();
 
+                                    let patt = new RegExp('shutters');
+                                    let shutter = patt.test(keys[x]);
+
+                                    if ((test === 'status' || (test === 'level' && !shutter)) && oldVal !== newVal) {
+                                        that.setState(keys[x], {val: data[i], ack: true});
+                                    } else if (test === 'on') {
+
+                                        if (parseInt(data[i]) === 0 && (oldVal !== 'false' || oldVal === null)) {
+                                            that.setState(keys[x], {val: false, ack: true});
+                                        } else if (parseInt(data[i]) === 100 && (oldVal !== 'true' || oldVal === null)) {
+                                            that.setState(keys[x], {val: true, ack: true});
                                         }
                                     }
+
                                 }
                             }
-                    })
-                }
-
+                        }
+                    }
+                })
             }
+
+        }
 
 
     }
 
     let wKlima = writeKlima.bind(this);
 
-    function writeKlima(data){
+    function writeKlima(data) {
         let that = this;
 
-        if(that.config.autoDetect){
+        if (that.config.autoDetect) {
             that.setObjectNotExists('sensors', {
                 type: 'group',
                 common: {
@@ -506,7 +580,7 @@ function createClient(){
             });
         }
 
-        this.getStates('sensors.*', function(err, states){
+        this.getStates('sensors.*', function (err, states) {
             let st;
             let vAlarm;
             let vWindM;
@@ -522,10 +596,10 @@ function createClient(){
             let vBriAv;
             let vBriAc;
 
-            for(st in states){
+            for (st in states) {
                 let name = st.replace(`heytech.${that['instance']}.sensors.`, '');
 
-                switch(name){
+                switch (name) {
                     case 'alarm':
                         vAlarm = states[st]['val'];
                         break;
@@ -569,8 +643,8 @@ function createClient(){
             }
 
 
-            if(that.config.briSensor === true || that.config.autoDetect){
-                if(vBriAc !== data[0]){
+            if (that.config.briSensor === true || that.config.autoDetect) {
+                if (vBriAc !== data[0]) {
                     that.setObjectNotExists('sensors.bri_actual', {
                         type: 'state',
                         common: {
@@ -583,60 +657,60 @@ function createClient(){
                         }
                     });
                     let briV = 0;
-                    if(data[0] < 19){
-                        briV = data[0]*1;
-                    }else if(data[0] > 19 && data[0] < 29){
-                        briV = data[0]*4;
-                    }else if(data[0] > 29 && data[0] < 39){
-                        briV = data[0]*8;
-                    }else if(data[0] > 39 && data[0] < 49){
-                        briV = data[0]*15;
-                    }else if(data[0] > 49 && data[0] < 59){
-                        briV = data[0]*22;
-                    }else if(data[0] > 59 && data[0] < 69){
-                        briV = data[0]*30;
-                    }else if(data[0] > 69 && data[0] < 79){
-                        briV = data[0]*40;
-                    }else if(data[0] > 79 && data[0] < 89){
-                        briV = data[0]*50;
-                    }else if(data[0] > 89 && data[0] < 99){
-                        briV = data[0]*64;
-                    }else if(data[0] > 99 && data[0] < 109){
-                        briV = data[0]*80;
-                    }else if(data[0] > 109 && data[0] < 119){
-                        briV = data[0]*100;
-                    }else if(data[0] > 119 && data[0] < 129){
-                        briV = data[0]*117;
-                    }else if(data[0] > 129 && data[0] < 139){
-                        briV = data[0]*138;
-                    }else if(data[0] > 139 && data[0] < 149){
-                        briV = data[0]*157;
-                    }else if(data[0] > 149 && data[0] < 159){
-                        briV = data[0]*173;
-                    }else if(data[0] > 159 && data[0] < 169){
-                        briV = data[0]*194;
-                    }else if(data[0] > 169 && data[0] < 179){
-                        briV = data[0]*212;
-                    }else if(data[0] > 179 && data[0] < 189){
-                        briV = data[0]*228;
-                    }else if(data[0] > 189 && data[0] < 199){
-                        briV = data[0]*247;
-                    }else if(data[0] > 199 && data[0] < 209){
-                        briV = data[0]*265;
-                    }else if(data[0] > 209 && data[0] < 219){
-                        briV = data[0]*286;
-                    }else if(data[0] > 219 && data[0] < 229){
-                        briV = data[0]*305;
-                    }else if(data[0] > 229 && data[0] < 239){
-                        briV = data[0]*322;
-                    }else if(data[0] > 239 && data[0] < 249){
-                        briV = data[0]*342;
-                    }else if(data[0] > 249 && data[0] < 259){
-                        briV = data[0]*360;
+                    if (data[0] < 19) {
+                        briV = data[0] * 1;
+                    } else if (data[0] > 19 && data[0] < 29) {
+                        briV = data[0] * 4;
+                    } else if (data[0] > 29 && data[0] < 39) {
+                        briV = data[0] * 8;
+                    } else if (data[0] > 39 && data[0] < 49) {
+                        briV = data[0] * 15;
+                    } else if (data[0] > 49 && data[0] < 59) {
+                        briV = data[0] * 22;
+                    } else if (data[0] > 59 && data[0] < 69) {
+                        briV = data[0] * 30;
+                    } else if (data[0] > 69 && data[0] < 79) {
+                        briV = data[0] * 40;
+                    } else if (data[0] > 79 && data[0] < 89) {
+                        briV = data[0] * 50;
+                    } else if (data[0] > 89 && data[0] < 99) {
+                        briV = data[0] * 64;
+                    } else if (data[0] > 99 && data[0] < 109) {
+                        briV = data[0] * 80;
+                    } else if (data[0] > 109 && data[0] < 119) {
+                        briV = data[0] * 100;
+                    } else if (data[0] > 119 && data[0] < 129) {
+                        briV = data[0] * 117;
+                    } else if (data[0] > 129 && data[0] < 139) {
+                        briV = data[0] * 138;
+                    } else if (data[0] > 139 && data[0] < 149) {
+                        briV = data[0] * 157;
+                    } else if (data[0] > 149 && data[0] < 159) {
+                        briV = data[0] * 173;
+                    } else if (data[0] > 159 && data[0] < 169) {
+                        briV = data[0] * 194;
+                    } else if (data[0] > 169 && data[0] < 179) {
+                        briV = data[0] * 212;
+                    } else if (data[0] > 179 && data[0] < 189) {
+                        briV = data[0] * 228;
+                    } else if (data[0] > 189 && data[0] < 199) {
+                        briV = data[0] * 247;
+                    } else if (data[0] > 199 && data[0] < 209) {
+                        briV = data[0] * 265;
+                    } else if (data[0] > 209 && data[0] < 219) {
+                        briV = data[0] * 286;
+                    } else if (data[0] > 219 && data[0] < 229) {
+                        briV = data[0] * 305;
+                    } else if (data[0] > 229 && data[0] < 239) {
+                        briV = data[0] * 322;
+                    } else if (data[0] > 239 && data[0] < 249) {
+                        briV = data[0] * 342;
+                    } else if (data[0] > 249 && data[0] < 259) {
+                        briV = data[0] * 360;
                     }
                     that.setState('sensors.bri_actual', {val: Math.round(briV), ack: true});
                 }
-                if(vBriAv !== data[14]){
+                if (vBriAv !== data[14]) {
                     that.setObjectNotExists('sensors.bri_average', {
                         type: 'state',
                         common: {
@@ -649,64 +723,64 @@ function createClient(){
                         }
                     });
                     let briV = 0;
-                    if(data[14] < 19){
-                        briV = data[14]*1;
-                    }else if(data[14] > 19 && data[14] < 29){
-                        briV = data[14]*4;
-                    }else if(data[14] > 29 && data[14] < 39){
-                        briV = data[14]*8;
-                    }else if(data[14] > 39 && data[14] < 49){
-                        briV = data[14]*15;
-                    }else if(data[14] > 49 && data[14] < 59){
-                        briV = data[14]*22;
-                    }else if(data[14] > 59 && data[14] < 69){
-                        briV = data[14]*30;
-                    }else if(data[14] > 69 && data[14] < 79){
-                        briV = data[14]*40;
-                    }else if(data[14] > 79 && data[14] < 89){
-                        briV = data[14]*50;
-                    }else if(data[14] > 89 && data[14] < 99){
-                        briV = data[14]*64;
-                    }else if(data[14] > 99 && data[14] < 109){
-                        briV = data[14]*80;
-                    }else if(data[14] > 109 && data[14] < 119){
-                        briV = data[14]*100;
-                    }else if(data[14] > 119 && data[14] < 129){
-                        briV = data[14]*117;
-                    }else if(data[14] > 129 && data[14] < 139){
-                        briV = data[14]*138;
-                    }else if(data[14] > 139 && data[14] < 149){
-                        briV = data[14]*157;
-                    }else if(data[14] > 149 && data[14] < 159){
-                        briV = data[14]*173;
-                    }else if(data[14] > 159 && data[14] < 169){
-                        briV = data[14]*194;
-                    }else if(data[14] > 169 && data[14] < 179){
-                        briV = data[14]*212;
-                    }else if(data[14] > 179 && data[14] < 189){
-                        briV = data[14]*228;
-                    }else if(data[14] > 189 && data[14] < 199){
-                        briV = data[14]*247;
-                    }else if(data[14] > 199 && data[14] < 209){
-                        briV = data[14]*265;
-                    }else if(data[14] > 209 && data[14] < 219){
-                        briV = data[14]*286;
-                    }else if(data[14] > 219 && data[14] < 229){
-                        briV = data[14]*305;
-                    }else if(data[14] > 229 && data[14] < 239){
-                        briV = data[14]*322;
-                    }else if(data[14] > 239 && data[14] < 249){
-                        briV = data[14]*342;
-                    }else if(data[14] > 249 && data[14] < 259){
-                        briV = data[14]*360;
+                    if (data[14] < 19) {
+                        briV = data[14] * 1;
+                    } else if (data[14] > 19 && data[14] < 29) {
+                        briV = data[14] * 4;
+                    } else if (data[14] > 29 && data[14] < 39) {
+                        briV = data[14] * 8;
+                    } else if (data[14] > 39 && data[14] < 49) {
+                        briV = data[14] * 15;
+                    } else if (data[14] > 49 && data[14] < 59) {
+                        briV = data[14] * 22;
+                    } else if (data[14] > 59 && data[14] < 69) {
+                        briV = data[14] * 30;
+                    } else if (data[14] > 69 && data[14] < 79) {
+                        briV = data[14] * 40;
+                    } else if (data[14] > 79 && data[14] < 89) {
+                        briV = data[14] * 50;
+                    } else if (data[14] > 89 && data[14] < 99) {
+                        briV = data[14] * 64;
+                    } else if (data[14] > 99 && data[14] < 109) {
+                        briV = data[14] * 80;
+                    } else if (data[14] > 109 && data[14] < 119) {
+                        briV = data[14] * 100;
+                    } else if (data[14] > 119 && data[14] < 129) {
+                        briV = data[14] * 117;
+                    } else if (data[14] > 129 && data[14] < 139) {
+                        briV = data[14] * 138;
+                    } else if (data[14] > 139 && data[14] < 149) {
+                        briV = data[14] * 157;
+                    } else if (data[14] > 149 && data[14] < 159) {
+                        briV = data[14] * 173;
+                    } else if (data[14] > 159 && data[14] < 169) {
+                        briV = data[14] * 194;
+                    } else if (data[14] > 169 && data[14] < 179) {
+                        briV = data[14] * 212;
+                    } else if (data[14] > 179 && data[14] < 189) {
+                        briV = data[14] * 228;
+                    } else if (data[14] > 189 && data[14] < 199) {
+                        briV = data[14] * 247;
+                    } else if (data[14] > 199 && data[14] < 209) {
+                        briV = data[14] * 265;
+                    } else if (data[14] > 209 && data[14] < 219) {
+                        briV = data[14] * 286;
+                    } else if (data[14] > 219 && data[14] < 229) {
+                        briV = data[14] * 305;
+                    } else if (data[14] > 229 && data[14] < 239) {
+                        briV = data[14] * 322;
+                    } else if (data[14] > 239 && data[14] < 249) {
+                        briV = data[14] * 342;
+                    } else if (data[14] > 249 && data[14] < 259) {
+                        briV = data[14] * 360;
                     }
                     that.setState('sensors.bri_average', {val: Math.round(briV), ack: true});
                 }
 
             }
 
-            if((that.config.iTempSensor === true || that.config.humiditySensor === true || that.config.autoDetect) && data[1] !== '999'){
-                if(vTi !== data[1] + ',' + data[2]){
+            if ((that.config.iTempSensor === true || that.config.humiditySensor === true || that.config.autoDetect) && data[1] !== '999') {
+                if (vTi !== data[1] + ',' + data[2]) {
                     that.setObjectNotExists('sensors.temp_indoor', {
                         type: 'state',
                         common: {
@@ -720,7 +794,7 @@ function createClient(){
                     });
                     that.setState('sensors.temp_indoor', {val: data[1] + ',' + data[2], ack: true});
                 }
-                if(vTiMin !== data[3]){
+                if (vTiMin !== data[3]) {
                     that.setObjectNotExists('sensors.temp_indoor_min', {
                         type: 'state',
                         common: {
@@ -734,7 +808,7 @@ function createClient(){
                     });
                     that.setState('sensors.temp_indoor_min', {val: data[3], ack: true});
                 }
-                if(vTiMax !== data[4]){
+                if (vTiMax !== data[4]) {
                     that.setObjectNotExists('sensors.temp_indoor_max', {
                         type: 'state',
                         common: {
@@ -751,8 +825,8 @@ function createClient(){
 
             }
 
-            if((that.config.oTempSensor === true || that.config.autoDetect) && data[5] !== '999'){
-                if(vTo !== data[5] + ',' + data[6]){
+            if ((that.config.oTempSensor === true || that.config.autoDetect) && data[5] !== '999') {
+                if (vTo !== data[5] + ',' + data[6]) {
                     that.setObjectNotExists('sensors.temp_outdoor', {
                         type: 'state',
                         common: {
@@ -766,7 +840,7 @@ function createClient(){
                     });
                     that.setState('sensors.temp_outdoor', {val: data[5] + ',' + data[6], ack: true});
                 }
-                if(vToMin !== data[7]){
+                if (vToMin !== data[7]) {
                     that.setObjectNotExists('sensors.temp_outdoor_min', {
                         type: 'state',
                         common: {
@@ -780,7 +854,7 @@ function createClient(){
                     });
                     that.setState('sensors.temp_outdoor_min', {val: data[7], ack: true});
                 }
-                if(vToMax !== data[8]){
+                if (vToMax !== data[8]) {
                     that.setObjectNotExists('sensors.temp_outdoor_max', {
                         type: 'state',
                         common: {
@@ -796,8 +870,8 @@ function createClient(){
                 }
             }
 
-            if(that.config.windSensor === true || that.config.autoDetect){
-                if(vWindA !== data[9]){
+            if (that.config.windSensor === true || that.config.autoDetect) {
+                if (vWindA !== data[9]) {
                     that.setObjectNotExists('sensors.wind_actual', {
                         type: 'state',
                         common: {
@@ -811,7 +885,7 @@ function createClient(){
                     });
                     that.setState('sensors.wind_actual', {val: data[9], ack: true});
                 }
-                if(vWindM !== data[10]){
+                if (vWindM !== data[10]) {
                     that.setObjectNotExists('sensors.wind_maximum', {
                         type: 'state',
                         common: {
@@ -827,8 +901,8 @@ function createClient(){
                 }
             }
 
-            if(that.config.alarmSensor === true || that.config.autoDetect){
-                if(vAlarm !== data[11]){
+            if (that.config.alarmSensor === true || that.config.autoDetect) {
+                if (vAlarm !== data[11]) {
                     that.setObjectNotExists('sensors.alarm', {
                         type: 'state',
                         common: {
@@ -844,8 +918,8 @@ function createClient(){
                 }
             }
 
-            if(that.config.rainSensor === true || that.config.autoDetect){
-                if(vRain !== data[12]){
+            if (that.config.rainSensor === true || that.config.autoDetect) {
+                if (vRain !== data[12]) {
                     that.setObjectNotExists('sensors.rain', {
                         type: 'state',
                         common: {
@@ -861,8 +935,8 @@ function createClient(){
                 }
             }
 
-            if((that.config.humiditySensor === true || that.config.autoDetect) && data[15] !== '999'){
-                if(vHumidity !== data[15]){
+            if ((that.config.humiditySensor === true || that.config.autoDetect) && data[15] !== '999') {
+                if (vHumidity !== data[15]) {
                     that.setObjectNotExists('sensors.humidity', {
                         type: 'state',
                         common: {
@@ -884,7 +958,6 @@ function createClient(){
 
     }
 }
-
 
 
 let cC;
@@ -913,7 +986,6 @@ class Heytech extends utils.Adapter {
     }
 
 
-
     /**
      * Is called when databases are connected and adapter received configuration.
      */
@@ -924,7 +996,7 @@ class Heytech extends utils.Adapter {
         Here a simple template for a boolean variable named "testVariable"
         Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
         */
-        if(this.config.autoDetect === false) {
+        if (this.config.autoDetect === false) {
             this.setObjectNotExists('controller', {
                 type: 'state',
                 common: {
@@ -1198,7 +1270,7 @@ class Heytech extends utils.Adapter {
 
             }
         }
-        if(this.config.ip !== '' && this.config.port !== ''){
+        if (this.config.ip !== '' && this.config.port !== '') {
             cC();
             client.connect();
         }
@@ -1243,11 +1315,12 @@ class Heytech extends utils.Adapter {
      * @param {ioBroker.State | null | undefined} state
      */
     onStateChange(id, state) {
+
         let d = new Date();
         let now = d.getTime();
         let diff = now - start;
 
-        if (state && diff > 30000) {
+        if (state && diff > 10000 && readSmn) {
             // The state was changed
             let patt1 = new RegExp('down');
             let patt2 = new RegExp('up');
@@ -1263,32 +1336,14 @@ class Heytech extends utils.Adapter {
             let res5 = patt5.test(id);
             let res6 = patt6.test(id);
 
-            if(client === null){
+            if (client === null) {
                 cC();
-            }else {
+            } else {
                 if (res1 === true) {
                     let helper = id.replace('.down', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
-                    client.send('rhi');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhb');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send('down');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhe');
-                    client.send(newLine);
-                    client.send(newLine);
+                    this.sendeHandsteuerungsBefehl(no[0], 'down');
 
                     this.log.info('down ' + no[0]);
                 }
@@ -1297,52 +1352,16 @@ class Heytech extends utils.Adapter {
                     let helper = id.replace('.up', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
-                    client.send('rhi');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhb');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send('up');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhe');
-                    client.send(newLine);
-                    client.send(newLine);
+                    this.sendeHandsteuerungsBefehl(no[0], 'up');
 
-                    this.log.info('up ' +no[0]);
+                    this.log.info('up ' + no[0]);
                 }
 
                 if (res3 === true) {
                     let helper = id.replace('.stop', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
-                    client.send('rhi');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhb');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send('off');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhe');
-                    client.send(newLine);
-                    client.send(newLine);
+                    this.sendeHandsteuerungsBefehl(no[0], 'off');
 
                     this.log.info('stop ' + no[0]);
                 }
@@ -1353,36 +1372,14 @@ class Heytech extends utils.Adapter {
                     let patt = new RegExp('dimmer');
                     let dim = patt.test(id);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
-                    }
-                    if(dim === false) {
-                        client.send('rhi');
-                        client.send(newLine);
-                        client.send(newLine);
-                        client.send('rhb');
-                        client.send(newLine);
-                        client.send(no[0]);
-                        client.send(newLine);
-                        if (state.val === true) {
-                            client.send('up');
-                        } else {
-                            client.send('off');
-                        }
-                        client.send(newLine);
-                        client.send(newLine);
-                        client.send('rhe');
-                        client.send(newLine);
-                        client.send(newLine);
-                    }else if(dim === true){
+                    if (dim === false) {
+                        this.sendeHandsteuerungsBefehl(no[0], state.val === true ? 'up' : 'off');
+                    } else if (dim === true) {
                         if (state.val === true) {
 
                             let lvl = id.replace('on', 'level');
                             this.setState(lvl, 100);
-                        } else if(state.val === false){
+                        } else if (state.val === false) {
                             let lvl = id.replace('on', 'level');
                             this.setState(lvl, 0);
 
@@ -1395,28 +1392,17 @@ class Heytech extends utils.Adapter {
                 if (res5 === true) {
                     let helper = id.replace('.level', '');
                     let no = helper.match(/\d*$/g);
+                    let patt = new RegExp('shutters');
+                    let shutter = patt.test(id);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin.toString());
-                        client.send(newLine);
+                    if (shutter === true) {
+                        this.gotoShutterPosition(no[0], state.val);
+                    } else {
+                        this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
                     }
-                    client.send('rhi');
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhb');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send(state.val.toString());
-                    client.send(newLine);
-                    client.send(newLine);
-                    client.send('rhe');
-                    client.send(newLine);
-                    client.send(newLine);
 
-                    this.log.info('level');
+
+                    this.log.info('level: ' + no[0] + ' ' + state.val);
                 }
 
 
@@ -1424,17 +1410,7 @@ class Heytech extends utils.Adapter {
                     let helper = id.replace('.acitivate', '');
                     let no = helper.match(/\d*$/g);
 
-                    if (this.config.pin !== '') {
-                        client.send('rsc');
-                        client.send(newLine);
-                        client.send(this.config.pin);
-                        client.send(newLine);
-                    }
-                    client.send('rsa');
-                    client.send(newLine);
-                    client.send(no[0]);
-                    client.send(newLine);
-                    client.send(newLine);
+                    this.sendeSzenarioBefehl(no[0]);
 
                     this.log.info('activate');
                 }
@@ -1448,8 +1424,143 @@ class Heytech extends utils.Adapter {
         }
     }
 
-}
+    checkShutterStatus() {
+        const intervalID = setInterval(() => {
+            client.send('sop');
+            client.send(newLine);
+        }, 1000);
+        setTimeout(() => {
+            clearInterval(intervalID);
+        }, 30000);
+    }
 
+    sendeHandsteuerungsBefehl(rolladenId, befehl) {
+        let handsteuerungAusfuehrung = () => {
+            if (this.config.pin !== '') {
+                client.send('rsc');
+                client.send(newLine);
+                client.send(this.config.pin.toString());
+                client.send(newLine);
+            }
+            client.send('rhi');
+            client.send(newLine);
+            client.send(newLine);
+            client.send('rhb');
+            client.send(newLine);
+            client.send(String(rolladenId));
+            client.send(newLine);
+            client.send(String(befehl));
+            client.send(newLine);
+            client.send(newLine);
+            client.send('rhe');
+            client.send(newLine);
+            client.send(newLine);
+        };
+        if (connected) {
+            handsteuerungAusfuehrung();
+            this.checkShutterStatus();
+        } else {
+            if (!connecting) {
+                client.disconnect();
+            }
+            commandCallbacks.push(handsteuerungAusfuehrung);
+            if (!connecting) {
+                connecting = true;
+                client.connect();
+            }
+        }
+
+    }
+
+    sleep(milliseconds) {
+        return new Promise(resolve => setTimeout(resolve, milliseconds))
+    }
+
+    async gotoShutterPosition(rolladenId, prozent) {
+        // if(rolladenId !== '10' && rolladenId !== '11') {
+        //     return;
+        // }
+        // // 100 = auf
+        // // 0 = zu
+        // const ziel = Number(prozent);
+        // let status = await this.getStateAsync(`shutters.${rolladenId}.status`);
+        // let aktuellePosition = Number(status.val);
+        // console.log(aktuellePosition);
+        // let direction = 'up';
+        // if (aktuellePosition > ziel) {
+        //     direction = 'down';
+        // } else if( aktuellePosition === ziel) {
+        //     direction = 'off';
+        // }
+        //
+        // this.sendeHandsteuerungsBefehl(rolladenId, direction);
+        // while (!((ziel - 5) < aktuellePosition && aktuellePosition < (ziel + 5))) {
+        //     aktuellePosition = Number((await this.getStateAsync(`shutters.${rolladenId}.status`)).val);
+        //     await this.sleep(250);
+        // }
+        //
+        // this.sendeHandsteuerungsBefehl(rolladenId, 'off');
+    }
+
+    sendeRefreshBefehl() {
+        let refreshBefehl = () => {
+            if (this.config.pin !== '') {
+                client.send('rsc');
+                client.send(newLine);
+                client.send(this.config.pin.toString());
+                client.send(newLine);
+            }
+            client.send('skd');
+            client.send(newLine);
+        };
+        if (connected) {
+            refreshBefehl();
+        } else {
+            if (!connecting) {
+                client.disconnect();
+            }
+            commandCallbacks.push(refreshBefehl);
+            if (!connecting) {
+                connecting = true;
+                client.connect();
+            }
+        }
+
+    }
+
+    sendeSzenarioBefehl(rolladenId) {
+        let szenarioAusfuehrung = () => {
+            if (this.config.pin !== '') {
+                client.send('rsc');
+                client.send(newLine);
+                client.send(this.config.pin);
+                client.send(newLine);
+            }
+            client.send('rsa');
+            client.send(newLine);
+            client.send(rolladenId);
+            client.send(newLine);
+            client.send(newLine);
+            client.send('sop');
+            client.send(newLine);
+            client.send(newLine);
+        };
+        if (connected) {
+            szenarioAusfuehrung();
+            this.checkShutterStatus();
+        } else {
+            if (!connecting) {
+                client.disconnect();
+            }
+            commandCallbacks.push(szenarioAusfuehrung);
+            if (!connecting) {
+                connecting = true;
+                client.connect();
+            }
+        }
+
+    }
+}
 
 
 if (module.parent) {

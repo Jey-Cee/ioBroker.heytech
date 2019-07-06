@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.1.4",
+        "version": "0.1.6",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -73,6 +73,14 @@
                 "es": "actualizar el cálculo de lux (gracias a stefan)\n",
                 "pl": "zaktualizuj obliczenia luksów (dzięki stefan)\n",
                 "zh-cn": "更新勒克斯计算（感谢stefan）\n"
+            },
+            "0.1.5": {
+                "en": "telnet connection will automaticly reconnect on refresh intervall to check weather and shutter status\n",
+                "de": "die Telnet-Verbindung wird nach einer Aktualisierungsphase automatisch wiederhergestellt, um den Wetter- und Verschlusszustand zu überprüfen\n"
+            },
+            "0.1.6": {
+                "en": "Bugfixes for stable setStates and shutter detectionn\n",
+                "de": "Bugfixes für stabile setStates und Shutter Erkennung\n"
             }
         },
         "title": "HEYtech",
@@ -136,6 +144,7 @@
         "ip": "",
         "port": "1002",
         "pin": "",
+        "refresh": 300000,
         "autoDetect": true,
         "typ": "",
         "eBoxes": 0,
