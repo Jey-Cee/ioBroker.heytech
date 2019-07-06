@@ -88,7 +88,7 @@
             $(".add-row").click(function(){
                 var name = $("#name").val();
                 var shutters = $("#shutters").val();
-                var markup = "<tr><td><input class='groupsInput' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
+                var markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
                 $("table tbody").append(markup);
             });
 
@@ -190,7 +190,7 @@
 
     </div>
     <div class="row">
-        <div class="input-field col s4">
+        <div class="input-field col">
             <label for="addGroups" class="translate">Shutter Groups</label>
             <form id="addGroups">
                 <input type="text" id="name" placeholder="Name">

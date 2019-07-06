@@ -154,7 +154,8 @@
         "rainSensor": false,
         "windSensor": false,
         "alarmSensor": false,
-        "humiditySensor": false
+        "humiditySensor": false,
+        "groups": []
     },
     "objects": [],
     "instanceObjects": []
