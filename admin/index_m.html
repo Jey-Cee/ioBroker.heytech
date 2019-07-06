@@ -72,8 +72,8 @@
                 if (!cells.length) {
                     continue;
                 }
-                name = cells[0].innerHTML;
-                shutters = cells[1].innerHTML.replace(/ /g, '').split(',');
+                name = cells[1].innerHTML;
+                shutters = cells[2].innerHTML.replace(/ /g, '').split(',');
                 shutterGroups.push({name, shutters});
             }
             obj['groups'] = shutterGroups;
@@ -88,7 +88,7 @@
             $(".add-row").click(function(){
                 var name = $("#name").val();
                 var shutters = $("#shutters").val();
-                var markup = "<tr><td><input type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
+                var markup = "<tr><td><input class='groupsInput' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
                 $("table tbody").append(markup);
             });
 

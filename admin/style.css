@@ -17,8 +17,6 @@ form{
 }
 form input, button{
     padding: 5px;
-    opacity: inherit;
-    pointer-events: inherit;
 }
 table{
     width: 100%;
@@ -31,4 +29,9 @@ table, th, td{
 table th, table td{
     padding: 10px;
     text-align: left;
+}
+
+.groupsInput {
+    opacity: inherit;
+    pointer-events: inherit;
 }
