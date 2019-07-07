@@ -127,7 +127,7 @@ function createClient() {
                 }
 
                 if (commandCallbacks.length > 0) {
-                    this.checkShutterStatus();
+                    this.checkShutterStatus()();
 
                     let commandCallback;
                     do {
@@ -1288,10 +1288,31 @@ class Heytech extends utils.Adapter {
         }
 
         if (this.config.groups && this.config.groups.length > 0) {
+            this.setObjectNotExists('groups', {
+                type: 'group',
+                common: {
+                    name: 'Shutter Groups',
+                    type: 'string',
+                    role: 'group',
+                    read: true,
+                    write: false
+                }
+            });
             this.config.groups.forEach((group) => {
                 const groupId = group.groupId;
                 const name = group.name;
                 const shutters = group.shutters.join(',');
+                const stateIdGroup = `groups.${groupId}`;
+                this.setObjectNotExists(stateIdGroup, {
+                    type: 'group',
+                    common: {
+                        name: name,
+                        type: 'string',
+                        role: 'group',
+                        read: true,
+                        write: false
+                    }
+                });
                 const stateIdName = `groups.${groupId}.name`;
                 this.setObjectNotExists(stateIdName, {
                     type: 'state',
@@ -1317,6 +1338,47 @@ class Heytech extends utils.Adapter {
                     }
                 });
                 this.setState(stateIdRefs, {val: shutters, ack: true});
+                this.setObjectNotExists(`groups.${groupId}.up`, {
+                    type: 'state',
+                    common: {
+                        name: 'Group ' + groupId + ' ' + name + ' up',
+                        type: 'boolean',
+                        role: 'button',
+                        read: true,
+                        write: true
+                    }
+                });
+                this.setObjectNotExists(`groups.${groupId}.down`, {
+                    type: 'state',
+                    common: {
+                        name: 'Group ' + groupId + ' ' + name + ' down',
+                        type: 'boolean',
+                        role: 'button',
+                        read: true,
+                        write: true
+                    }
+                });
+                this.setObjectNotExists(`groups.${groupId}.stop`, {
+                    type: 'state',
+                    common: {
+                        name: 'Group ' + groupId + ' ' + name + ' stop',
+                        type: 'boolean',
+                        role: 'button',
+                        read: true,
+                        write: true
+                    }
+                });
+                this.setObjectNotExists(`groups.${groupId}.percent`, {
+                    type: 'state',
+                    common: {
+                        name: 'Group ' + groupId + ' ' + name + ' percent',
+                        type: 'number',
+                        role: 'level.blind',
+                        unit: '%',
+                        read: true,
+                        write: true
+                    }
+                });
             });
 
         }
@@ -1500,12 +1562,14 @@ class Heytech extends utils.Adapter {
     }
 
     checkShutterStatus() {
-        const intervalID = setInterval(() => {
-            client.send('sop');
-            client.send(newLine);
-        }, 1000);
-        setTimeout(() => {
-            clearInterval(intervalID);
+        return _.debounce(async () => {
+            const intervalID = setInterval(() => {
+                client.send('sop');
+                client.send(newLine);
+            }, 5000);
+            setTimeout(() => {
+                clearInterval(intervalID);
+            }, 30000);
         }, 30000);
     }
 
@@ -1540,7 +1604,7 @@ class Heytech extends utils.Adapter {
         };
         if (connected) {
             handsteuerungAusfuehrung();
-            this.checkShutterStatus();
+            this.checkShutterStatus()();
         } else {
             if (!connecting) {
                 client.disconnect();
@@ -1641,7 +1705,7 @@ class Heytech extends utils.Adapter {
         };
         if (connected) {
             szenarioAusfuehrung();
-            this.checkShutterStatus();
+            this.checkShutterStatus()();
         } else {
             if (!connecting) {
                 client.disconnect();
