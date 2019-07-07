@@ -1546,7 +1546,7 @@ class Heytech extends utils.Adapter {
                     if (isShutter) {
                         this.gotoShutterPosition(no[0], state.val)();
                     } else if (isGroup) {
-                        this.gotoShutterPositionGroups(no[0], state.val)();
+                        this.gotoShutterPositionGroups(no[0], state.val);
                     }
 
                     this.log.info('percent: ' + no[0] + ' ' + state.val);
@@ -1570,14 +1570,20 @@ class Heytech extends utils.Adapter {
             setTimeout(() => {
                 clearInterval(intervalID);
             }, 30000);
-        }, 30000);
+        }, 30000, {
+            'leading': true,
+            'trailing': false
+        });
     }
 
     async sendeHandsteuerungsBefehlToGroup(groupdId, befehl) {
-        const shutters = (await this.getStateAsync(`groups.${groupdId}.refs`)).val.split(',');
-        shutters.forEach(rolladenId => {
-            this.sendeHandsteuerungsBefehl(rolladenId, befehl);
-        })
+        const shutterRefsState = await this.getStateAsync(`groups.${groupdId}.refs`);
+        if (shutterRefsState && shutterRefsState.val) {
+            const shutters = shutterRefsState.val.split(',');
+            shutters.forEach(rolladenId => {
+                this.sendeHandsteuerungsBefehl(rolladenId, befehl);
+            });
+        }
     }
 
     sendeHandsteuerungsBefehl(rolladenId, befehl) {
@@ -1622,13 +1628,19 @@ class Heytech extends utils.Adapter {
         return new Promise(resolve => setTimeout(resolve, milliseconds))
     }
 
-    gotoShutterPositionGroups(groupdId, prozent) {
-
-
+    async gotoShutterPositionGroups(groupdId, prozent) {
+        const shutterRefsState = await this.getStateAsync(`groups.${groupdId}.refs`);
+        if (shutterRefsState && shutterRefsState.val) {
+            const shutters = shutterRefsState.val.split(',');
+            shutters.forEach(rolladenId => {
+                this.gotoShutterPosition(rolladenId, prozent)();
+            });
+        }
     }
 
     gotoShutterPosition(rolladenId, prozent) {
         return memoizeDebounce(async () => {
+            this.log.debug(`Percent${rolladenId} ${prozent}`);
             // 100 = auf
             // 0 = zu
             const ziel = Number(prozent);
