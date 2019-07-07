@@ -133,7 +133,7 @@ function createClient() {
                     do {
                         commandCallback = commandCallbacks.shift();
                         if (commandCallback) {
-                                commandCallback();
+                            commandCallback();
                             await this.sleep(500);
                         }
                     } while (commandCallbacks.length > 0);
@@ -1296,27 +1296,27 @@ class Heytech extends utils.Adapter {
                 this.setObjectNotExists(stateIdName, {
                     type: 'state',
                     common: {
-                        name: 'Group ' + z + ' name',
+                        name: 'Group ' + groupId + ' name',
                         type: 'string',
                         role: 'indicator',
                         read: true,
                         write: false,
                     }
                 });
-                that.setState(stateIdName, {val: name, ack: true});
+                this.setState(stateIdName, {val: name, ack: true});
 
                 const stateIdRefs = `groups.${groupId}.refs`;
                 this.setObjectNotExists(stateIdRefs, {
                     type: 'state',
                     common: {
-                        name: 'Group ' + z + ' referenced shutters',
+                        name: 'Group ' + groupId + ' referenced shutters',
                         type: 'string',
                         role: 'indicator',
                         read: true,
                         write: false,
                     }
                 });
-                that.setState(stateIdRefs, {val: shutters, ack: true});
+                this.setState(stateIdRefs, {val: shutters, ack: true});
             });
 
         }
@@ -1401,7 +1401,7 @@ class Heytech extends utils.Adapter {
                     const helper = id.replace('.down', '');
                     const no = helper.match(/\d*$/g);
                     if (isShutter) {
-                    this.sendeHandsteuerungsBefehl(no[0], 'down');
+                        this.sendeHandsteuerungsBefehl(no[0], 'down');
                     } else if (isGroup) {
                         this.sendeHandsteuerungsBefehlToGroup(no[0], 'down');
                     }
@@ -1414,7 +1414,7 @@ class Heytech extends utils.Adapter {
                     const no = helper.match(/\d*$/g);
 
                     if (isShutter) {
-                    this.sendeHandsteuerungsBefehl(no[0], 'up');
+                        this.sendeHandsteuerungsBefehl(no[0], 'up');
                     } else if (isGroup) {
                         this.sendeHandsteuerungsBefehlToGroup(no[0], 'up');
                     }
@@ -1427,7 +1427,7 @@ class Heytech extends utils.Adapter {
                     const no = helper.match(/\d*$/g);
 
                     if (isShutter) {
-                    this.sendeHandsteuerungsBefehl(no[0], 'off');
+                        this.sendeHandsteuerungsBefehl(no[0], 'off');
                     } else if (isGroup) {
                         this.sendeHandsteuerungsBefehlToGroup(no[0], 'off');
                     }
@@ -1462,7 +1462,7 @@ class Heytech extends utils.Adapter {
                     const helper = id.replace('.level', '');
                     const no = helper.match(/\d*$/g);
 
-                        this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
+                    this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
 
                     this.log.info('level: ' + no[0] + ' ' + state.val);
                 }
