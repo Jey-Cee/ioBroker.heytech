@@ -53,6 +53,8 @@
                 const shutters = group.shutters.join(',');
                 const markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
                 $("table tbody").append(markup);
+                $(".delete-row").on('change', () => onChange());
+                $(".add-row").on('change', () => onChange());
             });
 
             onChange(false);
