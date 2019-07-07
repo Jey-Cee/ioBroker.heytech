@@ -48,14 +48,15 @@
             });
 
             const groups = settings['groups'];
+            $("table tbody").empty();
             groups.forEach(group => {
                 const name = group.name;
                 const shutters = group.shutters.join(',');
                 const markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
                 $("table tbody").append(markup);
-                $(".delete-row").click(() => onChange());
-                $(".add-row").click(() => onChange());
             });
+            $(".delete-row").click(() => onChange());
+            $(".add-row").click(() => onChange());
 
             onChange(false);
             // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
@@ -88,7 +89,6 @@
                 shutterGroups.push({name, shutters});
             }
             obj['groups'] = shutterGroups;
-            console.log(obj);
             callback(obj);
         }
     </script>
