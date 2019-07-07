@@ -46,6 +46,15 @@
                     $('.auto-detect').removeClass('hide');
                 }
             });
+
+            const groups = settings['groups'];
+            groups.forEach(group => {
+                const name = group.name;
+                const shutters = group.shutters.join(',');
+                const markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
+                $("table tbody").append(markup);
+            });
+
             onChange(false);
             // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
             if (M) M.updateTextFields();
@@ -86,9 +95,9 @@
     <script type="text/javascript">
         $(document).ready(function(){
             $(".add-row").click(function(){
-                var name = $("#name").val();
-                var shutters = $("#shutters").val();
-                var markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
+                const name = $("#name").val();
+                const shutters = $("#shutters").val();
+                const markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
                 $("table tbody").append(markup);
             });
 
