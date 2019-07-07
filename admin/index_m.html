@@ -50,9 +50,10 @@
             const groups = settings['groups'];
             $("table tbody").empty();
             groups.forEach(group => {
+                const groupId = group.groupId;
                 const name = group.name;
                 const shutters = group.shutters.join(',');
-                const markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
+                const markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + groupId + "</td><td>" + name + "</td><td>" + shutters + "</td></tr>";
                 $("table tbody").append(markup);
             });
             $(".delete-row").click(() => onChange());
@@ -77,15 +78,16 @@
             });
             var table = document.getElementById('groupsTable'),
                 rows = table.getElementsByTagName('tr'),
-                i, j, cells, name, shutters, shutterGroups = [];
+                i, j, cells, groupId, name, shutters, shutterGroups = [];
 
             for (i = 0, j = rows.length; i < j; ++i) {
                 cells = rows[i].getElementsByTagName('td');
                 if (!cells.length) {
                     continue;
                 }
-                name = cells[1].innerHTML;
-                shutters = cells[2].innerHTML.replace(/ /g, '').split(',');
+                groupId = cells[1].innerHTML;
+                name = cells[2].innerHTML;
+                shutters = cells[3].innerHTML.replace(/ /g, '').split(',');
                 shutterGroups.push({name, shutters});
             }
             obj['groups'] = shutterGroups;
@@ -97,9 +99,10 @@
     <script type="text/javascript">
         $(document).ready(function(){
             $(".add-row").click(function(){
+                const groupId = $("#groupId").val();
                 const name = $("#name").val();
                 const shutters = $("#shutters").val();
-                const markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + name + "</td><td>" + shutters + "</td></tr>";
+                const markup = "<tr><td><input style='pointer-events: inherit; opacity: inherit' type='checkbox' name='record'></td><td>" + groupId + "</td><td>" + name + "</td><td>" + shutters + "</td></tr>";
                 $("table tbody").append(markup);
             });
 
@@ -204,6 +207,7 @@
         <div class="input-field col">
             <label for="addGroups" class="translate">Shutter Groups</label>
             <form id="addGroups">
+                <input type="text" id="groupId" placeholder="Unique Group ID">
                 <input type="text" id="name" placeholder="Name">
                 <input type="text" id="shutters" placeholder="Shutters comma separated">
                 <input type="button" class="add-row" value="Add Group">
@@ -212,6 +216,7 @@
                 <thead>
                     <tr>
                         <th>Select to delete</th>
+                        <th>Unique Group ID</th>
                         <th>Name</th>
                         <th>Shutters</th>
                     </tr>

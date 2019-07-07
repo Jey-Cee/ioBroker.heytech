@@ -28,7 +28,7 @@ const ENDE_SMN_START_STI = 'ende_smn\r\nstart_sti';
 let client = null;
 let connected = false;
 let connecting = false;
-let commandCallbacks = [];
+const commandCallbacks = [];
 
 let readSop = false;
 let readSkd = false;
@@ -37,7 +37,7 @@ let readSmc = false;
 let readSfi = false;
 let readSmn = false;
 
-let actualPercents = {};
+const actualPercents = {};
 
 const memoizeDebounce = function (func, wait = 0, options = {}) {
     var mem = _.memoize(function () {
@@ -167,7 +167,7 @@ function createClient() {
             if (!readSmn && lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
                 if (lastStrings.indexOf(ENDE_SMN_START_STI) > 0) { //check end of smn data
                     smn = smn.concat(data); // erst hier concaten, weil ansonsten das if lastStrings.endsWith nicht mehr stimmt, weil die telnet Verbindung schon wieder was gesendet hat...
-                    let channels = smn.match(/\d\d,.*,\d,/gm);
+                    const channels = smn.match(/\d\d,.*,\d,/gm);
                     wOutputs(channels);
                     smn = '';
                     lastStrings = '';
@@ -180,10 +180,6 @@ function createClient() {
                 // SOP  Oeffnungs-Prozent
                 // start_sop0,0,0,0,0,0,0,0,0,0,0,0,0,0,100,100,100,100,100,100,100,100,100,100,100,0,100,100,100,100,100,100,ende_sop
 
-                // let statusStr = lastStrings.substring(
-                //     lastStrings.indexOf(START_SOP) + START_SOP.length,
-                //     lastStrings.indexOf(ENDE_SOP, lastStrings.indexOf(START_SOP))
-                // );
                 const regexpResults = lastStrings.match('t_sop([^]+)ende_sop');
                 if (regexpResults && regexpResults.length > 0) {
                     const statusStr = regexpResults[regexpResults.length - 1].replace('t_sop', '').replace(ENDE_SOP, '');
@@ -204,7 +200,7 @@ function createClient() {
             } else if (lastStrings.indexOf(START_SKD) >= 0 && lastStrings.indexOf(ENDE_SKD) >= 0) {
                 // Klima-Daten
                 // start_skd37,999,999,999,999,19,0,18,19,0,0,0,0,0,37,1,ende_skd
-                let klimaStr = lastStrings.substring(
+                const klimaStr = lastStrings.substring(
                     lastStrings.indexOf(START_SKD) + START_SKD.length,
                     lastStrings.indexOf(ENDE_SKD, lastStrings.indexOf(START_SKD))
                 );
@@ -243,7 +239,7 @@ function createClient() {
                 readSmo = true;
             } else if (lastStrings.indexOf(START_SMC) >= 0 && lastStrings.indexOf(ENDE_SMC) >= 0) {
                 // Number of channels
-                let noChannelStr = lastStrings.substring(
+                const noChannelStr = lastStrings.substring(
                     lastStrings.indexOf(START_SMC) + START_SMC.length,
                     lastStrings.indexOf(ENDE_SMC, lastStrings.indexOf(START_SMC))
                 );
@@ -253,7 +249,7 @@ function createClient() {
                 readSmc = true;
             } else if (lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0) {
                 // Software Version
-                let svStr = lastStrings.substring(
+                const svStr = lastStrings.substring(
                     lastStrings.indexOf(START_SFI) + START_SFI.length,
                     lastStrings.indexOf(ENDE_SFI, lastStrings.indexOf(START_SFI))
                 );
@@ -266,17 +262,17 @@ function createClient() {
         });
     }
 
-    let wOutputs = writeOutputs.bind(this);
+    const wOutputs = writeOutputs.bind(this);
 
     function writeOutputs(data) {
-        let that = this;
-        let n = data.length;
+        const that = this;
+        const n = data.length;
 
         for (let i = 0; i < n; i++) {
-            let z = i + 1;
-            let channel = data[i].split(',');
+            const z = i + 1;
+            const channel = data[i].split(',');
             if (channel[0] < 65) {
-                let number = parseInt(channel[0]);
+                const number = parseInt(channel[0]);
                 let vRole;
                 switch (channel[2]) {
                     case '1':
@@ -367,8 +363,8 @@ function createClient() {
                         }
                     });
                 } else if (vRole === 'device' || vRole === 'device group') {
-                    let patt = new RegExp('~');
-                    let dimmer = patt.test(channel[1]);
+                    const patt = new RegExp('~');
+                    const dimmer = patt.test(channel[1]);
 
                     if (dimmer === false) {
                         that.setObjectNotExists('devices', {
@@ -446,7 +442,7 @@ function createClient() {
 
                 }
             } else if (channel[0] > 64) {
-                let sceneNo = channel[0] - 64;
+                const sceneNo = channel[0] - 64;
                 that.setObjectNotExists('scenes', {
                     type: 'group',
                     common: {
@@ -482,14 +478,14 @@ function createClient() {
         }
     }
 
-    let wStatus = writeStatus.bind(this);
+    const wStatus = writeStatus.bind(this);
 
     function writeStatus(data) {
 
-        let that = this;
+        const that = this;
 
         for (let i = 0; i < data.length; i++) {
-            let z = i + 1;
+            const z = i + 1;
             const percent = Number(data[i]);
             if (!isNaN(percent)) {
                 actualPercents[String(z)] = percent;
@@ -509,11 +505,11 @@ function createClient() {
                     let keys = Object.keys(states);
 
                     //remove all states that are not for show values and scenes
-                    let pArr = ['down', 'up', 'stop', 'scenes', 'undefined'];
+                    const pArr = ['down', 'up', 'stop', 'scenes', 'undefined'];
                     for (let p in pArr) {
-                        let patt = new RegExp(pArr[p]);
+                        const patt = new RegExp(pArr[p]);
                         for (let x in keys) {
-                            let test = patt.test(keys[x]);
+                            const test = patt.test(keys[x]);
                             if (test === true || !keys[x].startsWith(`heytech.${that['instance']}.shutters.${z}.`)) {
                                 delete states[keys[x]];
                             }
@@ -547,17 +543,17 @@ function createClient() {
                                 }
 
                                 ts = parseInt(ts);
-                                let wait = 1000;
-                                let d = new Date();
-                                let time = d.getTime();
+                                const wait = 1000;
+                                const d = new Date();
+                                const time = d.getTime();
 
-                                let newVal = data[i];
+                                const newVal = data[i];
                                 if (key === z && time - ts > wait) {
                                     let test = keys[x].match(/\w+$/g);
                                     test = test.toString();
 
-                                    let patt = new RegExp('shutters');
-                                    let shutter = patt.test(keys[x]);
+                                    const patt = new RegExp('shutters');
+                                    const shutter = patt.test(keys[x]);
 
                                     if ((test === 'status' || (test === 'level' && !shutter)) && oldVal !== newVal) {
                                         that.setState(keys[x], {val: data[i], ack: true});
@@ -582,10 +578,10 @@ function createClient() {
 
     }
 
-    let wKlima = writeKlima.bind(this);
+    const wKlima = writeKlima.bind(this);
 
     function writeKlima(data) {
-        let that = this;
+        const that = this;
 
         if (that.config.autoDetect) {
             that.setObjectNotExists('sensors', {
@@ -617,7 +613,7 @@ function createClient() {
             let vBriAc;
 
             for (st in states) {
-                let name = st.replace(`heytech.${that['instance']}.sensors.`, '');
+                const name = st.replace(`heytech.${that['instance']}.sensors.`, '');
 
                 switch (name) {
                     case 'alarm':
@@ -1000,7 +996,7 @@ class Heytech extends utils.Adapter {
         this.on('unload', this.onUnload.bind(this));
 
         cC = createClient.bind(this);
-        let d = new Date();
+        const d = new Date();
         start = d.getTime();
 
     }
@@ -1225,7 +1221,7 @@ class Heytech extends utils.Adapter {
 
 
             for (let i = 0; i < out; i++) {
-                let z = i + 1;
+                const z = i + 1;
                 this.setObjectNotExists('outputs', {
                     type: 'group',
                     common: {
@@ -1290,6 +1286,41 @@ class Heytech extends utils.Adapter {
 
             }
         }
+
+        if (this.config.groups && this.config.groups.length > 0) {
+            this.config.groups.forEach((group) => {
+                const groupId = group.groupId;
+                const name = group.name;
+                const shutters = group.shutters.join(',');
+                const stateIdName = `groups.${groupId}.name`;
+                this.setObjectNotExists(stateIdName, {
+                    type: 'state',
+                    common: {
+                        name: 'Group ' + z + ' name',
+                        type: 'string',
+                        role: 'indicator',
+                        read: true,
+                        write: false,
+                    }
+                });
+                that.setState(stateIdName, {val: name, ack: true});
+
+                const stateIdRefs = `groups.${groupId}.refs`;
+                this.setObjectNotExists(stateIdRefs, {
+                    type: 'state',
+                    common: {
+                        name: 'Group ' + z + ' referenced shutters',
+                        type: 'string',
+                        role: 'indicator',
+                        read: true,
+                        write: false,
+                    }
+                });
+                that.setState(stateIdRefs, {val: shutters, ack: true});
+            });
+
+        }
+
         if (this.config.ip !== '' && this.config.port !== '') {
             cC();
             client.connect();
@@ -1336,73 +1367,89 @@ class Heytech extends utils.Adapter {
      */
     onStateChange(id, state) {
 
-        let d = new Date();
-        let now = d.getTime();
-        let diff = now - start;
+        const d = new Date();
+        const now = d.getTime();
+        const diff = now - start;
 
         if (state && diff > 10000 && readSmn) {
             // The state was changed
-            let patt1 = new RegExp('down');
-            let patt2 = new RegExp('up');
-            let patt3 = new RegExp('stop');
-            let patt4 = new RegExp('on');
-            let patt5 = new RegExp('level');
-            let patt6 = new RegExp('activate');
-            let patt7 = new RegExp('percent');
+            const patt1 = new RegExp('down');
+            const patt2 = new RegExp('up');
+            const patt3 = new RegExp('stop');
+            const patt4 = new RegExp('on');
+            const patt5 = new RegExp('level');
+            const patt6 = new RegExp('activate');
+            const patt7 = new RegExp('percent');
 
-            let res1 = patt1.test(id);
-            let res2 = patt2.test(id);
-            let res3 = patt3.test(id);
-            let res4 = patt4.test(id);
-            let res5 = patt5.test(id);
-            let res6 = patt6.test(id);
-            let res7 = patt7.test(id);
+            const res1 = patt1.test(id);
+            const res2 = patt2.test(id);
+            const res3 = patt3.test(id);
+            const res4 = patt4.test(id);
+            const res5 = patt5.test(id);
+            const res6 = patt6.test(id);
+            const res7 = patt7.test(id);
+
+            const patternShutter = new RegExp('shutters');
+            const isShutter = patternShutter.test(id);
+            const patternGroups = new RegExp('groups');
+            const isGroup = patternGroups.test(id);
 
             if (client === null) {
                 cC();
             } else {
                 if (res1 === true) {
-                    let helper = id.replace('.down', '');
-                    let no = helper.match(/\d*$/g);
-
+                    const helper = id.replace('.down', '');
+                    const no = helper.match(/\d*$/g);
+                    if (isShutter) {
                     this.sendeHandsteuerungsBefehl(no[0], 'down');
+                    } else if (isGroup) {
+                        this.sendeHandsteuerungsBefehlToGroup(no[0], 'down');
+                    }
 
                     this.log.info('down ' + no[0]);
                 }
 
                 if (res2 === true) {
-                    let helper = id.replace('.up', '');
-                    let no = helper.match(/\d*$/g);
+                    const helper = id.replace('.up', '');
+                    const no = helper.match(/\d*$/g);
 
+                    if (isShutter) {
                     this.sendeHandsteuerungsBefehl(no[0], 'up');
+                    } else if (isGroup) {
+                        this.sendeHandsteuerungsBefehlToGroup(no[0], 'up');
+                    }
 
                     this.log.info('up ' + no[0]);
                 }
 
                 if (res3 === true) {
-                    let helper = id.replace('.stop', '');
-                    let no = helper.match(/\d*$/g);
+                    const helper = id.replace('.stop', '');
+                    const no = helper.match(/\d*$/g);
 
+                    if (isShutter) {
                     this.sendeHandsteuerungsBefehl(no[0], 'off');
+                    } else if (isGroup) {
+                        this.sendeHandsteuerungsBefehlToGroup(no[0], 'off');
+                    }
 
                     this.log.info('stop ' + no[0]);
                 }
 
                 if (res4 === true) {
-                    let helper = id.replace('.on', '');
-                    let no = helper.match(/\d*$/g);
-                    let patt = new RegExp('dimmer');
-                    let dim = patt.test(id);
+                    const helper = id.replace('.on', '');
+                    const no = helper.match(/\d*$/g);
+                    const patt = new RegExp('dimmer');
+                    const dim = patt.test(id);
 
                     if (dim === false) {
                         this.sendeHandsteuerungsBefehl(no[0], state.val === true ? 'up' : 'off');
                     } else if (dim === true) {
                         if (state.val === true) {
 
-                            let lvl = id.replace('on', 'level');
+                            const lvl = id.replace('on', 'level');
                             this.setState(lvl, 100);
                         } else if (state.val === false) {
-                            let lvl = id.replace('on', 'level');
+                            const lvl = id.replace('on', 'level');
                             this.setState(lvl, 0);
 
                         }
@@ -1412,25 +1459,18 @@ class Heytech extends utils.Adapter {
                 }
 
                 if (res5 === true) {
-                    let helper = id.replace('.level', '');
-                    let no = helper.match(/\d*$/g);
-                    let patt = new RegExp('shutters');
-                    let shutter = patt.test(id);
+                    const helper = id.replace('.level', '');
+                    const no = helper.match(/\d*$/g);
 
-                    if (shutter === true) {
-                        // this.gotoShutterPosition(no[0], state.val);
-                    } else {
                         this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
-                    }
-
 
                     this.log.info('level: ' + no[0] + ' ' + state.val);
                 }
 
 
                 if (res6 === true) {
-                    let helper = id.replace('.acitivate', '');
-                    let no = helper.match(/\d*$/g);
+                    const helper = id.replace('.acitivate', '');
+                    const no = helper.match(/\d*$/g);
 
                     this.sendeSzenarioBefehl(no[0]);
 
@@ -1438,13 +1478,13 @@ class Heytech extends utils.Adapter {
                 }
 
                 if (res7 === true) {
-                    let helper = id.replace('.percent', '');
-                    let no = helper.match(/\d*$/g);
-                    let patt = new RegExp('shutters');
-                    let shutter = patt.test(id);
+                    const helper = id.replace('.percent', '');
+                    const no = helper.match(/\d*$/g);
 
-                    if (shutter === true) {
+                    if (isShutter) {
                         this.gotoShutterPosition(no[0], state.val)();
+                    } else if (isGroup) {
+                        this.gotoShutterPositionGroups(no[0], state.val)();
                     }
 
                     this.log.info('percent: ' + no[0] + ' ' + state.val);
@@ -1469,8 +1509,15 @@ class Heytech extends utils.Adapter {
         }, 30000);
     }
 
+    async sendeHandsteuerungsBefehlToGroup(groupdId, befehl) {
+        const shutters = (await this.getStateAsync(`groups.${groupdId}.refs`)).val.split(',');
+        shutters.forEach(rolladenId => {
+            this.sendeHandsteuerungsBefehl(rolladenId, befehl);
+        })
+    }
+
     sendeHandsteuerungsBefehl(rolladenId, befehl) {
-        let handsteuerungAusfuehrung = () => {
+        const handsteuerungAusfuehrung = () => {
             if (this.config.pin !== '') {
                 client.send('rsc');
                 client.send(newLine);
@@ -1511,6 +1558,11 @@ class Heytech extends utils.Adapter {
         return new Promise(resolve => setTimeout(resolve, milliseconds))
     }
 
+    gotoShutterPositionGroups(groupdId, prozent) {
+
+
+    }
+
     gotoShutterPosition(rolladenId, prozent) {
         return memoizeDebounce(async () => {
             // 100 = auf
@@ -1524,8 +1576,6 @@ class Heytech extends utils.Adapter {
             } else {
                 let status = actualPercents[String(rolladenId)];
                 let aktuellePosition = Number(status);
-                const staerPositionVorAusFuehrung = aktuellePosition;
-                console.log(aktuellePosition);
                 let direction = 'up';
                 if (aktuellePosition > ziel) {
                     direction = 'down';
@@ -1547,7 +1597,7 @@ class Heytech extends utils.Adapter {
     }
 
     sendeRefreshBefehl() {
-        let refreshBefehl = () => {
+        const refreshBefehl = () => {
             if (this.config.pin !== '') {
                 client.send('rsc');
                 client.send(newLine);
@@ -1573,7 +1623,7 @@ class Heytech extends utils.Adapter {
     }
 
     sendeSzenarioBefehl(rolladenId) {
-        let szenarioAusfuehrung = () => {
+        const szenarioAusfuehrung = () => {
             if (this.config.pin !== '') {
                 client.send('rsc');
                 client.send(newLine);
