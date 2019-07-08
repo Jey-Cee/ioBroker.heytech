@@ -575,6 +575,24 @@ function createClient() {
 
         }
 
+        if (that.config.groups && that.config.groups.length > 0) {
+            that.config.groups.forEach(group => {
+                const groupId = group.groupId;
+                const shutters = group.shutters;
+                let percentSum = 0;
+                shutters.forEach(shutter => {
+                    percentSum += (actualPercents[String(shutter)] || 0);
+                });
+                const avgPercent = Math.round(percentSum / shutters.length);
+                that.getState('groups.' + groupId + '.status', function (err, state) {
+                    if (err) {
+                        that.log.error(err);
+                    } else if (state === null || state.val !== avgPercent) {
+                        that.setState('groups.' + groupId + '.status', {val: avgPercent, ack: true});
+                    }
+                });
+            })
+        }
 
     }
 
@@ -1301,84 +1319,100 @@ class Heytech extends utils.Adapter {
             this.config.groups.forEach((group) => {
                 const groupId = group.groupId;
                 const name = group.name;
-                const shutters = group.shutters.join(',');
-                const stateIdGroup = `groups.${groupId}`;
-                this.setObjectNotExists(stateIdGroup, {
-                    type: 'group',
-                    common: {
-                        name: name,
-                        type: 'string',
-                        role: 'group',
-                        read: true,
-                        write: false
-                    }
-                });
-                const stateIdName = `groups.${groupId}.name`;
-                this.setObjectNotExists(stateIdName, {
-                    type: 'state',
-                    common: {
-                        name: 'Group ' + groupId + ' name',
-                        type: 'string',
-                        role: 'indicator',
-                        read: true,
-                        write: false,
-                    }
-                });
-                this.setState(stateIdName, {val: name, ack: true});
+                if (groupId && name && group.shutters && group.shutters.length > 0) {
 
-                const stateIdRefs = `groups.${groupId}.refs`;
-                this.setObjectNotExists(stateIdRefs, {
-                    type: 'state',
-                    common: {
-                        name: 'Group ' + groupId + ' referenced shutters',
-                        type: 'string',
-                        role: 'indicator',
-                        read: true,
-                        write: false,
-                    }
-                });
-                this.setState(stateIdRefs, {val: shutters, ack: true});
-                this.setObjectNotExists(`groups.${groupId}.up`, {
-                    type: 'state',
-                    common: {
-                        name: 'Group ' + groupId + ' ' + name + ' up',
-                        type: 'boolean',
-                        role: 'button',
-                        read: true,
-                        write: true
-                    }
-                });
-                this.setObjectNotExists(`groups.${groupId}.down`, {
-                    type: 'state',
-                    common: {
-                        name: 'Group ' + groupId + ' ' + name + ' down',
-                        type: 'boolean',
-                        role: 'button',
-                        read: true,
-                        write: true
-                    }
-                });
-                this.setObjectNotExists(`groups.${groupId}.stop`, {
-                    type: 'state',
-                    common: {
-                        name: 'Group ' + groupId + ' ' + name + ' stop',
-                        type: 'boolean',
-                        role: 'button',
-                        read: true,
-                        write: true
-                    }
-                });
-                this.setObjectNotExists(`groups.${groupId}.percent`, {
-                    type: 'state',
-                    common: {
-                        name: 'Group ' + groupId + ' ' + name + ' percent',
-                        type: 'number',
-                        role: 'level.blind',
-                        unit: '%',
-                        read: true,
-                        write: true
-                    }
-                });
+
+                    const shutters = group.shutters.join(',');
+                    const stateIdGroup = `groups.${groupId}`;
+                    this.setObjectNotExists(stateIdGroup, {
+                        type: 'group',
+                        common: {
+                            name: name,
+                            type: 'string',
+                            role: 'group',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    const stateIdName = `groups.${groupId}.name`;
+                    this.setObjectNotExists(stateIdName, {
+                        type: 'state',
+                        common: {
+                            name: 'Group ' + groupId + ' name',
+                            type: 'string',
+                            role: 'indicator',
+                            read: true,
+                            write: false,
+                        }
+                    });
+                    this.setState(stateIdName, {val: name, ack: true});
+
+                    const stateIdRefs = `groups.${groupId}.refs`;
+                    this.setObjectNotExists(stateIdRefs, {
+                        type: 'state',
+                        common: {
+                            name: 'Group ' + groupId + ' referenced shutters',
+                            type: 'string',
+                            role: 'indicator',
+                            read: true,
+                            write: false,
+                        }
+                    });
+                    const stateIdStatus = `groups.${groupId}.status`;
+                    this.setObjectNotExists(stateIdStatus, {
+                        type: 'state',
+                        common: {
+                            name: 'Group ' + groupId + ' status',
+                            type: 'number',
+                            role: 'indicator',
+                            unit: '%',
+                            read: true,
+                            write: false,
+                        }
+                    });
+                    this.setState(stateIdRefs, {val: shutters, ack: true});
+                    this.setObjectNotExists(`groups.${groupId}.up`, {
+                        type: 'state',
+                        common: {
+                            name: 'Group ' + groupId + ' ' + name + ' up',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true
+                        }
+                    });
+                    this.setObjectNotExists(`groups.${groupId}.down`, {
+                        type: 'state',
+                        common: {
+                            name: 'Group ' + groupId + ' ' + name + ' down',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true
+                        }
+                    });
+                    this.setObjectNotExists(`groups.${groupId}.stop`, {
+                        type: 'state',
+                        common: {
+                            name: 'Group ' + groupId + ' ' + name + ' stop',
+                            type: 'boolean',
+                            role: 'button',
+                            read: true,
+                            write: true
+                        }
+                    });
+                    this.setObjectNotExists(`groups.${groupId}.percent`, {
+                        type: 'state',
+                        common: {
+                            name: 'Group ' + groupId + ' ' + name + ' percent',
+                            type: 'number',
+                            role: 'level.blind',
+                            unit: '%',
+                            read: true,
+                            write: true
+                        }
+                    });
+                }
             });
 
         }
