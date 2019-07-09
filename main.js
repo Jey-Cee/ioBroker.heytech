@@ -29,6 +29,7 @@ let client = null;
 let connected = false;
 let connecting = false;
 const commandCallbacks = [];
+let runningCommandCallbacks = false;
 
 let readSop = false;
 let readSkd = false;
@@ -127,6 +128,8 @@ function createClient() {
                 }
 
                 if (commandCallbacks.length > 0) {
+                    await this.waitForRunningCommandCallbacks();
+                    runningCommandCallbacks = true;
                     this.checkShutterStatus()();
 
                     let commandCallback;
@@ -137,6 +140,7 @@ function createClient() {
                             await this.sleep(500);
                         }
                     } while (commandCallbacks.length > 0);
+                    runningCommandCallbacks = false;
                 }
 
             });
@@ -1620,8 +1624,15 @@ class Heytech extends utils.Adapter {
         }
     }
 
-    sendeHandsteuerungsBefehl(rolladenId, befehl) {
+    async waitForRunningCommandCallbacks() {
+        while (runningCommandCallbacks) {
+            await this.sleep(500);
+        }
+    }
+
+    async sendeHandsteuerungsBefehl(rolladenId, befehl) {
         const handsteuerungAusfuehrung = () => {
+            runningCommandCallbacks = true;
             if (this.config.pin !== '') {
                 client.send('rsc');
                 client.send(newLine);
@@ -1641,8 +1652,10 @@ class Heytech extends utils.Adapter {
             client.send('rhe');
             client.send(newLine);
             client.send(newLine);
+            runningCommandCallbacks = false;
         };
         if (connected) {
+            await this.waitForRunningCommandCallbacks();
             handsteuerungAusfuehrung();
             this.checkShutterStatus()();
         } else {
@@ -1706,8 +1719,9 @@ class Heytech extends utils.Adapter {
         }, 500);
     }
 
-    sendeRefreshBefehl() {
+    async sendeRefreshBefehl() {
         const refreshBefehl = () => {
+            runningCommandCallbacks = true;
             if (this.config.pin !== '') {
                 client.send('rsc');
                 client.send(newLine);
@@ -1716,8 +1730,10 @@ class Heytech extends utils.Adapter {
             }
             client.send('skd');
             client.send(newLine);
+            runningCommandCallbacks = false;
         };
         if (connected) {
+            await this.waitForRunningCommandCallbacks();
             refreshBefehl();
         } else {
             if (!connecting) {
@@ -1732,8 +1748,9 @@ class Heytech extends utils.Adapter {
 
     }
 
-    sendeSzenarioBefehl(rolladenId) {
+    async sendeSzenarioBefehl(rolladenId) {
         const szenarioAusfuehrung = () => {
+            runningCommandCallbacks = true;
             if (this.config.pin !== '') {
                 client.send('rsc');
                 client.send(newLine);
@@ -1748,8 +1765,10 @@ class Heytech extends utils.Adapter {
             client.send('sop');
             client.send(newLine);
             client.send(newLine);
+            runningCommandCallbacks = false;
         };
         if (connected) {
+            await this.waitForRunningCommandCallbacks();
             szenarioAusfuehrung();
             this.checkShutterStatus()();
         } else {
