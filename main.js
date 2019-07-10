@@ -557,10 +557,16 @@ function createClient() {
                                     test = test.toString();
 
                                     const patt = new RegExp('shutters');
-                                    const shutter = patt.test(keys[x]);
+                                    const isShutter = patt.test(keys[x]);
 
-                                    if ((test === 'status' || (test === 'level' && !shutter)) && oldVal !== newVal) {
+                                    if ((test === 'status' || (test === 'level' && !isShutter)) && oldVal !== newVal) {
                                         that.setState(keys[x], {val: data[i], ack: true});
+                                        if (isShutter && test === 'status') {
+                                            that.setState(keys[x].replace('status', 'percent'), {
+                                                val: data[i],
+                                                ack: true
+                                            });
+                                        }
                                     } else if (test === 'on') {
 
                                         if (parseInt(data[i]) === 0 && (oldVal !== 'false' || oldVal === null)) {
@@ -593,6 +599,7 @@ function createClient() {
                         that.log.error(err);
                     } else if (state === null || state.val !== avgPercent) {
                         that.setState('groups.' + groupId + '.status', {val: avgPercent, ack: true});
+                        that.setState('groups.' + groupId + '.percent', {val: avgPercent, ack: true});
                     }
                 });
             })
@@ -1466,7 +1473,11 @@ class Heytech extends utils.Adapter {
      * @param {ioBroker.State | null | undefined} state
      */
     onStateChange(id, state) {
-
+        // nur auf externe setStates lauschen
+        if (state.from.indexOf('system.adapter.heytech') === 0) {
+            this.log.debug('Skipped', id, state);
+            return;
+        }
         const d = new Date();
         const now = d.getTime();
         const diff = now - start;
