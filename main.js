@@ -1603,9 +1603,17 @@ class Heytech extends utils.Adapter {
                     const no = helper.match(/\d*$/g);
 
                     if (isShutter) {
+                        if (controllerSoftwareVersion >= '8.027o'){
+                            this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
+                        } else {
                         this.gotoShutterPosition(no[0], state.val)();
+                        }
                     } else if (isGroup) {
+                        if (controllerSoftwareVersion >= '8.027o'){
+                            this.sendeHandsteuerungsBefehlToGroup(no[0], state.val.toString());
+                        } else {
                         this.gotoShutterPositionGroups(no[0], state.val);
+                    }
                     }
 
                     this.log.info('percent: ' + no[0] + ' ' + state.val);
