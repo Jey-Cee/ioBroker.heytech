@@ -31,6 +31,9 @@ let connecting = false;
 const commandCallbacks = [];
 let runningCommandCallbacks = false;
 
+let controllerChannelCount;
+let controllerSoftwareVersion;
+
 let readSop = false;
 let readSkd = false;
 let readSmo = false;
@@ -187,7 +190,7 @@ function createClient() {
                 const regexpResults = lastStrings.match('t_sop([^]+)ende_sop');
                 if (regexpResults && regexpResults.length > 0) {
                     const statusStr = regexpResults[regexpResults.length - 1].replace('t_sop', '').replace(ENDE_SOP, '');
-                    const rolladenStatus = statusStr.split(',').slice(0, 32);
+                    const rolladenStatus = statusStr.split(',').slice(0, controllerChannelCount || 32);
                     lastStrings = '';
                     // this.log.debug(rolladenStatus);
                     //check rolladenStatus
@@ -249,6 +252,7 @@ function createClient() {
                 );
                 this.log.debug('Number of Channels :' + noChannelStr);
                 this.extendObject('controller', {"native": {"channels": noChannelStr}});
+                controllerChannelCount = Number(noChannelStr);
                 lastStrings = '';
                 readSmc = true;
             } else if (lastStrings.indexOf(START_SFI) >= 0 && lastStrings.indexOf(ENDE_SFI) >= 0) {
@@ -258,6 +262,7 @@ function createClient() {
                     lastStrings.indexOf(ENDE_SFI, lastStrings.indexOf(START_SFI))
                 );
                 this.log.info('Software version: ' + svStr);
+                controllerSoftwareVersion = svStr;
                 this.extendObject('controller', {"native": {"swversion": svStr}});
                 lastStrings = '';
                 readSfi = true;
@@ -317,11 +322,16 @@ function createClient() {
                     that.setObjectNotExists('shutters.' + number + '.up', {
                         type: 'state',
                         common: {
-                            name: channel[1] + ' up',
+                            name: channel[1].trim() + ' up',
                             type: 'boolean',
                             role: 'button',
-                            read: true,
-                            write: true
+                            read: false,
+                            write: true,
+                            smartName: {
+                                en: channel[1].trim() + ' up',
+                                de: channel[1].trim() + ' up',
+                                smartType: 'SWITCH'
+                            }
                         }
                     });
                     that.setObjectNotExists('shutters.' + number + '.down', {
@@ -330,7 +340,7 @@ function createClient() {
                             name: channel[1] + ' down',
                             type: 'boolean',
                             role: 'button',
-                            read: true,
+                            read: false,
                             write: true
                         }
                     });
@@ -340,7 +350,7 @@ function createClient() {
                             name: channel[1] + ' stop',
                             type: 'boolean',
                             role: 'button',
-                            read: true,
+                            read: false,
                             write: true
                         }
                     });
@@ -473,7 +483,7 @@ function createClient() {
                         name: 'Activate' + channel[1],
                         type: 'boolean',
                         role: 'button',
-                        read: true,
+                        read: false,
                         write: true
                     }
                 });
@@ -1388,7 +1398,7 @@ class Heytech extends utils.Adapter {
                             name: 'Group ' + groupId + ' ' + name + ' up',
                             type: 'boolean',
                             role: 'button',
-                            read: true,
+                            read: false,
                             write: true
                         }
                     });
@@ -1398,7 +1408,7 @@ class Heytech extends utils.Adapter {
                             name: 'Group ' + groupId + ' ' + name + ' down',
                             type: 'boolean',
                             role: 'button',
-                            read: true,
+                            read: false,
                             write: true
                         }
                     });
@@ -1408,7 +1418,7 @@ class Heytech extends utils.Adapter {
                             name: 'Group ' + groupId + ' ' + name + ' stop',
                             type: 'boolean',
                             role: 'button',
-                            read: true,
+                            read: false,
                             write: true
                         }
                     });
@@ -1475,7 +1485,7 @@ class Heytech extends utils.Adapter {
     onStateChange(id, state) {
         // nur auf externe setStates lauschen
         if (state.from.indexOf('system.adapter.heytech') === 0) {
-            this.log.debug('Skipped', id, state);
+            // this.log.debug('Skipped', id, state);
             return;
         }
         const d = new Date();
@@ -1593,9 +1603,17 @@ class Heytech extends utils.Adapter {
                     const no = helper.match(/\d*$/g);
 
                     if (isShutter) {
+                        if (controllerSoftwareVersion >= '8.027o'){
+                            this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
+                        } else {
                         this.gotoShutterPosition(no[0], state.val)();
+                        }
                     } else if (isGroup) {
+                        if (controllerSoftwareVersion >= '8.027o'){
+                            this.sendeHandsteuerungsBefehlToGroup(no[0], state.val.toString());
+                        } else {
                         this.gotoShutterPositionGroups(no[0], state.val);
+                    }
                     }
 
                     this.log.info('percent: ' + no[0] + ' ' + state.val);

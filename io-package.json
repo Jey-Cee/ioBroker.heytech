@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.1.7",
+        "version": "0.1.8",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -85,6 +85,10 @@
             "0.1.7": {
                 "en": "Set percentage shutter opening above 'percent' state. Definition of shutter groups in order to switch whole rooms at once\n",
                 "de": "Prozentualle Rolladen Öffnung setzen über 'percent' state. Definition von Rolladengruppen, um ganze Räume auf einmal schalten zu können\n"
+            },
+            "0.1.8": {
+                "en": "Support of Controller Version 8.027o\n",
+                "de": "Unterstützung für Controller Version 8.027o\n"
             }
         },
         "title": "HEYtech",
