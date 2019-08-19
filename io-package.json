@@ -89,6 +89,10 @@
             "0.1.8": {
                 "en": "Support of Controller Version 8.027o\n",
                 "de": "Unterstützung für Controller Version 8.027o\n"
+            },
+            "0.1.9": {
+                "en": "Support of Controller Version 1.014p of HEYtech RS874LL\n",
+                "de": "Unterstützung für Controller Version 1.014p des HEYtech RS874LL\n"
             }
         },
         "title": "HEYtech",
