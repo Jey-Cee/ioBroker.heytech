@@ -1603,13 +1603,13 @@ class Heytech extends utils.Adapter {
                     const no = helper.match(/\d*$/g);
 
                     if (isShutter) {
-                        if (controllerSoftwareVersion >= '8.027o'){
+                        if (this.checkNewerVersion()){
                             this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
                         } else {
                         this.gotoShutterPosition(no[0], state.val)();
                         }
                     } else if (isGroup) {
-                        if (controllerSoftwareVersion >= '8.027o'){
+                        if (this.checkNewerVersion()){
                             this.sendeHandsteuerungsBefehlToGroup(no[0], state.val.toString());
                         } else {
                         this.gotoShutterPositionGroups(no[0], state.val);
@@ -1626,6 +1626,11 @@ class Heytech extends utils.Adapter {
             // The state was deleted
             //this.log.info(`state ${id} deleted`);
         }
+    }
+
+    checkNewerVersion() {
+        return (controllerSoftwareVersion[0] === '8' && controllerSoftwareVersion >= '8.027o') ||
+            (controllerSoftwareVersion[0] === '1' && controllerSoftwareVersion >= '1.014p');
     }
 
     checkShutterStatus() {
