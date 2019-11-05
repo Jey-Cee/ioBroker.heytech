@@ -1,7 +1,7 @@
 {
     "name": "iobroker.heytech",
     "version": "0.1.9",
-    "description": "Template for adapter development",
+    "description": "Connects to HEYTech Controller",
     "author": {
         "name": "Jey Cee",
         "email": "jey-cee@live.com"
