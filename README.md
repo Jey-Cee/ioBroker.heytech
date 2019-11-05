@@ -27,6 +27,9 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 
 ## Changelog
 
+### 0.2.0 
+* Update Version
+
 ### 0.1.9
 * (AnsgarSchulte) Support of Controller Version 1.014p of HEYtech RS874LL
 
