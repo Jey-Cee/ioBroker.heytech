@@ -829,7 +829,12 @@ function createClient() {
                     } else if (data[14] > 249 && data[14] < 259) {
                         briV = data[14] * 360;
                     }
-                    that.setState('sensors.bri_average', {val: Math.round(briV), ack: true});
+                    briV = Math.round(briV);
+                    this.log.info(briV);
+                    this.log.info(data[14]);
+                    if(briV !== data[14]){
+                        that.setState('sensors.bri_average', {val: briV, ack: true});
+                    }
                 }
 
             }
