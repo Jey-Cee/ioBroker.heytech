@@ -830,8 +830,6 @@ function createClient() {
                         briV = data[14] * 360;
                     }
                     briV = Math.round(briV);
-                    this.log.info(briV);
-                    this.log.info(data[14]);
                     if(briV !== data[14]){
                         that.setState('sensors.bri_average', {val: briV, ack: true});
                     }
