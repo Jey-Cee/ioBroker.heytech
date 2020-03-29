@@ -19,6 +19,7 @@ tslint.json
 # npm package files
 iobroker.*.tgz
 package-lock.json
+tsconfig.json
 
 # i18n intermediate files
 admin/i18n
