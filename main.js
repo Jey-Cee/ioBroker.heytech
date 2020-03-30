@@ -55,9 +55,9 @@ const memoizeDebounce = function (func, wait = 0, options = {}) {
 function createClient() {
     let lastStrings = '';
 
-    // this.log.debug = console.log;
-    // this.log.info = console.info;
-    // this.log.error = console.error;
+    this.log.debug = console.log;
+    this.log.info = console.info;
+    this.log.error = console.error;
 
     if (this.config.ip === "" || this.config.ip === null || this.config.ip === undefined) {
         this.log.warn('No ip address in configuration found');
@@ -763,7 +763,11 @@ function createClient() {
                     } else if (data[0] > 249 && data[0] < 259) {
                         briV = data[0] * 360;
                     }
-                    that.setState('sensors.bri_actual', {val: Math.round(briV), ack: true});
+
+                    if (briV > 0) {
+                        that.setState('sensors.bri_actual', {val: briV, ack: true});
+                    }
+
                 }
                 if (vBriAv !== data[14]) {
                     that.setObjectNotExists('sensors.bri_average', {
