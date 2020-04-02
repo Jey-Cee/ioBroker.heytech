@@ -711,6 +711,17 @@ function createClient() {
                             write: false
                         }
                     });
+                    that.setObjectNotExists('sensors.bri_actual_orig', {
+                        type: 'state',
+                        common: {
+                            name: 'Actual brightness original',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'Lux',
+                            read: true,
+                            write: false
+                        }
+                    });
                     let briV = 0;
                     if (data[0] < 19) {
                         briV = data[0] * 1;
@@ -766,6 +777,7 @@ function createClient() {
 
                     if (briV > 0) {
                         that.setState('sensors.bri_actual', {val: briV, ack: true});
+                        that.setState('sensors.bri_actual_orig', {val: data[0], ack: true});
                     }
 
                 }
