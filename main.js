@@ -775,7 +775,7 @@ function createClient() {
                         briV = data[0] * 360;
                     }
 
-                    if (briV > 0) {
+                    if (briV > 0 && briV < 60000) {
                         that.setState('sensors.bri_actual', {val: briV, ack: true});
                         that.setState('sensors.bri_actual_orig', {val: data[0], ack: true});
                     }
