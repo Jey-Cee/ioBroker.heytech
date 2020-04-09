@@ -370,7 +370,7 @@ function createClient() {
                         common: {
                             name: channel[1] + ' percent',
                             type: 'number',
-                            role: 'level.blind',
+                            role: 'level',
                             unit: '%',
                             read: true,
                             write: true
@@ -385,7 +385,7 @@ function createClient() {
                             type: 'group',
                             common: {
                                 name: 'Devices',
-                                type: 'string',
+                                type: 'device',
                                 role: 'group',
                                 read: true,
                                 write: false
@@ -1416,7 +1416,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' up',
                             type: 'boolean',
-                            role: 'button',
+                            role: 'switch',
                             read: false,
                             write: true
                         }
@@ -1426,7 +1426,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' down',
                             type: 'boolean',
-                            role: 'button',
+                            role: 'switch',
                             read: false,
                             write: true
                         }
@@ -1436,7 +1436,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' stop',
                             type: 'boolean',
-                            role: 'button',
+                            role: 'switch',
                             read: false,
                             write: true
                         }
@@ -1446,7 +1446,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' percent',
                             type: 'number',
-                            role: 'level.blind',
+                            role: 'level',
                             unit: '%',
                             read: true,
                             write: true
