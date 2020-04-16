@@ -93,6 +93,9 @@
             "0.1.9": {
                 "en": "Support of Controller Version 1.014p of HEYtech RS874LL\n",
                 "de": "Unterstützung für Controller Version 1.014p des HEYtech RS874LL\n"
+            },
+            "0.2.1": {
+                "de": "Original Berechnung des Ausgabewert des Lichtsensors\n"
             }
         },
         "title": "HEYtech",
