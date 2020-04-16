@@ -236,7 +236,7 @@ function createClient() {
                         },
                         native: {
                             model: modelStr
-                        },
+                        }
                     });
                 } else {
                     this.extendObject('controller', {"native": {"model": modelStr}});
@@ -777,8 +777,47 @@ function createClient() {
 
                     if (briV > 0) {
                         that.setState('sensors.bri_actual', {val: briV, ack: true});
-                        that.setState('sensors.bri_actual_orig', {val: data[0], ack: true});
                     }
+
+                    const Wert = data[0];
+                    let LuxPrefix = 0;
+                    let Lux = 0;
+
+                    if (Wert < 10) {              // - LuxPrefix = 1 --> Lux-Wert n steht für   1 ... 900 Lux
+                        LuxPrefix = 0;
+                        Lux = Wert;             //  ' - LuxPrefix = 0 --> Lux-Wert n steht für 0,1 ... 0,9 Lux
+                    } else if (Wert <= 19) {     //  ' - LuxPrefix = 2 --> Lux-Wert n steht für   1 ... 900 kLux
+                        LuxPrefix = 1;
+                        Lux = Wert - 9;
+                    } else if (Wert <= 28) {
+                        LuxPrefix = 1;
+                        Lux = Wert - 20;
+                        Lux = Lux * 10;
+                        Lux = Lux + 20;
+                    } else if (Wert <= 36) {
+                        LuxPrefix = 1;
+                        Lux = Wert - 29;
+                        Lux = Lux * 100;
+                        Lux = Lux + 200;
+                    } else if (Wert <= 136) {
+                        LuxPrefix = 2;
+                        Lux = Wert - 36;
+                    } else {
+                        LuxPrefix = 2;
+                        Lux = Wert - 137;
+                        Lux = Lux * 10;
+                        Lux = Lux + 110;
+                    }
+
+                    let resultLux = 0;
+                    if (LuxPrefix === 0) {
+                        resultLux = 1 - (10 - Lux) / 10;
+                    } else if(LuxPrefix === 1){
+                        resultLux = Lux;
+                    } else { // LuxPrefix === 2
+                        resultLux = Lux * 1000;
+                    }
+                    that.setState('sensors.bri_actual_orig', {val: resultLux, ack: true});
 
                 }
                 if (vBriAv !== data[14]) {
@@ -846,7 +885,7 @@ function createClient() {
                         briV = data[14] * 360;
                     }
                     briV = Math.round(briV);
-                    if(briV !== data[14]){
+                    if (briV !== data[14]) {
                         that.setState('sensors.bri_average', {val: briV, ack: true});
                     }
                 }
@@ -1080,7 +1119,7 @@ class Heytech extends utils.Adapter {
                     read: true,
                     write: false
                 },
-                native: {},
+                native: {}
             });
 
             let out = this.config.eBoxes * 8;
@@ -1382,7 +1421,7 @@ class Heytech extends utils.Adapter {
                             type: 'string',
                             role: 'indicator',
                             read: true,
-                            write: false,
+                            write: false
                         }
                     });
                     this.setState(stateIdName, {val: name, ack: true});
@@ -1395,7 +1434,7 @@ class Heytech extends utils.Adapter {
                             type: 'string',
                             role: 'indicator',
                             read: true,
-                            write: false,
+                            write: false
                         }
                     });
                     const stateIdStatus = `groups.${groupId}.status`;
@@ -1407,7 +1446,7 @@ class Heytech extends utils.Adapter {
                             role: 'indicator',
                             unit: '%',
                             read: true,
-                            write: false,
+                            write: false
                         }
                     });
                     this.setState(stateIdRefs, {val: shutters, ack: true});
@@ -1622,17 +1661,17 @@ class Heytech extends utils.Adapter {
                     const no = helper.match(/\d*$/g);
 
                     if (isShutter) {
-                        if (this.checkNewerVersion()){
+                        if (this.checkNewerVersion()) {
                             this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
                         } else {
-                        this.gotoShutterPosition(no[0], state.val)();
+                            this.gotoShutterPosition(no[0], state.val)();
                         }
                     } else if (isGroup) {
-                        if (this.checkNewerVersion()){
+                        if (this.checkNewerVersion()) {
                             this.sendeHandsteuerungsBefehlToGroup(no[0], state.val.toString());
                         } else {
-                        this.gotoShutterPositionGroups(no[0], state.val);
-                    }
+                            this.gotoShutterPositionGroups(no[0], state.val);
+                        }
                     }
 
                     this.log.info('percent: ' + no[0] + ' ' + state.val);
