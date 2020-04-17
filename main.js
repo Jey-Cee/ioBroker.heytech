@@ -52,6 +52,103 @@ const memoizeDebounce = function (func, wait = 0, options = {}) {
     }
 };
 
+const calculateLuxValueBasedOnHeytech = function (wert) {
+    let luxPrefix = 0;
+    let lux = 0;
+
+    if (wert < 10) {              // - LuxPrefix = 1 --> Lux-Wert n steht für   1 ... 900 Lux
+        luxPrefix = 0;
+        lux = wert;             //  ' - LuxPrefix = 0 --> Lux-Wert n steht für 0,1 ... 0,9 Lux
+    } else if (wert <= 19) {     //  ' - LuxPrefix = 2 --> Lux-Wert n steht für   1 ... 900 kLux
+        luxPrefix = 1;
+        lux = wert - 9;
+    } else if (wert <= 28) {
+        luxPrefix = 1;
+        lux = wert - 20;
+        lux = lux * 10;
+        lux = lux + 20;
+    } else if (wert <= 36) {
+        luxPrefix = 1;
+        lux = wert - 29;
+        lux = lux * 100;
+        lux = lux + 200;
+    } else if (wert <= 136) {
+        luxPrefix = 2;
+        lux = wert - 36;
+    } else {
+        luxPrefix = 2;
+        lux = wert - 137;
+        lux = lux * 10;
+        lux = lux + 110;
+    }
+
+    let resultLux = 0;
+    if (luxPrefix === 0) {
+        resultLux = 1 - (10 - lux) / 10;
+    } else if (luxPrefix === 1) {
+        resultLux = lux;
+    } else { // LuxPrefix === 2
+        resultLux = lux * 1000;
+    }
+    return resultLux;
+};
+
+const calculateLuxValueCustom = function (data) {
+    let briV = 0;
+    if (data[0] < 19) {
+        briV = data * 1;
+    } else if (data > 19 && data[0] < 29) {
+        briV = data * 4;
+    } else if (data > 29 && data[0] < 39) {
+        briV = data * 8;
+    } else if (data > 39 && data[0] < 49) {
+        briV = data * 15;
+    } else if (data > 49 && data[0] < 59) {
+        briV = data * 22;
+    } else if (data > 59 && data[0] < 69) {
+        briV = data * 30;
+    } else if (data > 69 && data[0] < 79) {
+        briV = data * 40;
+    } else if (data > 79 && data[0] < 89) {
+        briV = data * 50;
+    } else if (data > 89 && data[0] < 99) {
+        briV = data * 64;
+    } else if (data > 99 && data[0] < 109) {
+        briV = data * 80;
+    } else if (data > 109 && data[0] < 119) {
+        briV = data * 100;
+    } else if (data > 119 && data[0] < 129) {
+        briV = data * 117;
+    } else if (data > 129 && data[0] < 139) {
+        briV = data * 138;
+    } else if (data > 139 && data[0] < 149) {
+        briV = data * 157;
+    } else if (data > 149 && data[0] < 159) {
+        briV = data * 173;
+    } else if (data > 159 && data[0] < 169) {
+        briV = data * 194;
+    } else if (data > 169 && data[0] < 179) {
+        briV = data * 212;
+    } else if (data > 179 && data[0] < 189) {
+        briV = data * 228;
+    } else if (data > 189 && data[0] < 199) {
+        briV = data * 247;
+    } else if (data > 199 && data[0] < 209) {
+        briV = data * 265;
+    } else if (data > 209 && data[0] < 219) {
+        briV = data * 286;
+    } else if (data > 219 && data[0] < 229) {
+        briV = data * 305;
+    } else if (data > 229 && data[0] < 239) {
+        briV = data * 322;
+    } else if (data > 239 && data[0] < 249) {
+        briV = data * 342;
+    } else if (data > 249 && data[0] < 259) {
+        briV = data * 360;
+    }
+    return briV;
+};
+
 function createClient() {
     let lastStrings = '';
 
@@ -711,10 +808,10 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setObjectNotExists('sensors.bri_actual_orig', {
+                    that.setObjectNotExists('sensors.bri_actual_hey', {
                         type: 'state',
                         common: {
-                            name: 'Actual brightness original',
+                            name: 'Actual brightness as in Heytech App',
                             type: 'number',
                             role: 'value.brightness',
                             unit: 'Lux',
@@ -722,102 +819,27 @@ function createClient() {
                             write: false
                         }
                     });
-                    let briV = 0;
-                    if (data[0] < 19) {
-                        briV = data[0] * 1;
-                    } else if (data[0] > 19 && data[0] < 29) {
-                        briV = data[0] * 4;
-                    } else if (data[0] > 29 && data[0] < 39) {
-                        briV = data[0] * 8;
-                    } else if (data[0] > 39 && data[0] < 49) {
-                        briV = data[0] * 15;
-                    } else if (data[0] > 49 && data[0] < 59) {
-                        briV = data[0] * 22;
-                    } else if (data[0] > 59 && data[0] < 69) {
-                        briV = data[0] * 30;
-                    } else if (data[0] > 69 && data[0] < 79) {
-                        briV = data[0] * 40;
-                    } else if (data[0] > 79 && data[0] < 89) {
-                        briV = data[0] * 50;
-                    } else if (data[0] > 89 && data[0] < 99) {
-                        briV = data[0] * 64;
-                    } else if (data[0] > 99 && data[0] < 109) {
-                        briV = data[0] * 80;
-                    } else if (data[0] > 109 && data[0] < 119) {
-                        briV = data[0] * 100;
-                    } else if (data[0] > 119 && data[0] < 129) {
-                        briV = data[0] * 117;
-                    } else if (data[0] > 129 && data[0] < 139) {
-                        briV = data[0] * 138;
-                    } else if (data[0] > 139 && data[0] < 149) {
-                        briV = data[0] * 157;
-                    } else if (data[0] > 149 && data[0] < 159) {
-                        briV = data[0] * 173;
-                    } else if (data[0] > 159 && data[0] < 169) {
-                        briV = data[0] * 194;
-                    } else if (data[0] > 169 && data[0] < 179) {
-                        briV = data[0] * 212;
-                    } else if (data[0] > 179 && data[0] < 189) {
-                        briV = data[0] * 228;
-                    } else if (data[0] > 189 && data[0] < 199) {
-                        briV = data[0] * 247;
-                    } else if (data[0] > 199 && data[0] < 209) {
-                        briV = data[0] * 265;
-                    } else if (data[0] > 209 && data[0] < 219) {
-                        briV = data[0] * 286;
-                    } else if (data[0] > 219 && data[0] < 229) {
-                        briV = data[0] * 305;
-                    } else if (data[0] > 229 && data[0] < 239) {
-                        briV = data[0] * 322;
-                    } else if (data[0] > 239 && data[0] < 249) {
-                        briV = data[0] * 342;
-                    } else if (data[0] > 249 && data[0] < 259) {
-                        briV = data[0] * 360;
+                    that.setObjectNotExists('sensors.bri_actual_sensor_byte', {
+                        type: 'state',
+                        common: {
+                            name: 'Actual brightness as byte from sensor',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'Lux',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    const resultLuxCustom = calculateLuxValueCustom(data[0]);
+                    if (resultLuxCustom > 0) {
+                        that.setState('sensors.bri_actual', {val: resultLuxCustom, ack: true});
                     }
 
-                    if (briV > 0) {
-                        that.setState('sensors.bri_actual', {val: briV, ack: true});
+                    const resultLuxHeytech = calculateLuxValueBasedOnHeytech(data[0]);
+                    if (resultLuxHeytech > 0) {
+                        that.setState('sensors.bri_actual_hey', {val: resultLuxHeytech, ack: true});
                     }
-
-                    const Wert = data[0];
-                    let LuxPrefix = 0;
-                    let Lux = 0;
-
-                    if (Wert < 10) {              // - LuxPrefix = 1 --> Lux-Wert n steht für   1 ... 900 Lux
-                        LuxPrefix = 0;
-                        Lux = Wert;             //  ' - LuxPrefix = 0 --> Lux-Wert n steht für 0,1 ... 0,9 Lux
-                    } else if (Wert <= 19) {     //  ' - LuxPrefix = 2 --> Lux-Wert n steht für   1 ... 900 kLux
-                        LuxPrefix = 1;
-                        Lux = Wert - 9;
-                    } else if (Wert <= 28) {
-                        LuxPrefix = 1;
-                        Lux = Wert - 20;
-                        Lux = Lux * 10;
-                        Lux = Lux + 20;
-                    } else if (Wert <= 36) {
-                        LuxPrefix = 1;
-                        Lux = Wert - 29;
-                        Lux = Lux * 100;
-                        Lux = Lux + 200;
-                    } else if (Wert <= 136) {
-                        LuxPrefix = 2;
-                        Lux = Wert - 36;
-                    } else {
-                        LuxPrefix = 2;
-                        Lux = Wert - 137;
-                        Lux = Lux * 10;
-                        Lux = Lux + 110;
-                    }
-
-                    let resultLux = 0;
-                    if (LuxPrefix === 0) {
-                        resultLux = 1 - (10 - Lux) / 10;
-                    } else if(LuxPrefix === 1){
-                        resultLux = Lux;
-                    } else { // LuxPrefix === 2
-                        resultLux = Lux * 1000;
-                    }
-                    that.setState('sensors.bri_actual_orig', {val: resultLux, ack: true});
+                    that.setState('sensors.bri_actual_sensor_byte', {val: data[0], ack: true});
 
                 }
                 if (vBriAv !== data[14]) {
@@ -832,62 +854,38 @@ function createClient() {
                             write: false
                         }
                     });
-                    let briV = 0;
-                    if (data[14] < 19) {
-                        briV = data[14] * 1;
-                    } else if (data[14] > 19 && data[14] < 29) {
-                        briV = data[14] * 4;
-                    } else if (data[14] > 29 && data[14] < 39) {
-                        briV = data[14] * 8;
-                    } else if (data[14] > 39 && data[14] < 49) {
-                        briV = data[14] * 15;
-                    } else if (data[14] > 49 && data[14] < 59) {
-                        briV = data[14] * 22;
-                    } else if (data[14] > 59 && data[14] < 69) {
-                        briV = data[14] * 30;
-                    } else if (data[14] > 69 && data[14] < 79) {
-                        briV = data[14] * 40;
-                    } else if (data[14] > 79 && data[14] < 89) {
-                        briV = data[14] * 50;
-                    } else if (data[14] > 89 && data[14] < 99) {
-                        briV = data[14] * 64;
-                    } else if (data[14] > 99 && data[14] < 109) {
-                        briV = data[14] * 80;
-                    } else if (data[14] > 109 && data[14] < 119) {
-                        briV = data[14] * 100;
-                    } else if (data[14] > 119 && data[14] < 129) {
-                        briV = data[14] * 117;
-                    } else if (data[14] > 129 && data[14] < 139) {
-                        briV = data[14] * 138;
-                    } else if (data[14] > 139 && data[14] < 149) {
-                        briV = data[14] * 157;
-                    } else if (data[14] > 149 && data[14] < 159) {
-                        briV = data[14] * 173;
-                    } else if (data[14] > 159 && data[14] < 169) {
-                        briV = data[14] * 194;
-                    } else if (data[14] > 169 && data[14] < 179) {
-                        briV = data[14] * 212;
-                    } else if (data[14] > 179 && data[14] < 189) {
-                        briV = data[14] * 228;
-                    } else if (data[14] > 189 && data[14] < 199) {
-                        briV = data[14] * 247;
-                    } else if (data[14] > 199 && data[14] < 209) {
-                        briV = data[14] * 265;
-                    } else if (data[14] > 209 && data[14] < 219) {
-                        briV = data[14] * 286;
-                    } else if (data[14] > 219 && data[14] < 229) {
-                        briV = data[14] * 305;
-                    } else if (data[14] > 229 && data[14] < 239) {
-                        briV = data[14] * 322;
-                    } else if (data[14] > 239 && data[14] < 249) {
-                        briV = data[14] * 342;
-                    } else if (data[14] > 249 && data[14] < 259) {
-                        briV = data[14] * 360;
+                    that.setObjectNotExists('sensors.bri_average_hey', {
+                        type: 'state',
+                        common: {
+                            name: 'Average brightness',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'Lux',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    that.setObjectNotExists('sensors.bri_average_sensor_byte', {
+                        type: 'state',
+                        common: {
+                            name: 'Average brightness as byte from sensor',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'Lux',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    const resultLuxCustom = calculateLuxValueCustom(data[14]);
+                    if (resultLuxCustom > 0) {
+                        that.setState('sensors.bri_average', {val: resultLuxCustom, ack: true});
                     }
-                    briV = Math.round(briV);
-                    if (briV !== data[14]) {
-                        that.setState('sensors.bri_average', {val: briV, ack: true});
+
+                    const resultLuxHeytech = calculateLuxValueBasedOnHeytech(data[14]);
+                    if (resultLuxHeytech > 0) {
+                        that.setState('sensors.bri_average_hey', {val: resultLuxHeytech, ack: true});
                     }
+                    that.setState('sensors.bri_average_sensor_byte', {val: data[14], ack: true});
                 }
 
             }
