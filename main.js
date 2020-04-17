@@ -97,53 +97,53 @@ const calculateLuxValueCustom = function (data) {
     let briV = 0;
     if (data < 19) {
         briV = data * 1;
-    } else if (data > 19 && data[0] < 29) {
+    } else if (data > 19 && data < 29) {
         briV = data * 4;
-    } else if (data > 29 && data[0] < 39) {
+    } else if (data > 29 && data < 39) {
         briV = data * 8;
-    } else if (data > 39 && data[0] < 49) {
+    } else if (data > 39 && data < 49) {
         briV = data * 15;
-    } else if (data > 49 && data[0] < 59) {
+    } else if (data > 49 && data < 59) {
         briV = data * 22;
-    } else if (data > 59 && data[0] < 69) {
+    } else if (data > 59 && data < 69) {
         briV = data * 30;
-    } else if (data > 69 && data[0] < 79) {
+    } else if (data > 69 && data < 79) {
         briV = data * 40;
-    } else if (data > 79 && data[0] < 89) {
+    } else if (data > 79 && data < 89) {
         briV = data * 50;
-    } else if (data > 89 && data[0] < 99) {
+    } else if (data > 89 && data < 99) {
         briV = data * 64;
-    } else if (data > 99 && data[0] < 109) {
+    } else if (data > 99 && data < 109) {
         briV = data * 80;
-    } else if (data > 109 && data[0] < 119) {
+    } else if (data > 109 && data < 119) {
         briV = data * 100;
-    } else if (data > 119 && data[0] < 129) {
+    } else if (data > 119 && data < 129) {
         briV = data * 117;
-    } else if (data > 129 && data[0] < 139) {
+    } else if (data > 129 && data < 139) {
         briV = data * 138;
-    } else if (data > 139 && data[0] < 149) {
+    } else if (data > 139 && data < 149) {
         briV = data * 157;
-    } else if (data > 149 && data[0] < 159) {
+    } else if (data > 149 && data < 159) {
         briV = data * 173;
-    } else if (data > 159 && data[0] < 169) {
+    } else if (data > 159 && data < 169) {
         briV = data * 194;
-    } else if (data > 169 && data[0] < 179) {
+    } else if (data > 169 && data < 179) {
         briV = data * 212;
-    } else if (data > 179 && data[0] < 189) {
+    } else if (data > 179 && data < 189) {
         briV = data * 228;
-    } else if (data > 189 && data[0] < 199) {
+    } else if (data > 189 && data < 199) {
         briV = data * 247;
-    } else if (data > 199 && data[0] < 209) {
+    } else if (data > 199 && data < 209) {
         briV = data * 265;
-    } else if (data > 209 && data[0] < 219) {
+    } else if (data > 209 && data < 219) {
         briV = data * 286;
-    } else if (data > 219 && data[0] < 229) {
+    } else if (data > 219 && data < 229) {
         briV = data * 305;
-    } else if (data > 229 && data[0] < 239) {
+    } else if (data > 229 && data < 239) {
         briV = data * 322;
-    } else if (data > 239 && data[0] < 249) {
+    } else if (data > 239 && data < 249) {
         briV = data * 342;
-    } else if (data > 249 && data[0] < 259) {
+    } else if (data > 249 && data < 259) {
         briV = data * 360;
     }
     return briV;
