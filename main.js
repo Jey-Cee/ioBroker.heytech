@@ -95,7 +95,7 @@ const calculateLuxValueBasedOnHeytech = function (wert) {
 
 const calculateLuxValueCustom = function (data) {
     let briV = 0;
-    if (data[0] < 19) {
+    if (data < 19) {
         briV = data * 1;
     } else if (data > 19 && data[0] < 29) {
         briV = data * 4;
