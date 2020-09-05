@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -93,6 +93,18 @@
             "0.1.9": {
                 "en": "Support of Controller Version 1.014p of HEYtech RS874LL\n",
                 "de": "Unterstützung für Controller Version 1.014p des HEYtech RS874LL\n"
+            },
+            "0.2.1": {
+                "en": "change module telnet-rxjs",
+                "de": "Modul telnet-rxjs ändern",
+                "ru": "изменить модуль telnet-rxjs",
+                "pt": "alterar módulo telnet-rxjs",
+                "nl": "wijzig module telnet-rxjs",
+                "fr": "modifier le module telnet-rxjs",
+                "it": "cambia modulo telnet-rxjs",
+                "es": "cambiar módulo telnet-rxjs",
+                "pl": "zmień moduł telnet-rxjs",
+                "zh-cn": "更改模块telnet-rxjs"
             }
         },
         "title": "HEYtech",
