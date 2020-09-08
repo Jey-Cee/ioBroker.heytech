@@ -52,12 +52,109 @@ const memoizeDebounce = function (func, wait = 0, options = {}) {
     }
 };
 
+const calculateLuxValueBasedOnHeytech = function (wert) {
+    let luxPrefix = 0;
+    let lux = 0;
+
+    if (wert < 10) {              // - LuxPrefix = 1 --> Lux-Wert n steht für   1 ... 900 Lux
+        luxPrefix = 0;
+        lux = wert;             //  ' - LuxPrefix = 0 --> Lux-Wert n steht für 0,1 ... 0,9 Lux
+    } else if (wert <= 19) {     //  ' - LuxPrefix = 2 --> Lux-Wert n steht für   1 ... 900 kLux
+        luxPrefix = 1;
+        lux = wert - 9;
+    } else if (wert <= 28) {
+        luxPrefix = 1;
+        lux = wert - 20;
+        lux = lux * 10;
+        lux = lux + 20;
+    } else if (wert <= 36) {
+        luxPrefix = 1;
+        lux = wert - 29;
+        lux = lux * 100;
+        lux = lux + 200;
+    } else if (wert <= 136) {
+        luxPrefix = 2;
+        lux = wert - 36;
+    } else {
+        luxPrefix = 2;
+        lux = wert - 137;
+        lux = lux * 10;
+        lux = lux + 110;
+    }
+
+    let resultLux = 0;
+    if (luxPrefix === 0) {
+        resultLux = 1 - (10 - lux) / 10;
+    } else if (luxPrefix === 1) {
+        resultLux = lux;
+    } else { // LuxPrefix === 2
+        resultLux = lux * 1000;
+    }
+    return resultLux;
+};
+
+const calculateLuxValueCustom = function (data) {
+    let briV = 0;
+    if (data < 19) {
+        briV = data * 1;
+    } else if (data > 19 && data < 29) {
+        briV = data * 4;
+    } else if (data > 29 && data < 39) {
+        briV = data * 8;
+    } else if (data > 39 && data < 49) {
+        briV = data * 15;
+    } else if (data > 49 && data < 59) {
+        briV = data * 22;
+    } else if (data > 59 && data < 69) {
+        briV = data * 30;
+    } else if (data > 69 && data < 79) {
+        briV = data * 40;
+    } else if (data > 79 && data < 89) {
+        briV = data * 50;
+    } else if (data > 89 && data < 99) {
+        briV = data * 64;
+    } else if (data > 99 && data < 109) {
+        briV = data * 80;
+    } else if (data > 109 && data < 119) {
+        briV = data * 100;
+    } else if (data > 119 && data < 129) {
+        briV = data * 117;
+    } else if (data > 129 && data < 139) {
+        briV = data * 138;
+    } else if (data > 139 && data < 149) {
+        briV = data * 157;
+    } else if (data > 149 && data < 159) {
+        briV = data * 173;
+    } else if (data > 159 && data < 169) {
+        briV = data * 194;
+    } else if (data > 169 && data < 179) {
+        briV = data * 212;
+    } else if (data > 179 && data < 189) {
+        briV = data * 228;
+    } else if (data > 189 && data < 199) {
+        briV = data * 247;
+    } else if (data > 199 && data < 209) {
+        briV = data * 265;
+    } else if (data > 209 && data < 219) {
+        briV = data * 286;
+    } else if (data > 219 && data < 229) {
+        briV = data * 305;
+    } else if (data > 229 && data < 239) {
+        briV = data * 322;
+    } else if (data > 239 && data < 249) {
+        briV = data * 342;
+    } else if (data > 249 && data < 259) {
+        briV = data * 360;
+    }
+    return briV;
+};
+
 function createClient() {
     let lastStrings = '';
 
-    // this.log.debug = console.log;
-    // this.log.info = console.info;
-    // this.log.error = console.error;
+    this.log.debug = console.log;
+    this.log.info = console.info;
+    this.log.error = console.error;
 
     if (this.config.ip === "" || this.config.ip === null || this.config.ip === undefined) {
         this.log.warn('No ip address in configuration found');
@@ -236,7 +333,7 @@ function createClient() {
                         },
                         native: {
                             model: modelStr
-                        },
+                        }
                     });
                 } else {
                     this.extendObject('controller', {"native": {"model": modelStr}});
@@ -370,7 +467,7 @@ function createClient() {
                         common: {
                             name: channel[1] + ' percent',
                             type: 'number',
-                            role: 'level.blind',
+                            role: 'level',
                             unit: '%',
                             read: true,
                             write: true
@@ -385,7 +482,7 @@ function createClient() {
                             type: 'group',
                             common: {
                                 name: 'Devices',
-                                type: 'string',
+                                type: 'device',
                                 role: 'group',
                                 read: true,
                                 write: false
@@ -711,59 +808,39 @@ function createClient() {
                             write: false
                         }
                     });
-                    let briV = 0;
-                    if (data[0] < 19) {
-                        briV = data[0] * 1;
-                    } else if (data[0] > 19 && data[0] < 29) {
-                        briV = data[0] * 4;
-                    } else if (data[0] > 29 && data[0] < 39) {
-                        briV = data[0] * 8;
-                    } else if (data[0] > 39 && data[0] < 49) {
-                        briV = data[0] * 15;
-                    } else if (data[0] > 49 && data[0] < 59) {
-                        briV = data[0] * 22;
-                    } else if (data[0] > 59 && data[0] < 69) {
-                        briV = data[0] * 30;
-                    } else if (data[0] > 69 && data[0] < 79) {
-                        briV = data[0] * 40;
-                    } else if (data[0] > 79 && data[0] < 89) {
-                        briV = data[0] * 50;
-                    } else if (data[0] > 89 && data[0] < 99) {
-                        briV = data[0] * 64;
-                    } else if (data[0] > 99 && data[0] < 109) {
-                        briV = data[0] * 80;
-                    } else if (data[0] > 109 && data[0] < 119) {
-                        briV = data[0] * 100;
-                    } else if (data[0] > 119 && data[0] < 129) {
-                        briV = data[0] * 117;
-                    } else if (data[0] > 129 && data[0] < 139) {
-                        briV = data[0] * 138;
-                    } else if (data[0] > 139 && data[0] < 149) {
-                        briV = data[0] * 157;
-                    } else if (data[0] > 149 && data[0] < 159) {
-                        briV = data[0] * 173;
-                    } else if (data[0] > 159 && data[0] < 169) {
-                        briV = data[0] * 194;
-                    } else if (data[0] > 169 && data[0] < 179) {
-                        briV = data[0] * 212;
-                    } else if (data[0] > 179 && data[0] < 189) {
-                        briV = data[0] * 228;
-                    } else if (data[0] > 189 && data[0] < 199) {
-                        briV = data[0] * 247;
-                    } else if (data[0] > 199 && data[0] < 209) {
-                        briV = data[0] * 265;
-                    } else if (data[0] > 209 && data[0] < 219) {
-                        briV = data[0] * 286;
-                    } else if (data[0] > 219 && data[0] < 229) {
-                        briV = data[0] * 305;
-                    } else if (data[0] > 229 && data[0] < 239) {
-                        briV = data[0] * 322;
-                    } else if (data[0] > 239 && data[0] < 249) {
-                        briV = data[0] * 342;
-                    } else if (data[0] > 249 && data[0] < 259) {
-                        briV = data[0] * 360;
+                    that.setObjectNotExists('sensors.bri_actual_hey', {
+                        type: 'state',
+                        common: {
+                            name: 'Actual brightness as in Heytech App',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'Lux',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    that.setObjectNotExists('sensors.bri_actual_sensor_byte', {
+                        type: 'state',
+                        common: {
+                            name: 'Actual brightness as byte from sensor',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'Byte',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    const resultLuxCustom = calculateLuxValueCustom(data[0]);
+                    if (resultLuxCustom > 0) {
+                        that.setState('sensors.bri_actual', {val: resultLuxCustom, ack: true});
                     }
-                    that.setState('sensors.bri_actual', {val: Math.round(briV), ack: true});
+
+                    const resultLuxHeytech = calculateLuxValueBasedOnHeytech(data[0]);
+                    if (resultLuxHeytech > 0) {
+                        that.setState('sensors.bri_actual_hey', {val: resultLuxHeytech, ack: true});
+                    }
+                    that.setState('sensors.bri_actual_sensor_byte', {val: data[0], ack: true});
+
                 }
                 if (vBriAv !== data[14]) {
                     that.setObjectNotExists('sensors.bri_average', {
@@ -777,59 +854,38 @@ function createClient() {
                             write: false
                         }
                     });
-                    let briV = 0;
-                    if (data[14] < 19) {
-                        briV = data[14] * 1;
-                    } else if (data[14] > 19 && data[14] < 29) {
-                        briV = data[14] * 4;
-                    } else if (data[14] > 29 && data[14] < 39) {
-                        briV = data[14] * 8;
-                    } else if (data[14] > 39 && data[14] < 49) {
-                        briV = data[14] * 15;
-                    } else if (data[14] > 49 && data[14] < 59) {
-                        briV = data[14] * 22;
-                    } else if (data[14] > 59 && data[14] < 69) {
-                        briV = data[14] * 30;
-                    } else if (data[14] > 69 && data[14] < 79) {
-                        briV = data[14] * 40;
-                    } else if (data[14] > 79 && data[14] < 89) {
-                        briV = data[14] * 50;
-                    } else if (data[14] > 89 && data[14] < 99) {
-                        briV = data[14] * 64;
-                    } else if (data[14] > 99 && data[14] < 109) {
-                        briV = data[14] * 80;
-                    } else if (data[14] > 109 && data[14] < 119) {
-                        briV = data[14] * 100;
-                    } else if (data[14] > 119 && data[14] < 129) {
-                        briV = data[14] * 117;
-                    } else if (data[14] > 129 && data[14] < 139) {
-                        briV = data[14] * 138;
-                    } else if (data[14] > 139 && data[14] < 149) {
-                        briV = data[14] * 157;
-                    } else if (data[14] > 149 && data[14] < 159) {
-                        briV = data[14] * 173;
-                    } else if (data[14] > 159 && data[14] < 169) {
-                        briV = data[14] * 194;
-                    } else if (data[14] > 169 && data[14] < 179) {
-                        briV = data[14] * 212;
-                    } else if (data[14] > 179 && data[14] < 189) {
-                        briV = data[14] * 228;
-                    } else if (data[14] > 189 && data[14] < 199) {
-                        briV = data[14] * 247;
-                    } else if (data[14] > 199 && data[14] < 209) {
-                        briV = data[14] * 265;
-                    } else if (data[14] > 209 && data[14] < 219) {
-                        briV = data[14] * 286;
-                    } else if (data[14] > 219 && data[14] < 229) {
-                        briV = data[14] * 305;
-                    } else if (data[14] > 229 && data[14] < 239) {
-                        briV = data[14] * 322;
-                    } else if (data[14] > 239 && data[14] < 249) {
-                        briV = data[14] * 342;
-                    } else if (data[14] > 249 && data[14] < 259) {
-                        briV = data[14] * 360;
+                    that.setObjectNotExists('sensors.bri_average_hey', {
+                        type: 'state',
+                        common: {
+                            name: 'Average brightness',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'Byte',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    that.setObjectNotExists('sensors.bri_average_sensor_byte', {
+                        type: 'state',
+                        common: {
+                            name: 'Average brightness as byte from sensor',
+                            type: 'number',
+                            role: 'value.brightness',
+                            unit: 'Lux',
+                            read: true,
+                            write: false
+                        }
+                    });
+                    const resultLuxCustom = calculateLuxValueCustom(data[14]);
+                    if (resultLuxCustom > 0) {
+                        that.setState('sensors.bri_average', {val: resultLuxCustom, ack: true});
                     }
-                    that.setState('sensors.bri_average', {val: Math.round(briV), ack: true});
+
+                    const resultLuxHeytech = calculateLuxValueBasedOnHeytech(data[14]);
+                    if (resultLuxHeytech > 0) {
+                        that.setState('sensors.bri_average_hey', {val: resultLuxHeytech, ack: true});
+                    }
+                    that.setState('sensors.bri_average_sensor_byte', {val: data[14], ack: true});
                 }
 
             }
@@ -1061,7 +1117,7 @@ class Heytech extends utils.Adapter {
                     read: true,
                     write: false
                 },
-                native: {},
+                native: {}
             });
 
             let out = this.config.eBoxes * 8;
@@ -1363,7 +1419,7 @@ class Heytech extends utils.Adapter {
                             type: 'string',
                             role: 'indicator',
                             read: true,
-                            write: false,
+                            write: false
                         }
                     });
                     this.setState(stateIdName, {val: name, ack: true});
@@ -1376,7 +1432,7 @@ class Heytech extends utils.Adapter {
                             type: 'string',
                             role: 'indicator',
                             read: true,
-                            write: false,
+                            write: false
                         }
                     });
                     const stateIdStatus = `groups.${groupId}.status`;
@@ -1388,7 +1444,7 @@ class Heytech extends utils.Adapter {
                             role: 'indicator',
                             unit: '%',
                             read: true,
-                            write: false,
+                            write: false
                         }
                     });
                     this.setState(stateIdRefs, {val: shutters, ack: true});
@@ -1397,7 +1453,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' up',
                             type: 'boolean',
-                            role: 'button',
+                            role: 'switch',
                             read: false,
                             write: true
                         }
@@ -1407,7 +1463,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' down',
                             type: 'boolean',
-                            role: 'button',
+                            role: 'switch',
                             read: false,
                             write: true
                         }
@@ -1417,7 +1473,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' stop',
                             type: 'boolean',
-                            role: 'button',
+                            role: 'switch',
                             read: false,
                             write: true
                         }
@@ -1427,7 +1483,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' percent',
                             type: 'number',
-                            role: 'level.blind',
+                            role: 'level',
                             unit: '%',
                             read: true,
                             write: true
@@ -1603,17 +1659,17 @@ class Heytech extends utils.Adapter {
                     const no = helper.match(/\d*$/g);
 
                     if (isShutter) {
-                        if (this.checkNewerVersion()){
+                        if (this.checkNewerVersion()) {
                             this.sendeHandsteuerungsBefehl(no[0], state.val.toString());
                         } else {
-                        this.gotoShutterPosition(no[0], state.val)();
+                            this.gotoShutterPosition(no[0], state.val)();
                         }
                     } else if (isGroup) {
-                        if (this.checkNewerVersion()){
+                        if (this.checkNewerVersion()) {
                             this.sendeHandsteuerungsBefehlToGroup(no[0], state.val.toString());
                         } else {
-                        this.gotoShutterPositionGroups(no[0], state.val);
-                    }
+                            this.gotoShutterPositionGroups(no[0], state.val);
+                        }
                     }
 
                     this.log.info('percent: ' + no[0] + ' ' + state.val);
