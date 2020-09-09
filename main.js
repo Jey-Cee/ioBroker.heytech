@@ -750,48 +750,50 @@ function createClient() {
 
             for (st in states) {
                 const name = st.replace(`heytech.${that['instance']}.sensors.`, '');
-
-                switch (name) {
-                    case 'alarm':
-                        vAlarm = states[st]['val'];
-                        break;
-                    case 'wind_maximum':
-                        vWindM = states[st]['val'];
-                        break;
-                    case 'wind_actual':
-                        vWindA = states[st]['val'];
-                        break;
-                    case 'rain':
-                        vRain = states[st]['val'];
-                        break;
-                    case 'humidity':
-                        vHumidity = states[st]['val'];
-                        break;
-                    case 'temp_indoor_max':
-                        vTiMax = states[st]['val'];
-                        break;
-                    case 'temp_indoor_min':
-                        vTiMin = states[st]['val'];
-                        break;
-                    case 'temp_indoor':
-                        vTi = states[st]['val'];
-                        break;
-                    case 'temp_outdoor_max':
-                        vToMax = states[st]['val'];
-                        break;
-                    case 'temp_outdoor_min':
-                        vToMin = states[st]['val'];
-                        break;
-                    case 'temp_outdoor':
-                        vTo = states[st]['val'];
-                        break;
-                    case 'bri_average':
-                        vBriAv = states[st]['val'];
-                        break;
-                    case 'bri_actual':
-                        vBriAc = states[st]['val'];
-                        break;
+                if(states[st]) {
+                    switch (name) {
+                        case 'alarm':
+                            vAlarm = states[st]['val'];
+                            break;
+                        case 'wind_maximum':
+                            vWindM = states[st]['val'];
+                            break;
+                        case 'wind_actual':
+                            vWindA = states[st]['val'];
+                            break;
+                        case 'rain':
+                            vRain = states[st]['val'];
+                            break;
+                        case 'humidity':
+                            vHumidity = states[st]['val'];
+                            break;
+                        case 'temp_indoor_max':
+                            vTiMax = states[st]['val'];
+                            break;
+                        case 'temp_indoor_min':
+                            vTiMin = states[st]['val'];
+                            break;
+                        case 'temp_indoor':
+                            vTi = states[st]['val'];
+                            break;
+                        case 'temp_outdoor_max':
+                            vToMax = states[st]['val'];
+                            break;
+                        case 'temp_outdoor_min':
+                            vToMin = states[st]['val'];
+                            break;
+                        case 'temp_outdoor':
+                            vTo = states[st]['val'];
+                            break;
+                        case 'bri_average':
+                            vBriAv = states[st]['val'];
+                            break;
+                        case 'bri_actual':
+                            vBriAc = states[st]['val'];
+                            break;
+                    }
                 }
+
             }
 
 
