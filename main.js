@@ -862,7 +862,7 @@ function createClient() {
                             name: 'Average brightness',
                             type: 'number',
                             role: 'value.brightness',
-                            unit: 'Byte',
+                            unit: 'Lux',
                             read: true,
                             write: false
                         }
@@ -873,7 +873,7 @@ function createClient() {
                             name: 'Average brightness as byte from sensor',
                             type: 'number',
                             role: 'value.brightness',
-                            unit: 'Lux',
+                            unit: 'Byte',
                             read: true,
                             write: false
                         }
