@@ -19,7 +19,7 @@
         "url": "https://github.com/Jey-Cee/ioBroker.heytech.git"
     },
     "dependencies": {
-        "@iobroker/adapter-core": "^2.4.0",
+        "@iobroker/adapter-core": "^2.2.1",
         "lodash": "^4.17.20",
         "telnet-rxjs-ansgar": "^2.2.0"
     },
