@@ -27,6 +27,9 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 
 ## Changelog
 
+### 0.2.2 
+* Telnet Dependency Update für aktuellere Node Versionen
+
 ### 0.2.1 
 * Minor Bugfix actual brightness
 

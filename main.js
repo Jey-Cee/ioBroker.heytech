@@ -152,9 +152,9 @@ const calculateLuxValueCustom = function (data) {
 function createClient() {
     let lastStrings = '';
 
-    this.log.debug = console.log;
-    this.log.info = console.info;
-    this.log.error = console.error;
+    // this.log.debug = console.log;
+    // this.log.info = console.info;
+    // this.log.error = console.error;
 
     if (this.config.ip === "" || this.config.ip === null || this.config.ip === undefined) {
         this.log.warn('No ip address in configuration found');

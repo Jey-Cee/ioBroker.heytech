@@ -1,6 +1,6 @@
 {
     "name": "iobroker.heytech",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Connects to HEYTech Controller",
     "author": {
         "name": "Jey Cee",
@@ -19,9 +19,9 @@
         "url": "https://github.com/Jey-Cee/ioBroker.heytech.git"
     },
     "dependencies": {
-        "@iobroker/adapter-core": "^2.2.1",
-        "lodash": "^4.17.15",
-        "telnet-rxjs": "^2.1.0"
+        "@iobroker/adapter-core": "^2.4.0",
+        "lodash": "^4.17.20",
+        "telnet-rxjs": "ansgarschulte/telnet-rxjs#master"
     },
     "devDependencies": {
         "@iobroker/testing": "^1.2.0",
