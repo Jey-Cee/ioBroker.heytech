@@ -783,12 +783,12 @@ function createClient() {
                             vToMin = states[st]['val'];
                             break;
                         case 'temp_outdoor':
-                            vTo = states[st]['val'];
+                            vTo = states[st]['val'].replace(',','.');
                             break;
-                        case 'bri_average':
+                        case 'bri_average_sensor_byte':
                             vBriAv = states[st]['val'];
                             break;
-                        case 'bri_actual':
+                        case 'bri_actual_sensor_byte':
                             vBriAc = states[st]['val'];
                             break;
                     }
@@ -939,7 +939,7 @@ function createClient() {
             }
 
             if ((that.config.oTempSensor === true || that.config.autoDetect) && data[5] !== '999') {
-                if (vTo !== data[5] + ',' + data[6]) {
+                if (vTo !== data[5] + '.' + data[6]) {
                     that.setObjectNotExists('sensors.temp_outdoor', {
                         type: 'state',
                         common: {
@@ -951,7 +951,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_outdoor', {val: data[5] + ',' + data[6], ack: true});
+                    that.setState('sensors.temp_outdoor', {val: data[5] + '.' + data[6], ack: true});
                 }
                 if (vToMin !== data[7]) {
                     that.setObjectNotExists('sensors.temp_outdoor_min', {

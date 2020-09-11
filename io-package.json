@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.2.2",
+        "version": "0.2.3",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -99,6 +99,9 @@
             },
             "0.2.2": {
                 "de": "Telnet Dependency Update für aktuellere Node Versionen\n"
+            },
+            "0.2.3": {
+                "de": "Helligkeitskorrekturen (Punkt statt Komma) und weniger Statusaktualisierungen\n"
             }
         },
         "title": "HEYtech",
