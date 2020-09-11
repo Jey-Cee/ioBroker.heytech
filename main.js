@@ -7,7 +7,7 @@
 const utils = require('@iobroker/adapter-core');
 
 const _ = require('lodash');
-const {Telnet} = require('telnet-rxjs');
+const {Telnet} = require('telnet-rxjs-ansgar');
 
 const newLine = String.fromCharCode(13);
 const START_SOP = 'start_sop';
@@ -152,9 +152,9 @@ const calculateLuxValueCustom = function (data) {
 function createClient() {
     let lastStrings = '';
 
-    this.log.debug = console.log;
-    this.log.info = console.info;
-    this.log.error = console.error;
+    // this.log.debug = console.log;
+    // this.log.info = console.info;
+    // this.log.error = console.error;
 
     if (this.config.ip === "" || this.config.ip === null || this.config.ip === undefined) {
         this.log.warn('No ip address in configuration found');
@@ -750,48 +750,50 @@ function createClient() {
 
             for (st in states) {
                 const name = st.replace(`heytech.${that['instance']}.sensors.`, '');
-
-                switch (name) {
-                    case 'alarm':
-                        vAlarm = states[st]['val'];
-                        break;
-                    case 'wind_maximum':
-                        vWindM = states[st]['val'];
-                        break;
-                    case 'wind_actual':
-                        vWindA = states[st]['val'];
-                        break;
-                    case 'rain':
-                        vRain = states[st]['val'];
-                        break;
-                    case 'humidity':
-                        vHumidity = states[st]['val'];
-                        break;
-                    case 'temp_indoor_max':
-                        vTiMax = states[st]['val'];
-                        break;
-                    case 'temp_indoor_min':
-                        vTiMin = states[st]['val'];
-                        break;
-                    case 'temp_indoor':
-                        vTi = states[st]['val'];
-                        break;
-                    case 'temp_outdoor_max':
-                        vToMax = states[st]['val'];
-                        break;
-                    case 'temp_outdoor_min':
-                        vToMin = states[st]['val'];
-                        break;
-                    case 'temp_outdoor':
-                        vTo = states[st]['val'];
-                        break;
-                    case 'bri_average':
-                        vBriAv = states[st]['val'];
-                        break;
-                    case 'bri_actual':
-                        vBriAc = states[st]['val'];
-                        break;
+                if(states[st]) {
+                    switch (name) {
+                        case 'alarm':
+                            vAlarm = states[st]['val'];
+                            break;
+                        case 'wind_maximum':
+                            vWindM = states[st]['val'];
+                            break;
+                        case 'wind_actual':
+                            vWindA = states[st]['val'];
+                            break;
+                        case 'rain':
+                            vRain = states[st]['val'];
+                            break;
+                        case 'humidity':
+                            vHumidity = states[st]['val'];
+                            break;
+                        case 'temp_indoor_max':
+                            vTiMax = states[st]['val'];
+                            break;
+                        case 'temp_indoor_min':
+                            vTiMin = states[st]['val'];
+                            break;
+                        case 'temp_indoor':
+                            vTi = states[st]['val'];
+                            break;
+                        case 'temp_outdoor_max':
+                            vToMax = states[st]['val'];
+                            break;
+                        case 'temp_outdoor_min':
+                            vToMin = states[st]['val'];
+                            break;
+                        case 'temp_outdoor':
+                            vTo = states[st]['val'];
+                            break;
+                        case 'bri_average':
+                            vBriAv = states[st]['val'];
+                            break;
+                        case 'bri_actual':
+                            vBriAc = states[st]['val'];
+                            break;
+                    }
                 }
+
             }
 
 
@@ -860,7 +862,7 @@ function createClient() {
                             name: 'Average brightness',
                             type: 'number',
                             role: 'value.brightness',
-                            unit: 'Byte',
+                            unit: 'Lux',
                             read: true,
                             write: false
                         }
@@ -871,7 +873,7 @@ function createClient() {
                             name: 'Average brightness as byte from sensor',
                             type: 'number',
                             role: 'value.brightness',
-                            unit: 'Lux',
+                            unit: 'Byte',
                             read: true,
                             write: false
                         }

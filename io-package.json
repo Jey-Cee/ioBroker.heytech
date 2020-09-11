@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.2.1",
+        "version": "0.2.2",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -96,6 +96,9 @@
             },
             "0.2.1": {
                 "de": "Original Berechnung des Ausgabewert des Lichtsensors\n"
+            },
+            "0.2.2": {
+                "de": "Telnet Dependency Update für aktuellere Node Versionen\n"
             }
         },
         "title": "HEYtech",
