@@ -859,7 +859,7 @@ function createClient() {
                     that.setObjectNotExists('sensors.bri_average_hey', {
                         type: 'state',
                         common: {
-                            name: 'Average brightness',
+                            name: 'Average brightness as in Heytech App',
                             type: 'number',
                             role: 'value.brightness',
                             unit: 'Lux',
