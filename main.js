@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use strict';
 
 /*
@@ -44,17 +45,17 @@ let readSmn = false;
 const actualPercents = {};
 
 const memoizeDebounce = function (func, wait = 0, options = {}) {
-    var mem = _.memoize(function () {
-        return _.debounce(func, wait, options)
+    const mem = _.memoize(function () {
+        return _.debounce(func, wait, options);
     }, options.resolver);
     return function () {
-        mem.apply(this, arguments).apply(this, arguments)
-    }
+        mem.apply(this, arguments).apply(this, arguments);
+    };
 };
 
 const calculateLuxValueBasedOnHeytech = function (wert) {
-    let luxPrefix = 0;
-    let lux = 0;
+    let luxPrefix;
+    let lux;
 
     if (wert < 10) {              // - LuxPrefix = 1 --> Lux-Wert n steht für   1 ... 900 Lux
         luxPrefix = 0;
@@ -82,7 +83,7 @@ const calculateLuxValueBasedOnHeytech = function (wert) {
         lux = lux + 110;
     }
 
-    let resultLux = 0;
+    let resultLux;
     if (luxPrefix === 0) {
         resultLux = 1 - (10 - lux) / 10;
     } else if (luxPrefix === 1) {
@@ -156,9 +157,9 @@ function createClient() {
     // this.log.info = console.info;
     // this.log.error = console.error;
 
-    if (this.config.ip === "" || this.config.ip === null || this.config.ip === undefined) {
+    if (this.config.ip === '' || this.config.ip === null || this.config.ip === undefined) {
         this.log.warn('No ip address in configuration found');
-    } else if (this.config.port === "" || this.config.port === null || this.config.port === undefined) {
+    } else if (this.config.port === '' || this.config.port === null || this.config.port === undefined) {
         this.log.warn('No port in configuration found');
     } else {
 
@@ -253,7 +254,7 @@ function createClient() {
             });
 
         client.subscribe(
-            (event) => {
+            () => {
                 // console.log('Received event:', event);
             },
             (error) => {
@@ -269,7 +270,7 @@ function createClient() {
             lastStrings = lastStrings.concat(data);
             // this.log.debug(lastStrings);
             if (!readSmn && lastStrings.indexOf(START_SMN) >= 0 || lastStrings.indexOf(ENDE_SMN) >= 0) {
-                if (lastStrings.indexOf(ENDE_SMN_START_STI) > 0) { //check end of smn data
+                if (lastStrings.includes(ENDE_SMN_START_STI)) { //check end of smn data
                     smn = smn.concat(data); // erst hier concaten, weil ansonsten das if lastStrings.endsWith nicht mehr stimmt, weil die telnet Verbindung schon wieder was gesendet hat...
                     const channels = smn.match(/\d\d,.*,\d,/gm);
                     wOutputs(channels);
@@ -297,7 +298,7 @@ function createClient() {
                         wStatus(rolladenStatus);
                         readSop = true;
                     } else {
-                        this.log.error('Rolladenstatus konnte nicht interpretiert werden: ' + statusStr)
+                        this.log.error('Rolladenstatus konnte nicht interpretiert werden: ' + statusStr);
                     }
                 }
 
@@ -336,7 +337,7 @@ function createClient() {
                         }
                     });
                 } else {
-                    this.extendObject('controller', {"native": {"model": modelStr}});
+                    this.extendObject('controller', {'native': {'model': modelStr}});
                 }
 
                 lastStrings = '';
@@ -348,7 +349,7 @@ function createClient() {
                     lastStrings.indexOf(ENDE_SMC, lastStrings.indexOf(START_SMC))
                 );
                 this.log.debug('Number of Channels :' + noChannelStr);
-                this.extendObject('controller', {"native": {"channels": noChannelStr}});
+                this.extendObject('controller', {'native': {'channels': noChannelStr}});
                 controllerChannelCount = Number(noChannelStr);
                 lastStrings = '';
                 readSmc = true;
@@ -360,7 +361,7 @@ function createClient() {
                 );
                 this.log.info('Software version: ' + svStr);
                 controllerSoftwareVersion = svStr;
-                this.extendObject('controller', {"native": {"swversion": svStr}});
+                this.extendObject('controller', {'native': {'swversion': svStr}});
                 lastStrings = '';
                 readSfi = true;
             }
@@ -375,7 +376,6 @@ function createClient() {
         const n = data.length;
 
         for (let i = 0; i < n; i++) {
-            const z = i + 1;
             const channel = data[i].split(',');
             if (channel[0] < 65) {
                 const number = parseInt(channel[0]);
@@ -617,9 +617,9 @@ function createClient() {
 
                     //remove all states that are not for show values and scenes
                     const pArr = ['down', 'up', 'stop', 'scenes', 'undefined'];
-                    for (let p in pArr) {
+                    for (const p in pArr) {
                         const patt = new RegExp(pArr[p]);
-                        for (let x in keys) {
+                        for (const x in keys) {
                             const test = patt.test(keys[x]);
                             if (test === true || !keys[x].startsWith(`heytech.${that['instance']}.shutters.${z}.`)) {
                                 delete states[keys[x]];
@@ -632,14 +632,14 @@ function createClient() {
 
                     for (let x = 0; x < keys.length; x++) {
                         if (keys[x] === 'undefined' || keys[x] === undefined) {
-
+                            //noop
                         } else {
                             let key = keys[x].replace(/\w*\.\d.\w*\./g, '');
                             key = key.replace(/\.\w+$/g, '');
                             key = parseInt(key);
 
                             if (states[keys[x]] === undefined) {
-
+                                //noop
                             } else {
                                 let oldVal = null;
                                 let ts = 0;
@@ -687,7 +687,7 @@ function createClient() {
                             }
                         }
                     }
-                })
+                });
             }
 
         }
@@ -709,7 +709,7 @@ function createClient() {
                         that.setState('groups.' + groupId + '.percent', {val: avgPercent, ack: true});
                     }
                 });
-            })
+            });
         }
 
     }
@@ -750,7 +750,7 @@ function createClient() {
 
             for (st in states) {
                 const name = st.replace(`heytech.${that['instance']}.sensors.`, '');
-                if(states[st]) {
+                if (states[st]) {
                     switch (name) {
                         case 'alarm':
                             vAlarm = states[st]['val'];
@@ -783,12 +783,12 @@ function createClient() {
                             vToMin = states[st]['val'];
                             break;
                         case 'temp_outdoor':
-                            vTo = states[st]['val'];
+                            vTo = states[st]['val'].replace(',','.');
                             break;
-                        case 'bri_average':
+                        case 'bri_average_sensor_byte':
                             vBriAv = states[st]['val'];
                             break;
-                        case 'bri_actual':
+                        case 'bri_actual_sensor_byte':
                             vBriAc = states[st]['val'];
                             break;
                     }
@@ -859,7 +859,7 @@ function createClient() {
                     that.setObjectNotExists('sensors.bri_average_hey', {
                         type: 'state',
                         common: {
-                            name: 'Average brightness',
+                            name: 'Average brightness as in Heytech App',
                             type: 'number',
                             role: 'value.brightness',
                             unit: 'Lux',
@@ -939,7 +939,7 @@ function createClient() {
             }
 
             if ((that.config.oTempSensor === true || that.config.autoDetect) && data[5] !== '999') {
-                if (vTo !== data[5] + ',' + data[6]) {
+                if (vTo !== data[5] + '.' + data[6]) {
                     that.setObjectNotExists('sensors.temp_outdoor', {
                         type: 'state',
                         common: {
@@ -951,7 +951,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_outdoor', {val: data[5] + ',' + data[6], ack: true});
+                    that.setState('sensors.temp_outdoor', {val: data[5] + '.' + data[6], ack: true});
                 }
                 if (vToMin !== data[7]) {
                     that.setObjectNotExists('sensors.temp_outdoor_min', {
@@ -1027,7 +1027,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.alarm', {val: data[11], ack: true})
+                    that.setState('sensors.alarm', {val: data[11], ack: true});
                 }
             }
 
@@ -1044,7 +1044,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.rain', {val: data[12], ack: true})
+                    that.setState('sensors.rain', {val: data[12], ack: true});
                 }
             }
 
@@ -1061,7 +1061,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.humidity', {val: data[15], ack: true})
+                    that.setState('sensors.humidity', {val: data[15], ack: true});
                 }
 
             }
@@ -1106,8 +1106,8 @@ class Heytech extends utils.Adapter {
         // Initialize your adapter here
         /*
         For every state in the system there has to be also an object of type state
-        Here a simple template for a boolean variable named "testVariable"
-        Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
+        Here a simple template for a boolean letiable named "testletiable"
+        Because every adapter instance uses its own unique namespace letiable names can't collide with other adapters letiables
         */
         if (this.config.autoDetect === false) {
             this.setObjectNotExists('controller', {
@@ -1764,7 +1764,7 @@ class Heytech extends utils.Adapter {
     }
 
     sleep(milliseconds) {
-        return new Promise(resolve => setTimeout(resolve, milliseconds))
+        return new Promise(resolve => setTimeout(resolve, milliseconds));
     }
 
     async gotoShutterPositionGroups(groupdId, prozent) {
