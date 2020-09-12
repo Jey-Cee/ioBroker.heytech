@@ -44,6 +44,9 @@ let readSmn = false;
 
 const actualPercents = {};
 
+let checkShutterStatusClearTimeoutHandler;
+let sleepClearTimeoutHandler;
+
 const memoizeDebounce = function (func, wait = 0, options = {}) {
     const mem = _.memoize(function () {
         return _.debounce(func, wait, options);
@@ -1514,6 +1517,8 @@ class Heytech extends utils.Adapter {
     onUnload(callback) {
         try {
             this.log.info('cleaned everything up...');
+            clearTimeout(checkShutterStatusClearTimeoutHandler);
+            clearTimeout(sleepClearTimeoutHandler);
             callback();
         } catch (e) {
             callback();
@@ -1697,7 +1702,7 @@ class Heytech extends utils.Adapter {
                 client.send('sop');
                 client.send(newLine);
             }, 5000);
-            setTimeout(() => {
+            checkShutterStatusClearTimeoutHandler = setTimeout(() => {
                 clearInterval(intervalID);
             }, 30000);
         }, 30000, {
@@ -1764,7 +1769,9 @@ class Heytech extends utils.Adapter {
     }
 
     sleep(milliseconds) {
-        return new Promise(resolve => setTimeout(resolve, milliseconds));
+        return new Promise(resolve => {
+            sleepClearTimeoutHandler = setTimeout(resolve, milliseconds);
+        });
     }
 
     async gotoShutterPositionGroups(groupdId, prozent) {

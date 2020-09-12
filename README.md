@@ -27,6 +27,9 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 
 ## Changelog
 
+### 0.2.4
+* back to original & updated telnet-rxjs dependency
+
 ### 0.2.3 
 * brigthness fixes (dot instead of comma) and less state updates
 

@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "0.2.3",
+        "version": "0.2.4",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -102,6 +102,9 @@
             },
             "0.2.3": {
                 "de": "Helligkeitskorrekturen (Punkt statt Komma) und weniger Statusaktualisierungen\n"
+            },
+            "0.2.4": {
+                "de": "zurück zur ursprünglichen & aktualisierten telnet-rxjs-Abhängigkeit\n\n"
             }
         },
         "title": "HEYtech",
