@@ -1,6 +1,6 @@
 {
     "name": "iobroker.heytech",
-    "version": "0.2.5",
+    "version": "1.0.0",
     "description": "Connects to HEYTech Controller",
     "author": {
         "name": "Jey Cee",
