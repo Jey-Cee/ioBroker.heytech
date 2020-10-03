@@ -896,7 +896,7 @@ function createClient() {
             }
 
             if ((that.config.iTempSensor === true || that.config.humiditySensor === true || that.config.autoDetect) && data[1] !== '999') {
-                if (vTi !== data[1] + ',' + data[2]) {
+                if (vTi !== data[1] + '.' + data[2]) {
                     that.setObjectNotExists('sensors.temp_indoor', {
                         type: 'state',
                         common: {
@@ -908,7 +908,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_indoor', {val: data[1] + ',' + data[2], ack: true});
+                    that.setState('sensors.temp_indoor', {val: data[1] + '.' + data[2], ack: true});
                 }
                 if (vTiMin !== data[3]) {
                     that.setObjectNotExists('sensors.temp_indoor_min', {
