@@ -609,7 +609,7 @@ function createClient() {
                     if (err) {
                         that.log.error(err);
                     } else if (state !== null && state.val !== data[i]) {
-                        that.setState('outputs.' + z + '.status', {val: data[i], ack: true});
+                        that.setState('outputs.' + z + '.status', {val: Number(data[i]), ack: true});
                     }
                 });
             } else if (that.config.autoDetect === true) {
@@ -670,10 +670,10 @@ function createClient() {
                                     const isShutter = patt.test(keys[x]);
 
                                     if ((test === 'status' || (test === 'level' && !isShutter)) && oldVal !== newVal) {
-                                        that.setState(keys[x], {val: data[i], ack: true});
+                                        that.setState(keys[x], {val: Number(data[i]), ack: true});
                                         if (isShutter && test === 'status') {
                                             that.setState(keys[x].replace('status', 'percent'), {
-                                                val: data[i],
+                                                val: Number(data[i]),
                                                 ack: true
                                             });
                                         }
@@ -708,8 +708,8 @@ function createClient() {
                     if (err) {
                         that.log.error(err);
                     } else if (state === null || state.val !== avgPercent) {
-                        that.setState('groups.' + groupId + '.status', {val: avgPercent, ack: true});
-                        that.setState('groups.' + groupId + '.percent', {val: avgPercent, ack: true});
+                        that.setState('groups.' + groupId + '.status', {val: Number(avgPercent), ack: true});
+                        that.setState('groups.' + groupId + '.percent', {val: Number(avgPercent), ack: true});
                     }
                 });
             });
@@ -837,14 +837,14 @@ function createClient() {
                     });
                     const resultLuxCustom = calculateLuxValueCustom(data[0]);
                     if (resultLuxCustom > 0) {
-                        that.setState('sensors.bri_actual', {val: resultLuxCustom, ack: true});
+                        that.setState('sensors.bri_actual', {val: Number(resultLuxCustom), ack: true});
                     }
 
                     const resultLuxHeytech = calculateLuxValueBasedOnHeytech(data[0]);
                     if (resultLuxHeytech > 0) {
-                        that.setState('sensors.bri_actual_hey', {val: resultLuxHeytech, ack: true});
+                        that.setState('sensors.bri_actual_hey', {val: Number(resultLuxHeytech), ack: true});
                     }
-                    that.setState('sensors.bri_actual_sensor_byte', {val: data[0], ack: true});
+                    that.setState('sensors.bri_actual_sensor_byte', {val: Number(data[0]), ack: true});
 
                 }
                 if (vBriAv !== data[14]) {
@@ -883,14 +883,14 @@ function createClient() {
                     });
                     const resultLuxCustom = calculateLuxValueCustom(data[14]);
                     if (resultLuxCustom > 0) {
-                        that.setState('sensors.bri_average', {val: resultLuxCustom, ack: true});
+                        that.setState('sensors.bri_average', {val: Number(resultLuxCustom), ack: true});
                     }
 
                     const resultLuxHeytech = calculateLuxValueBasedOnHeytech(data[14]);
                     if (resultLuxHeytech > 0) {
-                        that.setState('sensors.bri_average_hey', {val: resultLuxHeytech, ack: true});
+                        that.setState('sensors.bri_average_hey', {val: Number(resultLuxHeytech), ack: true});
                     }
-                    that.setState('sensors.bri_average_sensor_byte', {val: data[14], ack: true});
+                    that.setState('sensors.bri_average_sensor_byte', {val: Number(data[14]), ack: true});
                 }
 
             }
@@ -908,7 +908,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_indoor', {val: data[1] + '.' + data[2], ack: true});
+                    that.setState('sensors.temp_indoor', {val: Number(data[1] + '.' + data[2]), ack: true});
                 }
                 if (vTiMin !== data[3]) {
                     that.setObjectNotExists('sensors.temp_indoor_min', {
@@ -922,7 +922,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_indoor_min', {val: data[3], ack: true});
+                    that.setState('sensors.temp_indoor_min', {val: Number(data[3]), ack: true});
                 }
                 if (vTiMax !== data[4]) {
                     that.setObjectNotExists('sensors.temp_indoor_max', {
@@ -936,7 +936,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_indoor_max', {val: data[4], ack: true});
+                    that.setState('sensors.temp_indoor_max', {val: Number(data[4]), ack: true});
                 }
 
             }
@@ -954,7 +954,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_outdoor', {val: data[5] + '.' + data[6], ack: true});
+                    that.setState('sensors.temp_outdoor', {val: Number(data[5] + '.' + data[6]), ack: true});
                 }
                 if (vToMin !== data[7]) {
                     that.setObjectNotExists('sensors.temp_outdoor_min', {
@@ -968,7 +968,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_outdoor_min', {val: data[7], ack: true});
+                    that.setState('sensors.temp_outdoor_min', {val: Number(data[7]), ack: true});
                 }
                 if (vToMax !== data[8]) {
                     that.setObjectNotExists('sensors.temp_outdoor_max', {
@@ -982,7 +982,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.temp_outdoor_max', {val: data[8], ack: true});
+                    that.setState('sensors.temp_outdoor_max', {val: Number(data[8]), ack: true});
                 }
             }
 
@@ -999,7 +999,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.wind_actual', {val: data[9], ack: true});
+                    that.setState('sensors.wind_actual', {val: Number(data[9]), ack: true});
                 }
                 if (vWindM !== data[10]) {
                     that.setObjectNotExists('sensors.wind_maximum', {
@@ -1013,7 +1013,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.wind_maximum', {val: data[10], ack: true});
+                    that.setState('sensors.wind_maximum', {val: Number(data[10]), ack: true});
                 }
             }
 
@@ -1030,7 +1030,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.alarm', {val: data[11], ack: true});
+                    that.setState('sensors.alarm', {val: Number(data[11]), ack: true});
                 }
             }
 
@@ -1047,7 +1047,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.rain', {val: data[12], ack: true});
+                    that.setState('sensors.rain', {val: Number(data[12]), ack: true});
                 }
             }
 
@@ -1064,7 +1064,7 @@ function createClient() {
                             write: false
                         }
                     });
-                    that.setState('sensors.humidity', {val: data[15], ack: true});
+                    that.setState('sensors.humidity', {val: Number(data[15]), ack: true});
                 }
 
             }
@@ -1452,7 +1452,7 @@ class Heytech extends utils.Adapter {
                             write: false
                         }
                     });
-                    this.setState(stateIdRefs, {val: shutters, ack: true});
+                    this.setState(stateIdRefs, {val: Number(shutters), ack: true});
                     this.setObjectNotExists(`groups.${groupId}.up`, {
                         type: 'state',
                         common: {
@@ -1696,6 +1696,12 @@ class Heytech extends utils.Adapter {
             (controllerSoftwareVersion[0] === '1' && controllerSoftwareVersion >= '1.014p');
     }
 
+    checkVersionCanSetPercentage() {
+        return (controllerSoftwareVersion[0] === '8' && controllerSoftwareVersion >= '8.027r');
+    }
+
+
+
     checkShutterStatus() {
         return _.debounce(async () => {
             const intervalID = setInterval(() => {
@@ -1796,24 +1802,28 @@ class Heytech extends utils.Adapter {
             } else if (ziel === 0) {
                 this.sendeHandsteuerungsBefehl(rolladenId, 'down');
             } else {
-                let status = actualPercents[String(rolladenId)];
-                let aktuellePosition = Number(status);
-                let direction = 'up';
-                if (aktuellePosition > ziel) {
-                    direction = 'down';
-                } else if (aktuellePosition === ziel) {
-                    direction = 'off';
+                if(this.checkVersionCanSetPercentage()){
+                    this.sendeHandsteuerungsBefehl(rolladenId, ziel);
+                } else {
+                    let status = actualPercents[String(rolladenId)];
+                    let aktuellePosition = Number(status);
+                    let direction = 'up';
+                    if (aktuellePosition > ziel) {
+                        direction = 'down';
+                    } else if (aktuellePosition === ziel) {
+                        direction = 'off';
+                    }
+
+                    this.sendeHandsteuerungsBefehl(rolladenId, direction);
+
+                    while ((direction === 'down' && aktuellePosition > ziel) || (direction === 'up' && aktuellePosition < ziel)) {
+                        status = actualPercents[String(rolladenId)];
+                        aktuellePosition = Number(status);
+                        await this.sleep(100);
+                    }
+
+                    this.sendeHandsteuerungsBefehl(rolladenId, 'off');
                 }
-
-                this.sendeHandsteuerungsBefehl(rolladenId, direction);
-
-                while ((direction === 'down' && aktuellePosition > ziel) || (direction === 'up' && aktuellePosition < ziel)) {
-                    status = actualPercents[String(rolladenId)];
-                    aktuellePosition = Number(status);
-                    await this.sleep(100);
-                }
-
-                this.sendeHandsteuerungsBefehl(rolladenId, 'off');
             }
         }, 500);
     }
