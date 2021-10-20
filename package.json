@@ -1,6 +1,6 @@
 {
     "name": "iobroker.heytech",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Connects to HEYTech Controller",
     "author": {
         "name": "Jey Cee",
@@ -21,7 +21,7 @@
     "dependencies": {
         "@iobroker/adapter-core": "^2.5.1",
         "lodash": "^4.17.21",
-        "telnet-rxjs": "^2.2.0"
+        "telnet-rxjs-ansgar": "2.4.0"
     },
     "devDependencies": {
         "@iobroker/testing": "^1.2.0",

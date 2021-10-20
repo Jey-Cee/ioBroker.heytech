@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "1.0.2",
+        "version": "1.0.3",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -113,7 +113,12 @@
                 "de": "Für Stable Repository Version Update\n"
             },
             "1.0.2": {
-                "de": "maintance and able to set percentage directly\n"
+                "en": "maintance and able to set percentage directly\n",
+                "de": "Wartung und die Möglichkeit, den Prozentsatz direkt einzustellen\n"
+            },
+            "1.0.3": {
+                "en": "maintance rxjs versions and discovered to stick to node 12\n",
+                "de": "Wartung rxjs-Versionen und entdeckt, dass der Adapter erstmal auf auf Node 12 weiter angewiesen ist.\n"
             }
         },
         "title": "HEYtech",
