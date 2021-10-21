@@ -1719,7 +1719,7 @@ class Heytech extends utils.Adapter {
 
     async sendeHandsteuerungsBefehlToGroup(groupdId, befehl) {
         const shutterRefsState = await this.getStateAsync(`groups.${groupdId}.refs`);
-        if (shutterRefsState && shutterRefsState.val) {
+        if (shutterRefsState && shutterRefsState.val && shutterRefsState.val.split) {
             const shutters = shutterRefsState.val.split(',');
             shutters.forEach(rolladenId => {
                 this.sendeHandsteuerungsBefehl(rolladenId, befehl);
