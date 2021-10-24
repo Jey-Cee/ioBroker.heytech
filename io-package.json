@@ -119,6 +119,10 @@
             "1.0.3": {
                 "en": "maintance rxjs versions and discovered to stick to node 12\n",
                 "de": "Wartung rxjs-Versionen und entdeckt, dass der Adapter erstmal auf auf Node 12 weiter angewiesen ist.\n"
+            },
+            "1.0.4": {
+                "en": "bugfix groups did not work\n",
+                "de": "Bugfix Gruppen funktionierten nicht.\n"
             }
         },
         "title": "HEYtech",

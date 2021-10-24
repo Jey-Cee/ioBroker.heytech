@@ -506,7 +506,7 @@ function createClient() {
                             common: {
                                 name: channel[1] + ' on',
                                 type: 'boolean',
-                                role: 'switch',
+                                role: 'button',
                                 read: true,
                                 write: true
                             }
@@ -537,7 +537,7 @@ function createClient() {
                             common: {
                                 name: channel[1] + ' on',
                                 type: 'boolean',
-                                role: 'switch',
+                                role: 'button',
                                 read: true,
                                 write: true
                             }
@@ -786,7 +786,7 @@ function createClient() {
                             vToMin = states[st]['val'];
                             break;
                         case 'temp_outdoor':
-                            vTo = states[st]['val'].replace(',','.');
+                            vTo = String(states[st]['val']).replace(',','.');
                             break;
                         case 'bri_average_sensor_byte':
                             vBriAv = states[st]['val'];
@@ -1452,13 +1452,13 @@ class Heytech extends utils.Adapter {
                             write: false
                         }
                     });
-                    this.setState(stateIdRefs, {val: Number(shutters), ack: true});
+                    this.setState(stateIdRefs, {val: shutters, ack: true});
                     this.setObjectNotExists(`groups.${groupId}.up`, {
                         type: 'state',
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' up',
                             type: 'boolean',
-                            role: 'switch',
+                            role: 'button',
                             read: false,
                             write: true
                         }
@@ -1468,7 +1468,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' down',
                             type: 'boolean',
-                            role: 'switch',
+                            role: 'button',
                             read: false,
                             write: true
                         }
@@ -1478,7 +1478,7 @@ class Heytech extends utils.Adapter {
                         common: {
                             name: 'Group ' + groupId + ' ' + name + ' stop',
                             type: 'boolean',
-                            role: 'switch',
+                            role: 'button',
                             read: false,
                             write: true
                         }
@@ -1555,7 +1555,7 @@ class Heytech extends utils.Adapter {
         const now = d.getTime();
         const diff = now - start;
 
-        if (state && diff > 10000 && readSmn) {
+        if (state && diff > 4000 && readSmn) {
             // The state was changed
             const patt1 = new RegExp('down');
             const patt2 = new RegExp('up');
@@ -1719,7 +1719,7 @@ class Heytech extends utils.Adapter {
 
     async sendeHandsteuerungsBefehlToGroup(groupdId, befehl) {
         const shutterRefsState = await this.getStateAsync(`groups.${groupdId}.refs`);
-        if (shutterRefsState && shutterRefsState.val && shutterRefsState.val.split) {
+        if (shutterRefsState && shutterRefsState.val) {
             const shutters = shutterRefsState.val.split(',');
             shutters.forEach(rolladenId => {
                 this.sendeHandsteuerungsBefehl(rolladenId, befehl);
