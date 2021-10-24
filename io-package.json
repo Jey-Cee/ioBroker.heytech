@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -123,6 +123,10 @@
             "1.0.4": {
                 "en": "bugfix groups did not work\n",
                 "de": "Bugfix Gruppen funktionierten nicht.\n"
+            },
+            "1.0.5": {
+                "en": "added node version\n",
+                "de": "added node version.\n"
             }
         },
         "title": "HEYtech",
