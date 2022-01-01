@@ -9,6 +9,7 @@ const utils = require('@iobroker/adapter-core');
 
 const _ = require('lodash');
 const {Telnet} = require('telnet-rxjs-ansgar');
+const net = require('net');
 
 const newLine = String.fromCharCode(13);
 const START_SOP = 'start_sop';
@@ -166,7 +167,7 @@ function createClient() {
         this.log.warn('No port in configuration found');
     } else {
 
-        client = Telnet.client(this.config.ip + ':' + this.config.port);
+        client = Telnet.client(this.config.ip + ':' + this.config.port, {socket: new net.Socket({ readable: false, writable: false })});
         setInterval(() => {
             this.sendeRefreshBefehl();
         }, this.config.refresh || 300000);

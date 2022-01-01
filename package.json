@@ -1,13 +1,13 @@
 {
     "name": "iobroker.heytech",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Connects to HEYTech Controller",
     "author": {
         "name": "Jey Cee",
         "email": "jey-cee@live.com"
     },
     "engines": {
-        "node": ">=8 <13"
+        "node": ">=8"
     },
     "homepage": "https://github.com/Jey-Cee/ioBroker.heytech",
     "license": "MIT",

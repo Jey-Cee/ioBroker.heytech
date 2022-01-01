@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "heytech",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "news": {
             "0.0.1": {
                 "en": "initial version created with Adapter-Studio by Jey Cee",
@@ -127,6 +127,10 @@
             "1.0.5": {
                 "en": "added node version\n",
                 "de": "added node version.\n"
+            },
+            "1.0.6": {
+                "en": "compatibilty to node 14 and above.\n",
+                "de": "compatibilty to node 14 and above.\n"
             }
         },
         "title": "HEYtech",
