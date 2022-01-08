@@ -192,7 +192,7 @@ function createClient() {
                     return result;
                 }
 
-                this.log.info('Connected to controller');
+                this.log.debug('Connected to controller');
 
 
                 if (this.config.pin !== '') {
@@ -252,7 +252,7 @@ function createClient() {
 
         client.filter((event) => event instanceof Telnet.Event.Disconnected)
             .subscribe(() => {
-                this.log.info('Disconnected from controller');
+                this.log.debug('Disconnected from controller');
                 connected = false;
                 connecting = false;
             });
