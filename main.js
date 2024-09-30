@@ -1400,6 +1400,34 @@ class Heytech extends utils.Adapter {
                     write: false
                 }
             });
+
+
+            this.getForeignObjects(`${this.namespace}.groups.*`, 'group', (err, objs) => {
+                if (err) {
+                    this.log.error('Error fetching groups: ' + err);
+                } else {
+                    const configGroupIds = this.config.groups.map(group => group.groupId);
+                    const foreignGroupIds = Object.keys(objs).map(key => key.split('.').pop());
+
+                    const nonConfigGroups = foreignGroupIds.filter(id => !configGroupIds.includes(id));
+
+                    if (nonConfigGroups.length > 0) {
+                        this.log.warn('These groups are not configured in this.config.groups: ' + nonConfigGroups.join(', '));
+                        nonConfigGroups.forEach(groupId => {
+                            this.delObject(`groups.${groupId}`, {recursive: true}, (err) => {
+                                if (err) {
+                                    this.log.error(`Error deleting group ${groupId}: ${err}`);
+                                } else {
+                                    this.log.info(`Successfully deleted group ${groupId} and all its child objects.`);
+                                }
+                            });
+                        });
+                    } else {
+                        this.log.info('All groups in objects are configured in this.config.groups.');
+                    }
+                }
+            });
+
             this.config.groups.forEach((group) => {
                 const groupId = group.groupId;
                 const name = group.name;
@@ -1549,6 +1577,10 @@ class Heytech extends utils.Adapter {
      */
     onStateChange(id, state) {
         // nur auf externe setStates lauschen
+        if(!state){
+            return;
+        }
+
         if (state.from.indexOf('system.adapter.heytech') === 0) {
             // this.log.debug('Skipped', id, state);
             return;
