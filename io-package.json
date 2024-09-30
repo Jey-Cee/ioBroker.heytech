@@ -24,7 +24,6 @@
                 "de": "compatibilty to node 14 and above.\n"
             }
         },
-        "title": "HEYtech",
         "titleLang": {
             "en": "HEYtech",
             "de": "HEYtech",
@@ -35,7 +34,8 @@
             "it": "HEYtech",
             "es": "HEYtech",
             "pl": "HEYtech",
-            "zh-cn": "HEYtech"
+            "zh-cn": "HEYtech",
+            "uk": "HEYtech"
         },
         "desc": {
             "en": "Connect to and control HEYtech devices. https://rolladensteuerung.de/",
@@ -47,39 +47,41 @@
             "it": "Connetti e controlla i dispositivi HEYtech. https://rolladensteuerung.de/",
             "es": "Conectar y controlar dispositivos HEYtech. https://rolladensteuerung.de/",
             "pl": "Połącz się i kontroluj urządzenia HEYtech. https://rolladensteuerung.de/",
-            "zh-cn": "连接并控制HEYtech设备"
+            "zh-cn": "连接并控制HEYtech设备",
+            "uk":"Підключайтеся до пристроїв HEYtech і керуйте ними. https://rolladensteuerung.de/"
         },
         "authors": [
             "Jey Cee<jey-cee@live.com>",
             "Ansgar Schulte<ansgar@schulte.com.de>"
         ],
         "keywords": [
-            "iobroker",
             "shutter",
             "shutter control",
             "heytech,"
         ],
-        "license": "MIT",
+        "licenseInformation": {
+            "type": "free",
+            "license": "MIT"
+        },
         "platform": "Javascript/Node.js",
-        "main": "main.js",
         "icon": "heytech.png",
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/Jey-Cee/ioBroker.heytech/master/admin/heytech.png",
         "readme": "https://github.com/Jey-Cee/ioBroker.heytech/blob/master/README.md",
         "loglevel": "info",
+        "tier": 3,
         "mode": "daemon",
         "type": "hardware",
         "compact": true,
-        "materialize": true,
+        "adminUI": {
+            "config": "materialize"
+        },
         "supportCustoms": false,
         "connectionType": "local",
         "dataSource": "poll",
         "dependencies": [
             {
-                "admin": ">=3.0.0"
-            },
-            {
-                "js-controller": ">=3.0.0"
+                "js-controller": ">=5.0.19"
             }
         ],
         "messagebox": false

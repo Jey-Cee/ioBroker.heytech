@@ -7,6 +7,7 @@
 
 const utils = require('@iobroker/adapter-core');
 
+
 const _ = require('lodash');
 const {Telnet} = require('telnet-rxjs-ansgar');
 const net = require('net');
