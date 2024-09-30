@@ -1,23 +1,11 @@
 {
     "common": {
         "name": "heytech",
-        "version": "1.0.6",
+        "version": "1.1.0",
         "news": {
-            "1.0.2": {
-                "en": "maintance and able to set percentage directly\n",
-                "de": "Wartung und die Möglichkeit, den Prozentsatz direkt einzustellen\n"
-            },
-            "1.0.3": {
-                "en": "maintance rxjs versions and discovered to stick to node 12\n",
-                "de": "Wartung rxjs-Versionen und entdeckt, dass der Adapter erstmal auf auf Node 12 weiter angewiesen ist.\n"
-            },
-            "1.0.4": {
-                "en": "bugfix groups did not work\n",
-                "de": "Bugfix Gruppen funktionierten nicht.\n"
-            },
-            "1.0.5": {
-                "en": "added node version\n",
-                "de": "added node version.\n"
+            "1.1.0": {
+                "en": "Delete group objects if the group was removed from configuration \nMigrate configuration to JSON Config",
+                "de": "Gruppenobjekte löschen, wenn die Gruppe aus der Konfiguration entfernt wurde \nKonfiguration nach JSON Config migriert"
             },
             "1.0.6": {
                 "en": "compatibilty to node 14 and above.\n",
