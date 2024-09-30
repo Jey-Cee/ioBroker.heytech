@@ -1,0 +1,100 @@
+{
+	"i18n": true,
+	"type": "tabs",
+	"items": {
+		"general": {
+			"type": "panel",
+			"label": "General",
+			"items": {
+				"ip": {
+					"type": "text",
+					"label": "IP",
+					"trim": true,
+					"placeholder": "192.168.0.1",
+					"xl": 2,
+					"lg": 3,
+					"md": 4,
+					"sm": 6,
+					"xs": 12
+				},
+				"port": {
+					"type": "number",
+					"label": "Port",
+					"placeholder": "1002",
+					"xl": 1,
+					"lg": 1,
+					"md": 2,
+					"sm": 3,
+					"xs": 12,
+					"newLine": true
+				},
+				"pin": {
+					"type": "number",
+					"label": "PIN",
+					"placeholder": "1234",
+					"xl": 1,
+					"lg": 1,
+					"md": 2,
+					"sm": 3,
+					"xs": 12,
+					"newLine": true
+				},
+				"refresh": {
+					"type": "number",
+					"label": "Refresh",
+					"placeholder": "1000",
+					"xl": 1,
+					"lg": 2,
+					"md": 2,
+					"sm": 3,
+					"xs": 12,
+					"newLine": true
+				},
+				"autoDetect": {
+					"type": "checkbox",
+					"label": "Auto Detect",
+					"xl": 2,
+					"lg": 2,
+					"md": 3,
+					"sm": 4,
+					"xs": 12,
+					"newLine": true
+				}
+			}
+		},
+		"shutterGroups": {
+			"type": "panel",
+			"label": "Shutter Groups",
+			"items": {
+				"groups": {
+					"type": "table",
+					"xl": 12,
+					"lg": 12,
+					"md": 12,
+					"sm": 12,
+					"xs": 12,
+					"items": [
+						{
+							"attr": "groupId",
+							"type": "text",
+							"title": "UGID",
+							"trim": true
+						},
+						{
+							"attr": "name",
+							"type": "text",
+							"title": "Name",
+							"trim": true
+						},
+						{
+							"attr": "shutters",
+							"type": "chips",
+							"title": "Shutters",
+							"trim": true
+						}
+					]
+				}
+			}
+		}
+	}
+}

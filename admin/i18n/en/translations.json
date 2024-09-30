@@ -1,0 +1,10 @@
+{
+	"IP": "IP address",
+	"Port": "Port",
+	"PIN": "PIN",
+	"Refresh": "Refresh (in ms)",
+	"Auto Detect": "Auto Detection",
+	"UGID": "Unique group ID",
+	"Name": "Name",
+	"Shutters": "Shutters"
+}

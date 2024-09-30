@@ -74,7 +74,7 @@
         "type": "hardware",
         "compact": true,
         "adminUI": {
-            "config": "materialize"
+            "config": "json"
         },
         "supportCustoms": false,
         "connectionType": "local",
