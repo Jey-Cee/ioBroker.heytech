@@ -10,7 +10,7 @@ const utils = require('@iobroker/adapter-core');
 
 const _ = require('lodash');
 const {Telnet} = require('telnet-rxjs-ansgar');
-const net = require('net');
+const net = require('node:net');
 
 const newLine = String.fromCharCode(13);
 const START_SOP = 'start_sop';
