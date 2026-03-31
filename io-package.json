@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heytech",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "news": {
+      "1.1.2": {
+        "en": "fix linting errors",
+        "de": "fehler beheben",
+        "ru": "исправить ошибки подкладки",
+        "pt": "corrigir erros de linting",
+        "nl": "fix linting fouten",
+        "fr": "correction des erreurs de doublage",
+        "it": "correggere errori di linting",
+        "es": "corregir errores de forro",
+        "pl": "naprawić błędy linowania",
+        "uk": "виправити помилки linting",
+        "zh-cn": "修正嵌入错误"
+      },
       "1.1.1": {
         "en": "update dependencies\nupdate testing\nfix repochecker issues",
         "de": "Aktualisierung der Abhängigkeiten\nAktualisierung der Tests\nrepochecker probleme beheben",
