@@ -1,5 +1,5 @@
 <h1>
-    <img src="admin/heytech.png" width="64"/>
+    <img alt="" src="admin/heytech.png" width="64"/>
     ioBroker.heytech
 </h1>
 
@@ -26,6 +26,11 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 [HEYTech](https://rolladensteuerung.de/index.htm)
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+* (jey-cee) update dependencies
+* (jey-cee) update testing
+* (jey-cee) fix repochecker issues
 
 ### 1.1.0 (2024-09-30)
 * (Jey Cee) Delete group objects if the group was removed from configuration
@@ -89,7 +94,7 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 ## License
 MIT License
 
-Copyright (c) 2019-2025 Jey Cee <jey-cee@live.com>
+Copyright (c) 2019-2026 Jey Cee <jey-cee@live.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

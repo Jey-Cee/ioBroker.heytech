@@ -69,7 +69,12 @@
         "dataSource": "poll",
         "dependencies": [
             {
-                "js-controller": ">=5.0.19"
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=7.6.20"
             }
         ],
         "messagebox": false
