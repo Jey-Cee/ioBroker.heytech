@@ -26,8 +26,7 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 [HEYTech](https://rolladensteuerung.de/index.htm)
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.1.1 (2026-03-31)
 * (jey-cee) update dependencies
 * (jey-cee) update testing
 * (jey-cee) fix repochecker issues
@@ -71,22 +70,17 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 ### 0.1.4
 * update lux calculation (Thanks to stefan)
 
-
 ### 0.1.3
 * update calculation for brightness
-
 
 ### 0.1.2
 * added LUX calculation
 
-
 ### 0.1.1
 * added travis file
 
-
 ### 0.1.0
 * ready for beta test
-
 
 ### 0.0.1
 * (Author) initial release

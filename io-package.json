@@ -1,101 +1,114 @@
 {
-    "common": {
-        "name": "heytech",
-        "version": "1.1.0",
-        "news": {
-            "1.1.0": {
-                "en": "Delete group objects if the group was removed from configuration \nMigrate configuration to JSON Config",
-                "de": "Gruppenobjekte löschen, wenn die Gruppe aus der Konfiguration entfernt wurde \nKonfiguration nach JSON Config migriert"
-            },
-            "1.0.6": {
-                "en": "compatibilty to node 14 and above.\n",
-                "de": "compatibilty to node 14 and above.\n"
-            }
-        },
-        "titleLang": {
-            "en": "HEYtech",
-            "de": "HEYtech",
-            "ru": "HEYtech",
-            "pt": "HEYtech",
-            "nl": "HEYtech",
-            "fr": "HEYtech",
-            "it": "HEYtech",
-            "es": "HEYtech",
-            "pl": "HEYtech",
-            "zh-cn": "HEYtech",
-            "uk": "HEYtech"
-        },
-        "desc": {
-            "en": "Connect to and control HEYtech devices. https://rolladensteuerung.de/",
-            "de": "Anschließen und Steuern von HEYtech-Geräten. https://rolladensteuerung.de/",
-            "ru": "Подключайтесь и управляйте устройствами HEYtech. https://rolladensteuerung.de/",
-            "pt": "Conecte e controle dispositivos HEYtech. https://rolladensteuerung.de/",
-            "nl": "Maak verbinding met HEYtech-apparaten en bedien deze. https://rolladensteuerung.de/",
-            "fr": "Connectez-vous à et contrôlez les appareils HEYtech. https://rolladensteuerung.de/",
-            "it": "Connetti e controlla i dispositivi HEYtech. https://rolladensteuerung.de/",
-            "es": "Conectar y controlar dispositivos HEYtech. https://rolladensteuerung.de/",
-            "pl": "Połącz się i kontroluj urządzenia HEYtech. https://rolladensteuerung.de/",
-            "zh-cn": "连接并控制HEYtech设备",
-            "uk":"Підключайтеся до пристроїв HEYtech і керуйте ними. https://rolladensteuerung.de/"
-        },
-        "authors": [
-            "Jey Cee<jey-cee@live.com>",
-            "Ansgar Schulte<ansgar@schulte.com.de>"
-        ],
-        "keywords": [
-            "shutter",
-            "shutter control",
-            "heytech,"
-        ],
-        "licenseInformation": {
-            "type": "free",
-            "license": "MIT"
-        },
-        "platform": "Javascript/Node.js",
-        "icon": "heytech.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/Jey-Cee/ioBroker.heytech/master/admin/heytech.png",
-        "readme": "https://github.com/Jey-Cee/ioBroker.heytech/blob/master/README.md",
-        "loglevel": "info",
-        "tier": 3,
-        "mode": "daemon",
-        "type": "hardware",
-        "compact": true,
-        "adminUI": {
-            "config": "json"
-        },
-        "supportCustoms": false,
-        "connectionType": "local",
-        "dataSource": "poll",
-        "dependencies": [
-            {
-                "js-controller": ">=6.0.11"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=7.6.20"
-            }
-        ],
-        "messagebox": false
+  "common": {
+    "name": "heytech",
+    "version": "1.1.1",
+    "news": {
+      "1.1.1": {
+        "en": "update dependencies\nupdate testing\nfix repochecker issues",
+        "de": "Aktualisierung der Abhängigkeiten\nAktualisierung der Tests\nrepochecker probleme beheben",
+        "ru": "обновление зависимостей\nобновление теста\nисправить проблемы с репочекером",
+        "pt": "atualizar dependências\nactualizar os testes\ncorrigir problemas com o repochecker",
+        "nl": "afhankelijkheden bijwerken\nbijwerken van tests\nrepochecker problemen oplossen",
+        "fr": "mettre à jour les dépendances\nmise à jour des essais\nrésoudre les problèmes de repochecker",
+        "it": "aggiornamento dipendenze\ntest di aggiornamento\nrisolvere problemi di repochecker",
+        "es": "dependencias de actualización\npruebas de actualización\nsolucionar problemas de repochecker",
+        "pl": "aktualizacji zależności\nbadanie aktualizacji\nnaprawiać problemy repochecker",
+        "uk": "оновлення залежності\nтестування оновлення\nвиправити проблеми репочекера",
+        "zh-cn": "更新依赖关系\n更新测试\n修复再检查器问题"
+      },
+      "1.1.0": {
+        "en": "Delete group objects if the group was removed from configuration \nMigrate configuration to JSON Config",
+        "de": "Gruppenobjekte löschen, wenn die Gruppe aus der Konfiguration entfernt wurde \nKonfiguration nach JSON Config migriert"
+      },
+      "1.0.6": {
+        "en": "compatibilty to node 14 and above.\n",
+        "de": "compatibilty to node 14 and above.\n"
+      }
     },
-    "native": {
-        "ip": "",
-        "port": "1002",
-        "pin": "",
-        "refresh": 300000,
-        "autoDetect": true,
-        "typ": "",
-        "eBoxes": 0,
-        "briSensor": false,
-        "oTempSensor": false,
-        "iTempSensor": false,
-        "rainSensor": false,
-        "windSensor": false,
-        "alarmSensor": false,
-        "humiditySensor": false,
-        "groups": []
+    "titleLang": {
+      "en": "HEYtech",
+      "de": "HEYtech",
+      "ru": "HEYtech",
+      "pt": "HEYtech",
+      "nl": "HEYtech",
+      "fr": "HEYtech",
+      "it": "HEYtech",
+      "es": "HEYtech",
+      "pl": "HEYtech",
+      "zh-cn": "HEYtech",
+      "uk": "HEYtech"
     },
-    "objects": [],
-    "instanceObjects": []
+    "desc": {
+      "en": "Connect to and control HEYtech devices. https://rolladensteuerung.de/",
+      "de": "Anschließen und Steuern von HEYtech-Geräten. https://rolladensteuerung.de/",
+      "ru": "Подключайтесь и управляйте устройствами HEYtech. https://rolladensteuerung.de/",
+      "pt": "Conecte e controle dispositivos HEYtech. https://rolladensteuerung.de/",
+      "nl": "Maak verbinding met HEYtech-apparaten en bedien deze. https://rolladensteuerung.de/",
+      "fr": "Connectez-vous à et contrôlez les appareils HEYtech. https://rolladensteuerung.de/",
+      "it": "Connetti e controlla i dispositivi HEYtech. https://rolladensteuerung.de/",
+      "es": "Conectar y controlar dispositivos HEYtech. https://rolladensteuerung.de/",
+      "pl": "Połącz się i kontroluj urządzenia HEYtech. https://rolladensteuerung.de/",
+      "zh-cn": "连接并控制HEYtech设备",
+      "uk": "Підключайтеся до пристроїв HEYtech і керуйте ними. https://rolladensteuerung.de/"
+    },
+    "authors": [
+      "Jey Cee<jey-cee@live.com>",
+      "Ansgar Schulte<ansgar@schulte.com.de>"
+    ],
+    "keywords": [
+      "shutter",
+      "shutter control",
+      "heytech,"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "heytech.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/Jey-Cee/ioBroker.heytech/master/admin/heytech.png",
+    "readme": "https://github.com/Jey-Cee/ioBroker.heytech/blob/master/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "hardware",
+    "compact": true,
+    "adminUI": {
+      "config": "json"
+    },
+    "supportCustoms": false,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.6.20"
+      }
+    ],
+    "messagebox": false
+  },
+  "native": {
+    "ip": "",
+    "port": "1002",
+    "pin": "",
+    "refresh": 300000,
+    "autoDetect": true,
+    "typ": "",
+    "eBoxes": 0,
+    "briSensor": false,
+    "oTempSensor": false,
+    "iTempSensor": false,
+    "rainSensor": false,
+    "windSensor": false,
+    "alarmSensor": false,
+    "humiditySensor": false,
+    "groups": []
+  },
+  "objects": [],
+  "instanceObjects": []
 }
