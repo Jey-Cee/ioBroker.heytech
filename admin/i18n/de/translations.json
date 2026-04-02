@@ -1,10 +1,10 @@
 {
-	"IP": "IP Adresse",
-	"Port": "Port",
-	"PIN": "PIN",
-	"Refresh": "Aktualisierung (in ms)",
 	"Auto Detect": "Automatische Erkennung",
-	"UGID": "Einzigartige Gruppen ID",
+	"IP": "IP Adresse",
 	"Name": "Name",
-	"Shutters": "Rollläden"
+	"PIN": "PIN",
+	"Port": "Port",
+	"Refresh": "Aktualisierung (in ms)",
+	"Shutters": "Rollläden",
+	"UGID": "Einzigartige Gruppen ID"
 }

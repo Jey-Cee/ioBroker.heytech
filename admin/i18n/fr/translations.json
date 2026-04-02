@@ -1,5 +1,10 @@
 {
-	"test adapter settings": "Paramètres d'adaptateur pour test",
-	"option1": "option1",
-	"option2": "option2"
+	"Auto Detect": "Détection automatique",
+	"IP": "Adresse IP",
+	"Name": "Nom",
+	"PIN": "ÉPINGLE",
+	"Port": "Port",
+	"Refresh": "Actualiser (en ms)",
+	"Shutters": "Volets",
+	"UGID": "ID de groupe unique"
 }

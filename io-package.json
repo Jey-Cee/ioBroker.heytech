@@ -15,40 +15,6 @@
         "pl": "automatyzacji wydania",
         "uk": "автоматичний реліз",
         "zh-cn": "自动释放"
-      },
-      "1.1.2": {
-        "en": "fix linting errors",
-        "de": "fehler beheben",
-        "ru": "исправить ошибки подкладки",
-        "pt": "corrigir erros de linting",
-        "nl": "fix linting fouten",
-        "fr": "correction des erreurs de doublage",
-        "it": "correggere errori di linting",
-        "es": "corregir errores de forro",
-        "pl": "naprawić błędy linowania",
-        "uk": "виправити помилки linting",
-        "zh-cn": "修正嵌入错误"
-      },
-      "1.1.1": {
-        "en": "update dependencies\nupdate testing\nfix repochecker issues",
-        "de": "Aktualisierung der Abhängigkeiten\nAktualisierung der Tests\nrepochecker probleme beheben",
-        "ru": "обновление зависимостей\nобновление теста\nисправить проблемы с репочекером",
-        "pt": "atualizar dependências\nactualizar os testes\ncorrigir problemas com o repochecker",
-        "nl": "afhankelijkheden bijwerken\nbijwerken van tests\nrepochecker problemen oplossen",
-        "fr": "mettre à jour les dépendances\nmise à jour des essais\nrésoudre les problèmes de repochecker",
-        "it": "aggiornamento dipendenze\ntest di aggiornamento\nrisolvere problemi di repochecker",
-        "es": "dependencias de actualización\npruebas de actualización\nsolucionar problemas de repochecker",
-        "pl": "aktualizacji zależności\nbadanie aktualizacji\nnaprawiać problemy repochecker",
-        "uk": "оновлення залежності\nтестування оновлення\nвиправити проблеми репочекера",
-        "zh-cn": "更新依赖关系\n更新测试\n修复再检查器问题"
-      },
-      "1.1.0": {
-        "en": "Delete group objects if the group was removed from configuration \nMigrate configuration to JSON Config",
-        "de": "Gruppenobjekte löschen, wenn die Gruppe aus der Konfiguration entfernt wurde \nKonfiguration nach JSON Config migriert"
-      },
-      "1.0.6": {
-        "en": "compatibilty to node 14 and above.\n",
-        "de": "compatibilty to node 14 and above.\n"
       }
     },
     "titleLang": {

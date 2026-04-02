@@ -1,5 +1,10 @@
 {
-	"test adapter settings": "Adapterinstellingen voor test",
-	"option1": "optie1",
-	"option2": "optie2"
+	"Auto Detect": "Automatische detectie",
+	"IP": "IP-adres",
+	"Name": "Naam",
+	"PIN": "PIN",
+	"Port": "Haven",
+	"Refresh": "Vernieuwen (in ms)",
+	"Shutters": "Luiken",
+	"UGID": "Unieke groeps-ID"
 }

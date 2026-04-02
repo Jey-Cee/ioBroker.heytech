@@ -1,5 +1,10 @@
 {
-	"test adapter settings": "Ustawienia adaptera dla test",
-	"option1": "opcja 1",
-	"option2": "opcja 2"
+	"Auto Detect": "Automatyczne wykrywanie",
+	"IP": "Adres IP",
+	"Name": "Nazwa",
+	"PIN": "SZPILKA",
+	"Port": "Port",
+	"Refresh": "Odśwież (w ms)",
+	"Shutters": "Żaluzje",
+	"UGID": "Unikalny identyfikator grupy"
 }

@@ -1,5 +1,10 @@
 {
-	"test adapter settings": "Configurações do adaptador para test",
-	"option1": "opção1",
-	"option2": "opção2"
+	"Auto Detect": "Detecção automática",
+	"IP": "Endereço IP",
+	"Name": "Nome",
+	"PIN": "ALFINETE",
+	"Port": "Porta",
+	"Refresh": "Atualizar (em ms)",
+	"Shutters": "Persianas",
+	"UGID": "ID de grupo exclusivo"
 }

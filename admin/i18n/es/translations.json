@@ -1,5 +1,10 @@
 {
-	"test adapter settings": "Ajustes del adaptador para test",
-	"option1": "opción1",
-	"option2": "opción2"
+	"Auto Detect": "Detección automática",
+	"IP": "dirección IP",
+	"Name": "Nombre",
+	"PIN": "ALFILER",
+	"Port": "Puerto",
+	"Refresh": "Actualizar (en ms)",
+	"Shutters": "Persianas",
+	"UGID": "ID de grupo único"
 }

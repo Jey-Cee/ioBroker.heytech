@@ -1,5 +1,10 @@
 {
-	"test adapter settings": "test的适配器设置",
-	"option1": "选项1",
-	"option2": "选项2"
+	"Auto Detect": "自动检测",
+	"IP": "IP地址",
+	"Name": "姓名",
+	"PIN": "别针",
+	"Port": "港口",
+	"Refresh": "刷新（以毫秒为单位）",
+	"Shutters": "百叶窗",
+	"UGID": "唯一的组ID"
 }

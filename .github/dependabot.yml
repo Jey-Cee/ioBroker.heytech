@@ -4,14 +4,14 @@
 # Reference: https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 version: 2
 updates:
-
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
       interval: 'monthly'
+      day: 3
       time: '00:05'
       timezone: 'Europe/Berlin'
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 15
     assignees:
       - 'jey-cee'
     versioning-strategy: 'increase'
@@ -26,4 +26,4 @@ updates:
       timezone: 'Europe/Berlin'
     open-pull-requests-limit: 5
     assignees:
-      - 'jey-cee'
+      - jey-cee

@@ -1,5 +1,10 @@
 {
-	"test adapter settings": "Impostazioni dell'adattatore per test",
-	"option1": "opzione1",
-	"option2": "opzione2"
+	"Auto Detect": "Rilevamento automatico",
+	"IP": "Indirizzo IP",
+	"Name": "Nome",
+	"PIN": "SPILLO",
+	"Port": "Porta",
+	"Refresh": "Aggiorna (in ms)",
+	"Shutters": "Persiane",
+	"UGID": "ID gruppo univoco"
 }
