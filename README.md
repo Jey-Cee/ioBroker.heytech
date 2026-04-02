@@ -26,7 +26,7 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 [HEYTech](https://rolladensteuerung.de/index.htm)
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.1.4 (2026-04-02)
 * (jey-cee) fix some issues found by adapter checker
 
 ### 1.1.3 (2026-03-31)

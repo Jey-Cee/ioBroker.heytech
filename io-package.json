@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heytech",
-    "version": "1.1.3",
+    "version": "1.1.4",
     "news": {
+      "1.1.4": {
+        "en": "fix some issues found by adapter checker",
+        "de": "einige probleme zu beheben, die von adapter checker gefunden wurden",
+        "ru": "устранение некоторых проблем, обнаруженных с помощью adapter checker",
+        "pt": "corrigir alguns problemas encontrados pelo verificador adaptador",
+        "nl": "fix een aantal problemen gevonden door adapter checker",
+        "fr": "correction de certains problèmes trouvés par adaptateur checker",
+        "it": "risolvere alcuni problemi trovati da adattatore checker",
+        "es": "solucionar algunos problemas encontrados por adaptador",
+        "pl": "naprawić niektóre problemy znalezione przez sprawdzacz adaptera",
+        "uk": "виправити деякі проблеми, знайдені за допомогою адаптера",
+        "zh-cn": "修正适配器检查器发现的一些问题"
+      },
       "1.1.3": {
         "en": "automate release",
         "de": "automatenfreigabe",
