@@ -7,7 +7,7 @@
     "email": "jey-cee@live.com"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "homepage": "https://github.com/Jey-Cee/ioBroker.heytech",
   "license": "MIT",
