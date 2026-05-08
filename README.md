@@ -26,6 +26,8 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 [HEYTech](https://rolladensteuerung.de/index.htm)
 
 ## Changelog
+### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22 now
 ### 1.1.6 (2026-05-03)
 * Bump typescript from 6.0.2 to 6.0.3
 * Bump @types/node from 25.5.0 to 25.6.0
