@@ -28,6 +28,11 @@ Normaly you can leave the "Auto detect" function on. If this does not work you c
 ## Changelog
 ### **WORK IN PROGRESS**
 - (copilot) Adapter requires node.js >= 22 now
+### 1.1.8 (2026-07-03)
+* chore(deps-dev): bump @alcalzone/release-script from 5.2.0 to 5.2.1
+* Bump js-yaml from 4.1.1 to 4.2.0
+* Bump http-proxy-middleware from 3.0.5 to 3.0.7
+
 ### 1.1.7 (2026-06-03)
 * Bump @alcalzone/release-script-plugin-iobroker from 5.1.2 to 5.2.0
 * Bump @alcalzone/release-script-plugin-license from 5.1.1 to 5.2.0

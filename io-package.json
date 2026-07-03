@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heytech",
-    "version": "1.1.7",
+    "version": "1.1.8",
     "news": {
+      "1.1.8": {
+        "en": "* chore(deps-dev): bump @alcalzone/release-script from 5.2.0 to 5.2.1\n* Bump js-yaml from 4.1.1 to 4.2.0\n* Bump http-proxy-middleware from 3.0.5 to 3.0.7",
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "Обновлены зависимости",
+        "pt": "Dependências atualizadas",
+        "nl": "Afhankelijkheden bijgewerkt",
+        "fr": "Dépendances mises à jour",
+        "it": "Dipendenze aggiornate",
+        "es": "Dependencias actualizadas",
+        "pl": "Zaktualizowano zależności",
+        "uk": "Оновлено залежності",
+        "zh-cn": "更新依赖"
+      },
       "1.1.7": {
         "en": "* Bump @alcalzone/release-script-plugin-iobroker from 5.1.2 to 5.2.0\n* Bump @alcalzone/release-script-plugin-license from 5.1.1 to 5.2.0\n* Bump @alcalzone/release-script from 5.1.1 to 5.2.0\n* Bump @iobroker/eslint-config from 2.2.0 to 2.3.4\n* Bump @alcalzone/release-script-plugin-manual-review from 5.1.1 to 5.2.0\n* Bump protobufjs from 7.5.5 to 7.5.8\n* Bump @protobufjs/utf8 from 1.1.0 to 1.1.1\n* Bump fast-uri from 3.1.0 to 3.1.2\n* Bump axios from 1.15.0 to 1.16.0\n* Update from template: S6020-addChangelogOld\n* Update from template: X0000-dropNode20\n* Update from template: W8917-dependabot-addIgnoreTypesNode",
         "de": "Abhängigkeiten aktualisiert",
