@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heytech",
-    "version": "1.1.8",
+    "version": "1.1.9",
     "news": {
+      "1.1.9": {
+        "en": "* chore(deps-dev): bump engine.io from 6.6.6 to 6.6.9\n* chore(deps-dev): bump @iobroker/testing from 5.2.2 to 5.3.0\n* chore(deps-dev): bump fast-uri from 3.1.2 to 3.1.4\n* chore(deps): bump axios from 1.16.0 to 1.18.1",
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "Обновлены зависимости",
+        "pt": "Dependências atualizadas",
+        "nl": "Afhankelijkheden bijgewerkt",
+        "fr": "Dépendances mises à jour",
+        "it": "Dipendenze aggiornate",
+        "es": "Dependencias actualizadas",
+        "pl": "Zaktualizowano zależności",
+        "uk": "Оновлено залежності",
+        "zh-cn": "更新依赖"
+      },
       "1.1.8": {
         "en": "* chore(deps-dev): bump @alcalzone/release-script from 5.2.0 to 5.2.1\n* Bump js-yaml from 4.1.1 to 4.2.0\n* Bump http-proxy-middleware from 3.0.5 to 3.0.7",
         "de": "Abhängigkeiten aktualisiert",
