@@ -198,13 +198,22 @@ function createClient() {
 
 				this.log.debug('Connected to controller');
 
+				// HEYTECH_SOCKET_GUARD_V1: stop initialization after a lost connection.
+				const socketWritable = () => {
+					const socket = client?.socket;
+					return connected && client?.connected && socket?.writable && !socket.destroyed && !socket.writableEnded;
+				};
+				if (!socketWritable()) {
+					return;
+				}
+
 				if (this.config.pin !== '') {
 					client.send('rsc');
 					client.send(newLine);
 					client.send(this.config.pin.toString());
 					client.send(newLine);
 				}
-				while (!firstRunDone()) {
+				while (socketWritable() && !firstRunDone()) {
 					client.send(newLine);
 					client.send('sss');
 					client.send(newLine);
@@ -233,6 +242,11 @@ function createClient() {
 						client.send(newLine);
 					}
 					await this.sleep(2000);
+				}
+
+				if (!socketWritable()) {
+					this.log.warn('HEYtech connection lost during initialization; pending commands not executed');
+					return;
 				}
 
 				if (commandCallbacks.length > 0) {
