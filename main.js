@@ -201,7 +201,9 @@ function createClient() {
 				// HEYTECH_SOCKET_GUARD_V1: stop initialization after a lost connection.
 				const socketWritable = () => {
 					const socket = client?.socket;
-					return connected && client?.connected && socket?.writable && !socket.destroyed && !socket.writableEnded;
+					return (
+						connected && client?.connected && socket?.writable && !socket.destroyed && !socket.writableEnded
+					);
 				};
 				if (!socketWritable()) {
 					return;
