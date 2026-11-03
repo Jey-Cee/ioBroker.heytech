@@ -253,18 +253,27 @@ function createClient() {
 
 				if (commandCallbacks.length > 0) {
 					await this.waitForRunningCommandCallbacks();
+					if (!socketWritable()) {
+						this.log.warn('HEYtech connection lost before queued commands; pending commands not executed');
+						return;
+					}
 					runningCommandCallbacks = true;
-					this.checkShutterStatus()();
-
-					let commandCallback;
-					do {
-						commandCallback = commandCallbacks.shift();
-						if (commandCallback) {
-							commandCallback();
-							await this.sleep(500);
+					try {
+						this.checkShutterStatus()();
+						while (commandCallbacks.length > 0) {
+							if (!socketWritable()) {
+								this.log.warn('HEYtech connection lost; remaining queued commands not executed');
+								break;
+							}
+							const commandCallback = commandCallbacks.shift();
+							if (commandCallback) {
+								commandCallback();
+								await this.sleep(500);
+							}
 						}
-					} while (commandCallbacks.length > 0);
-					runningCommandCallbacks = false;
+					} finally {
+						runningCommandCallbacks = false;
+					}
 				}
 			});
 
