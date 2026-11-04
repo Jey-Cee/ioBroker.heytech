@@ -198,13 +198,24 @@ function createClient() {
 
 				this.log.debug('Connected to controller');
 
+				// HEYTECH_SOCKET_GUARD_V1: stop initialization after a lost connection.
+				const socketWritable = () => {
+					const socket = client?.socket;
+					return (
+						connected && client?.connected && socket?.writable && !socket.destroyed && !socket.writableEnded
+					);
+				};
+				if (!socketWritable()) {
+					return;
+				}
+
 				if (this.config.pin !== '') {
 					client.send('rsc');
 					client.send(newLine);
 					client.send(this.config.pin.toString());
 					client.send(newLine);
 				}
-				while (!firstRunDone()) {
+				while (socketWritable() && !firstRunDone()) {
 					client.send(newLine);
 					client.send('sss');
 					client.send(newLine);
@@ -235,20 +246,34 @@ function createClient() {
 					await this.sleep(2000);
 				}
 
+				if (!socketWritable()) {
+					this.log.warn('HEYtech connection lost during initialization; pending commands not executed');
+					return;
+				}
+
 				if (commandCallbacks.length > 0) {
 					await this.waitForRunningCommandCallbacks();
+					if (!socketWritable()) {
+						this.log.warn('HEYtech connection lost before queued commands; pending commands not executed');
+						return;
+					}
 					runningCommandCallbacks = true;
-					this.checkShutterStatus()();
-
-					let commandCallback;
-					do {
-						commandCallback = commandCallbacks.shift();
-						if (commandCallback) {
-							commandCallback();
-							await this.sleep(500);
+					try {
+						this.checkShutterStatus()();
+						while (commandCallbacks.length > 0) {
+							if (!socketWritable()) {
+								this.log.warn('HEYtech connection lost; remaining queued commands not executed');
+								break;
+							}
+							const commandCallback = commandCallbacks.shift();
+							if (commandCallback) {
+								commandCallback();
+								await this.sleep(500);
+							}
 						}
-					} while (commandCallbacks.length > 0);
-					runningCommandCallbacks = false;
+					} finally {
+						runningCommandCallbacks = false;
+					}
 				}
 			});
 
